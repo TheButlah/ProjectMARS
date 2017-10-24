@@ -1,2 +1,2 @@
-# VGG16
-VGG16 Implementation in TensorFlow. Generalized to 1D, 2D, and 3D convolutions.
+# Layers
+Layers is an implementation of a variety of Neural Network layers and other helper functions in TensorFlow. It is designed with an emphasis on being well documented, cleanly written, and as generalizable as possible to new network architectures.
