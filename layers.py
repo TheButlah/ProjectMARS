@@ -52,7 +52,7 @@ def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
         ema = tf.train.ExponentialMovingAverage(decay=decay)
 
         def mean_var_with_update():
-            """Updates the moving average and returns the averaged mean and variance."""
+            """Updates the moving average and returns the batch mean and variance."""
             ema_apply_op = ema.apply([batch_mean, batch_var])  # Update moving average
 
             # There is no dependency in the graph for batch_mean on updating the average, so we add one.
@@ -100,11 +100,11 @@ def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
         return tf.identity(tf.cond(phase_train, train, test), name='Dropped')
 
 
-def convolutional(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kernel_init=None, scope='Conv'):
+def convolutional(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, custom_inits=None, scope='Conv'):
     """"Convolutional Layer.
 
     Works on n spatial dimensions, as long as 1<=n<=3. Optionally performs batch normalization and also intelligently
-    initializes the weights by using xavier initializer by default.
+    initializes the weights by using a xavier initializer by default.
 
     Args:
         x:            Tensor, shaped [batch, spatial..., features]. Can have 1<=n<=3 spatial dimensions.
@@ -114,14 +114,15 @@ def convolutional(x, num_features, size=3, activation=tf.nn.relu, phase_train=No
         phase_train:  If not `None`, then the scores will be put through a batch norm layer before getting fed into the
                       activation function. In that case, this will be a scalar boolean tensor indicating if the model
                       is currently being trained or if it is inference time.
-        kernel_init:  The initializer to use for the weights of the kernel. If `None`, then Xavier initializer is used.
-                      Ref.: http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
+        custom_inits: The initializer to use for the weights of the kernel, and any other variables such as those in the
+                      batch norm layer, if `phase_train` has been specified. If `None` then default parameters are used.
         scope:        String or VariableScope to use as the variable scope.
     Returns:
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
     """
-    input_shape = x.shape
+    input_shape = x.shape.as_list()  # Don't deal with a TensorShape and instead use a list
+
     num_spatial = (len(input_shape) - 2)
     if num_spatial < 1 or num_spatial > 3 or (None in input_shape[1:]):
         raise ValueError("`x.shape` must be [batch, spatial..., features], with 1<=n<=3 spatial dims.")
@@ -133,29 +134,30 @@ def convolutional(x, num_features, size=3, activation=tf.nn.relu, phase_train=No
         # Figure out `kernel_shape`
         kernel_shape = [size]*num_spatial
         kernel_shape += [input_shape[-1], num_features]  # example: [size, size, input_features, num_features]
-        kernel_shape = tf.TensorShape(kernel_shape)
+        kernel_shape = kernel_shape
 
-        # Set up initializer for `kernel`
-        if kernel_init is None:
-            # Use Xavier initialization.
-            var_inits
-            kernel_init = xavier_initializer
+        # Define default initializers for the kernel and bias. These are functions from shape to tensor.
+        inits = {
+            'Kernel': lambda shape: xavier_initializer(shape=shape),
+            'Bias': lambda shape: xavier_initializer(shape=shape),
+        }
 
-        var_inits = {}
+        if custom_inits is not None:
+            inits.update(custom_inits)  # Overwrite default inits with `custom_inits`
 
-        kernel = tf.get_variable('Kernel', initializer=kernel_init(kernel_shape))
-        # kernel.set_shape(([size]*(len(input_shape)-2) + [None, num_features]))
+        kernel = tf.get_variable('Kernel', initializer=inits['Kernel'](kernel_shape))
+        print(kernel)
         vars = {'Kernel': kernel}
 
         convolved = tf.nn.convolution(x, kernel, padding="SAME", name='Conv')
 
         # Do batch norm?
         if phase_train is not None:
-            scores, bn_vars = batch_norm(convolved, phase_train)
-            vars["BN"] = bn_vars
+            scores, bn_vars = batch_norm(convolved, phase_train, custom_inits=inits.get('BN'))
+            vars['BN'] = bn_vars
         else:
             # If we aren't doing batch norm, we need a bias!
-            bias = tf.get_variable('Bias', initializer=kernel_init(kernel_shape))
+            bias = tf.get_variable('Bias', initializer=inits['Bias']([num_features]))
             vars['Bias'] = bias
             scores = convolved + bias
 
