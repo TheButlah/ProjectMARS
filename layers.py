@@ -3,10 +3,9 @@ from __future__ import division
 from __future__ import absolute_import
 
 import tensorflow as tf
-import numpy as np
 
 
-def batch_norm(x, phase_train, decay=0.9, initial_beta=0.0, initial_gamma=1.0, scope='BN'):
+def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
     """Batch normalization layer.
 
     Used to stabilize distribution of outputs from a layer. Typically used right before a non-linearity. Works on
@@ -19,31 +18,56 @@ def batch_norm(x, phase_train, decay=0.9, initial_beta=0.0, initial_gamma=1.0, s
         x:             Tensor,  shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
         phase_train:   Boolean tensor, true indicates training phase.
         decay:         Float. The decay to use for the exponential moving average.
-        initial_beta:  The initial target mean (offset). This will change as the model learns.
-        initial_gamma: The initial target stddev (scale). This will change as the model learns.
+        custom_inits:  Dict from strings to functions that take a shape and return a tensor. These functions
+                       are used to initialize the corresponding variable. If a variable is not in the dict, then it is
+                       initialized with the default initializer for that variable. If None, then default initial
         scope:         String or VariableScope to use as the variable scope.
     Returns:
         normed, vars:  `normed` is a tensor of the batch-normalized features, and has same shape as `x`.
                        `vars` is a dict of the variables.
     """
-    with tf.variable_scope(scope):
-        beta = tf.get_variable('Beta', initializer=tf.constant(initial_beta, shape=x.shape[-1]))  # Learned mean
-        gamma = tf.get_variable('Gamma', initializer=tf.constant(initial_gamma, shape=x.shape[-1]))  # Learned std. dev.
+    x_shape = x.shape.as_list()  # Don't deal with a TensorShape and instead use a list
 
-        batch_mean, batch_var = tf.nn.moments(x, np.arange(len(x.shape)-1), name='Moments')
+    # Check to ensure the minimum shape is met and there are no unknown dims in important places
+    if None in x_shape[1:] or len(x_shape) < 2:
+        raise ValueError("`x.shape` must be [batch, ..., features].")
+
+    with tf.variable_scope(scope):
+        # Define default initializers for beta and gamma. These are functions from shape to tensor.
+        inits = {
+            'Beta': lambda shape: tf.constant(0., shape=shape),
+            'Gamma': lambda shape: tf.constant(1., shape=shape),
+        }
+
+        if custom_inits is not None:
+            inits.update(custom_inits)  # Overwrite default inits with `custom_inits`
+
+        beta = tf.get_variable('Beta', initializer=inits['Beta']([x_shape[-1]]))  # Learned mean
+        gamma = tf.get_variable('Gamma', initializer=inits['Gamma']([x_shape[-1]]))  # Learned std. dev.
+
+        # Get mean and variance over batch and spatial dims
+        batch_mean, batch_var = tf.nn.moments(x, list(range(len(x_shape)-1)), name='Moments')
+
+        # We want to figure out mean and variance of whole dataset while training, so we use a moving average
         ema = tf.train.ExponentialMovingAverage(decay=decay)
 
         def mean_var_with_update():
-            ema_apply_op = ema.apply([batch_mean, batch_var])
+            """Updates the moving average and returns the averaged mean and variance."""
+            ema_apply_op = ema.apply([batch_mean, batch_var])  # Update moving average
+
+            # There is no dependency in the graph for batch_mean on updating the average, so we add one.
             with tf.control_dependencies([ema_apply_op]):
                 return tf.identity(batch_mean), tf.identity(batch_var)
 
         mean, var = tf.cond(
             phase_train,
-            mean_var_with_update,
-            lambda: (ema.average(batch_mean), ema.average(batch_var)))
+            mean_var_with_update,  # If training, use batch mean and var
+            lambda: (ema.average(batch_mean), ema.average(batch_var)))  # If inference, use averaged mean
         normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3, name='Normalized')
     return normed, {'Beta': beta, 'Gamma': gamma}
+
+
+bn = batch_norm
 
 
 def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
@@ -76,7 +100,7 @@ def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
         return tf.identity(tf.cond(phase_train, train, test), name='Dropped')
 
 
-def conv(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kernel_init=None, scope='Conv'):
+def convolutional(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kernel_init=None, scope='Conv'):
     """"Convolutional Layer.
 
     Works on n spatial dimensions, as long as 1<=n<=3. Optionally performs batch normalization and also intelligently
@@ -97,20 +121,30 @@ def conv(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kerne
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
     """
+    input_shape = x.shape
+    num_spatial = (len(input_shape) - 2)
+    if num_spatial < 1 or num_spatial > 3 or (None in input_shape[1:]):
+        raise ValueError("`x.shape` must be [batch, spatial..., features], with 1<=n<=3 spatial dims.")
+
+    if not x.dtype.is_floating:
+        raise ValueError("`x` must be floating point.")
+
     with tf.variable_scope(scope):
-        # Figure out `kernel_shape` tensor
-        input_shape = tf.unstack(tf.shape(x))
-        kernel_shape = [size]*(len(input_shape)-2)
-        kernel_shape += [input_shape[-1], num_features]
-        kernel_shape = tf.stack(kernel_shape)  # example: [size, size, input_features, num_features]
+        # Figure out `kernel_shape`
+        kernel_shape = [size]*num_spatial
+        kernel_shape += [input_shape[-1], num_features]  # example: [size, size, input_features, num_features]
+        kernel_shape = tf.TensorShape(kernel_shape)
 
         # Set up initializer for `kernel`
         if kernel_init is None:
             # Use Xavier initialization.
+            var_inits
             kernel_init = xavier_initializer
 
-        kernel = tf.get_variable('Kernel', initializer=kernel_init(kernel_shape), validate_shape=False)
-        kernel.set_shape(([size]*(len(input_shape)-2) + [None, num_features]))
+        var_inits = {}
+
+        kernel = tf.get_variable('Kernel', initializer=kernel_init(kernel_shape))
+        # kernel.set_shape(([size]*(len(input_shape)-2) + [None, num_features]))
         vars = {'Kernel': kernel}
 
         convolved = tf.nn.convolution(x, kernel, padding="SAME", name='Conv')
@@ -118,9 +152,12 @@ def conv(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kerne
         # Do batch norm?
         if phase_train is not None:
             scores, bn_vars = batch_norm(convolved, phase_train)
-            vars.update(bn_vars)
+            vars["BN"] = bn_vars
         else:
-            scores = convolved
+            # If we aren't doing batch norm, we need a bias!
+            bias = tf.get_variable('Bias', initializer=kernel_init(kernel_shape))
+            vars['Bias'] = bias
+            scores = convolved + bias
 
         # Do activation function?
         if activation is not None:
@@ -129,6 +166,17 @@ def conv(x, num_features, size=3, activation=tf.nn.relu, phase_train=None, kerne
             result = scores
 
         return tf.identity(result, "Output"), vars
+
+
+conv = convolutional
+
+
+def fully_connected(x, num_features, scope='FC'):
+    with tf.variable_scope(scope):
+        pass
+
+
+fc = fully_connected
 
 
 def xavier_initializer(shape, uniform=True, dtype=tf.float32, name='Xavier-Initializer'):
@@ -166,3 +214,10 @@ def xavier_initializer(shape, uniform=True, dtype=tf.float32, name='Xavier-Initi
     else:
         stddev = tf.sqrt(1.3 / n_avg)  # This corrects for the fact that we are using a truncated normal distribution.
         return tf.truncated_normal(shape, stddev=stddev, dtype=dtype, name=name)
+
+
+def get_inits(default_inits, custom_inits):
+    if default_inits is not None:
+        for k, v in custom_inits.items():
+            pass
+    return {}
