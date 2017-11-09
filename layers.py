@@ -224,7 +224,7 @@ def pool(x, compute_mask=False, pool_type="MAX", size=2, scope='Pool'):
     if pool_type is not "MAX" and compute_mask:
         raise ValueError("`compute_mask` cannot be `True` if `pool_type` is not \"MAX\"")
     with tf.variable_scope(scope):
-        window_shape = [2] * (len(x.shape) - 2)
+        window_shape = [size] * (len(x.shape) - 2)
         pooled = tf.nn.pool(x, window_shape=window_shape, pooling_type=pool_type, strides=window_shape, padding="SAME")
 
         if compute_mask:
