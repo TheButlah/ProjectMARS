@@ -247,7 +247,7 @@ def xavier_initializer(shape, uniform=True, dtype=tf.float32, name='Xavier-Initi
     Ref.: http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 
     Args:
-        shape:  A tensor describing the shape of the output tensor.
+        shape:   A tensor describing the shape of the output tensor.
         uniform: If a uniform or normal distribution should be used. Uniform performs slightly better empirically.
         dtype:   The type of tensor. Should be floating point.
         name:    The name of the initializer
