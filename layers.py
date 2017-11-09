@@ -174,6 +174,68 @@ def convolutional(input, num_features, size=3, activation=tf.nn.relu, phase_trai
 conv = convolutional
 
 
+def pool(x, compute_mask=False, pool_type="MAX", size=2, scope='Pool'):
+    """Creates a pooling layer.
+
+    Will work on N-Dimensional data. Can also compute a mask to indicate the selected pooling indices for max pooling.
+
+    Args:
+        x:            The tensor to perform pooling on. Should have shape `[batch, ..., features] where the middle dims
+                      are spatial dimensions.
+        compute_mask: Whether or not to compute a mask that indicates which indices were selected from `x`. Should only
+                      be `True` when `pool_type` is "MAX".
+        pool_type:    The type of pooling to use. Will be passed directly to `tf.nn.pool`. Should be "MAX" or "AVG".
+        size:         The size of the pooling window to use.
+        scope:        A string or `VariableScope` object that will scope the pooling layer.
+    Returns:
+        A tensor of the pooled result if `compute_mask` is false, otherwise a tuple of `(pooled,mask)` where `mask` is
+        a mask on `x` to identify which indices were selected in the max pooling operation.
+    """
+
+    def _upscale(x, factor=2, scope='Upscale'):
+        """Upscales the shape of a N-Dimensional tensor by duplicating adjacent entries.
+
+        Args:
+            x:      The tensor to upscale. Only the spatial dimensions (all but first and last dim) are upscaled.
+            factor: The factory by which to upscale. This should be an integer.
+            scope:  A string or `VariableScope` object that will scope the upscale operations.
+        Returns:
+            The upscaled tensor. Shape is multiplied by `factor` on each spatial dimension (all but first and last dim).
+        """
+        x = tf.convert_to_tensor(x)
+        with tf.variable_scope(scope):
+            num_spatial = len(x.shape) - 2
+            # Iterate over spatial dims in reverse order
+            for dim in range(num_spatial, 0, -1):
+                x_shape = x.shape.as_list()
+
+                x = tf.expand_dims(x, dim + 1)
+
+                tile_multiples = [1] * len(x.shape)
+                tile_multiples[dim + 1] = factor
+                x = tf.tile(x, tile_multiples)
+
+                x_shape[0] = -1
+                x_shape[dim] *= factor
+                x = tf.reshape(x, x_shape)
+            return x
+
+    x = tf.convert_to_tensor(x)
+    if pool_type is not "MAX" and compute_mask:
+        raise ValueError("`compute_mask` cannot be `True` if `pool_type` is not \"MAX\"")
+    with tf.variable_scope(scope):
+        window_shape = [2] * (len(x.shape) - 2)
+        pooled = tf.nn.pool(x, window_shape=window_shape, pooling_type=pool_type, strides=window_shape, padding="SAME")
+
+        if compute_mask:
+            upscaled_pool = _upscale(pooled)
+            mask = tf.equal(x, upscaled_pool)
+            mask = tf.cast(mask, tf.float32, name='Mask')
+            return pooled, mask
+        else:
+            return pooled
+
+
 def fully_connected(input, num_features, activation=tf.nn.relu, phase_train=None, custom_inits=None, scope='FC'):
     """Creates a fully connected (dense) layer.
 
