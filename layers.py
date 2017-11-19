@@ -6,7 +6,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def batch_norm(input, phase_train, decay=0.9, custom_inits=None, scope='BN'):
+def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
     """Creates a batch normalization layer.
 
     Used to stabilize distribution of outputs from a layer. Typically used right before a non-linearity. Works on
@@ -16,22 +16,23 @@ def batch_norm(input, phase_train, decay=0.9, custom_inits=None, scope='BN'):
     Ref.: https://arxiv.org/pdf/1502.03167.pdf
 
     Args:
-        input:         Tensor,  shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
-        phase_train:   Boolean tensor, true indicates training phase.
-        decay:         Float. The decay to use for the exponential moving average.
-        custom_inits:  Dict from strings to functions that take a shape and return a tensor. These functions
-                       are used to initialize the corresponding variable. If a variable is not in the dict, then it is
-                       initialized with the default initializer for that variable. If None, then default initial
-        scope:         String or VariableScope to use as the variable scope.
+        x:            Tensor,  shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
+        phase_train:  Boolean tensor, true indicates training phase.
+        decay:        Float. The decay to use for the exponential moving average.
+        custom_inits: Dict from strings to functions that take a shape and return a tensor. These functions
+                      are used to initialize the corresponding variable. If a variable is not in the dict, then it is
+                      initialized with the default initializer for that variable. If None, then default initial
+        scope:        String or VariableScope to use as the variable scope.
     Returns:
-        normed, vars:  `normed` is a tensor of the batch-normalized features, and has same shape as `input`.
-                       `vars` is a dict of the variables.
+        normed, vars: `normed` is a tensor of the batch-normalized features, and has same shape as `input`.
+                      `vars` is a dict of the variables.
     """
-    x_shape = input.shape.as_list()  # Don't deal with a TensorShape and instead use a list
+    x = tf.convert_to_tensor(x)
+    x_shape = x.shape.as_list()  # Don't deal with a TensorShape and instead use a list
 
     # Check to ensure the minimum shape is met and there are no unknown dims in important places
     if None in x_shape[1:] or len(x_shape) < 2:
-        raise ValueError("`input.shape` must be [batch, ..., features].")
+        raise ValueError("`x.shape` must be [batch, ..., features].")
 
     with tf.variable_scope(scope):
         # Define default initializers for beta and gamma. These are functions from shape to tensor.
@@ -46,7 +47,7 @@ def batch_norm(input, phase_train, decay=0.9, custom_inits=None, scope='BN'):
         gamma = tf.get_variable('Gamma', initializer=inits['Gamma']([x_shape[-1]]))  # Learned std. dev.
 
         # Get mean and variance over batch and spatial dims
-        batch_mean, batch_var = tf.nn.moments(input, list(range(len(x_shape) - 1)), name='Moments')
+        batch_mean, batch_var = tf.nn.moments(x, list(range(len(x_shape) - 1)), name='Moments')
 
         # We want to figure out mean and variance of whole dataset while training, so we use a moving average
         ema = tf.train.ExponentialMovingAverage(decay=decay)
@@ -63,14 +64,14 @@ def batch_norm(input, phase_train, decay=0.9, custom_inits=None, scope='BN'):
             phase_train,
             mean_var_with_update,  # If training, use batch mean and var
             lambda: (ema.average(batch_mean), ema.average(batch_var)))  # If inference, use averaged mean
-        normed = tf.nn.batch_normalization(input, mean, var, beta, gamma, 1e-3, name='Normalized')
+        normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3, name='Normalized')
     return normed, {'Beta': beta, 'Gamma': gamma}
 
 
 bn = batch_norm
 
 
-def dropout(input, phase_train, keep_prob=0.75, scope='Dropout'):
+def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
     """Creates a dropout layer.
 
     Used to regularize Conv and FC layers by preventing co-adaptation of neurons. Works on n-dimensional data.
@@ -79,7 +80,7 @@ def dropout(input, phase_train, keep_prob=0.75, scope='Dropout'):
     Ref.: https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf
 
     Args:
-        input:           Tensor, shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
+        x:           Tensor, shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
         phase_train: Boolean tensor, true indicates training phase. If false, no neurons are dropped.
         keep_prob:   Float, probability of dropping a neuron.
         scope:       String or VariableScope to use as the variable scope.
@@ -89,13 +90,13 @@ def dropout(input, phase_train, keep_prob=0.75, scope='Dropout'):
     with tf.variable_scope(scope):
         def train():
             # Figure out `shape` tensor for the dropout function
-            dims = tf.unstack(tf.shape(input))
+            dims = tf.unstack(tf.shape(x))
             dims[1:-1] = [1] * (len(dims) - 2)  # set all spatial dims to 1 so that they are all dropped together
             shape = tf.stack(dims)  # example: [batch, 1, 1, features]
-            return tf.nn.dropout(input, keep_prob, shape, name='Train')
+            return tf.nn.dropout(x, keep_prob, shape, name='Train')
 
         def test():
-            return tf.identity(input, name='Inference')
+            return tf.identity(x, name='Inference')
 
         return tf.identity(tf.cond(phase_train, train, test), name='Dropped')
 
@@ -103,14 +104,14 @@ def dropout(input, phase_train, keep_prob=0.75, scope='Dropout'):
 drop = dropout
 
 
-def convolutional(input, num_features, size=3, activation=tf.nn.relu, phase_train=None, custom_inits=None, scope='Conv'):
+def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope='Conv'):
     """"Creates a convolutional Layer.
 
-    Works on n spatial dimensions, as long as 1<=n<=3. Optionally performs batch normalization and also intelligently
-    initializes the weights by using a xavier initializer by default.
+    Works on n spatial dimensions, as long as 1<=n<=3 due to limitations in `tf.nn.convolution`. Optionally performs
+    batch normalization and also intelligently initializes the weights via a xavier initializer by default.
 
     Args:
-        input:        Tensor, shaped [batch, spatial..., features]. Can have 1<=n<=3 spatial dimensions.
+        x:            Tensor, shaped [batch, spatial..., features]. Can have 1<=n<=3 spatial dimensions.
         num_features: The size of the feature dimension. This is the number of filters/neurons the layer will use.
         size:         The size of each convolutional filter.
         activation:   The activation function to use. If `None`, the raw scores are returned.
@@ -124,14 +125,14 @@ def convolutional(input, num_features, size=3, activation=tf.nn.relu, phase_trai
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
     """
-    input_shape = input.shape.as_list()  # Don't deal with a TensorShape and instead use a list
+    input_shape = x.shape.as_list()  # Don't deal with a TensorShape and instead use a list
 
     num_spatial = (len(input_shape) - 2)
     if num_spatial < 1 or num_spatial > 3 or (None in input_shape[1:]):
-        raise ValueError("`input.shape` must be [batch, spatial..., features], with 1<=n<=3 spatial dims.")
+        raise ValueError("`x.shape` must be [batch, spatial..., features], with 1<=n<=3 spatial dims.")
 
-    if not input.dtype.is_floating:
-        raise ValueError("`input` must be floating point.")
+    if not x.dtype.is_floating:
+        raise ValueError("`x` must be floating point.")
 
     with tf.variable_scope(scope):
         # Figure out `kernel_shape`
@@ -150,7 +151,7 @@ def convolutional(input, num_features, size=3, activation=tf.nn.relu, phase_trai
         kernel = tf.get_variable('Kernel', initializer=inits['Kernel'](kernel_shape))
         vars = {'Kernel': kernel}
 
-        convolved = tf.nn.convolution(input, kernel, padding="SAME", name='Conv')
+        convolved = tf.nn.convolution(x, kernel, padding="SAME", name='Conv')
 
         # Do batch norm?
         if phase_train is not None:
@@ -174,7 +175,36 @@ def convolutional(input, num_features, size=3, activation=tf.nn.relu, phase_trai
 conv = convolutional
 
 
-def pool(x, compute_mask=False, pool_type="MAX", size=2, scope='Pool'):
+def _upscale(x, factor=2, scope='Upscale'):
+    """Upscales the shape of a N-Dimensional tensor by duplicating adjacent entries.
+
+    Args:
+        x:      The tensor to upscale. Only the spatial dimensions (all but first and last dim) are upscaled.
+        factor: The factory by which to upscale. This should be an integer.
+        scope:  A string or `VariableScope` object that will scope the upscale operations.
+    Returns:
+        The upscaled tensor. Shape is multiplied by `factor` on each spatial dimension (all but first and last dim).
+    """
+    x = tf.convert_to_tensor(x)
+    with tf.variable_scope(scope):
+        num_spatial = len(x.shape) - 2
+        # Iterate over spatial dims in reverse order
+        for dim in range(num_spatial, 0, -1):
+            x_shape = x.shape.as_list()
+
+            x = tf.expand_dims(x, dim + 1)
+
+            tile_multiples = [1] * len(x.shape)
+            tile_multiples[dim + 1] = factor
+            x = tf.tile(x, tile_multiples)
+
+            x_shape[0] = -1
+            x_shape[dim] *= factor
+            x = tf.reshape(x, x_shape)
+        return x
+
+
+def pool(x, compute_mask=True, pool_type="MAX", size=2, scope='Pool'):
     """Creates a pooling layer.
 
     Will work on N-Dimensional data. Can also compute a mask to indicate the selected pooling indices for max pooling.
@@ -192,39 +222,11 @@ def pool(x, compute_mask=False, pool_type="MAX", size=2, scope='Pool'):
         a mask on `x` to identify which indices were selected in the max pooling operation.
     """
 
-    def _upscale(x, factor=2, scope='Upscale'):
-        """Upscales the shape of a N-Dimensional tensor by duplicating adjacent entries.
-
-        Args:
-            x:      The tensor to upscale. Only the spatial dimensions (all but first and last dim) are upscaled.
-            factor: The factory by which to upscale. This should be an integer.
-            scope:  A string or `VariableScope` object that will scope the upscale operations.
-        Returns:
-            The upscaled tensor. Shape is multiplied by `factor` on each spatial dimension (all but first and last dim).
-        """
-        x = tf.convert_to_tensor(x)
-        with tf.variable_scope(scope):
-            num_spatial = len(x.shape) - 2
-            # Iterate over spatial dims in reverse order
-            for dim in range(num_spatial, 0, -1):
-                x_shape = x.shape.as_list()
-
-                x = tf.expand_dims(x, dim + 1)
-
-                tile_multiples = [1] * len(x.shape)
-                tile_multiples[dim + 1] = factor
-                x = tf.tile(x, tile_multiples)
-
-                x_shape[0] = -1
-                x_shape[dim] *= factor
-                x = tf.reshape(x, x_shape)
-            return x
-
     x = tf.convert_to_tensor(x)
     if pool_type is not "MAX" and compute_mask:
         raise ValueError("`compute_mask` cannot be `True` if `pool_type` is not \"MAX\"")
     with tf.variable_scope(scope):
-        window_shape = [size] * (len(x.shape) - 2)
+        window_shape = [size]*(len(x.shape)-2)  # 2 for all spatial dims
         pooled = tf.nn.pool(x, window_shape=window_shape, pooling_type=pool_type, strides=window_shape, padding="SAME")
 
         if compute_mask:
@@ -236,13 +238,38 @@ def pool(x, compute_mask=False, pool_type="MAX", size=2, scope='Pool'):
             return pooled
 
 
-def fully_connected(input, num_features, activation=tf.nn.relu, phase_train=None, custom_inits=None, scope='FC'):
+def unpool(x, mask, factor=2, scope='Unpool'):
+    """Creates an unpooling layer.
+
+    Unpooling takes `x` and upscales it, putting zeros in all locations except the indices selected in `mask`. Will work
+    on N-Dimensional data. The method is described in detail in the SegNet paper by Badrinarayanan et. al.:
+    https://arxiv.org/abs/1511.00561
+
+    Args:
+        x:      The tensor to perform unpooling on. Should have shape `[batch, ..., features] where the middle
+                dims are spatial dimensions.
+        mask:   A boolean tensor that indicates which indices in the output should be non-zero. Same shape as the
+                output tensor.
+        factor: The factor by which to upscale `x` when unpooling.
+        scope:  A string or `VariableScope` object that will scope the pooling layer.
+    Returns:
+        A tensor for the result of the unpooling. Will have the same shape as `x` but the spatial dims will be
+        multiplied by `factor`.
+    """
+    x = tf.convert_to_tensor(x)
+    with tf.variable_scope(scope):
+        upscaled = _upscale(x, factor)
+        output = tf.multiply(upscaled, mask, name='Unpooled')  # Force all but the indices selected in `mask` to 0
+        return output
+
+
+def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope='FC'):
     """Creates a fully connected (dense) layer.
 
     Optionally performs batch normalization and also intelligently initializes weights. Will flatten `input` correctly.
 
     Args:
-        input:        Tensor of shape `[batch, features]` that this FC layer uses as its input features.
+        x:            Tensor of shape `[batch, features]` that this FC layer uses as its input features.
         num_features: The number of features that the layer will output.
         activation:   The activation function to use. If `None`, the raw scores are returned.
         phase_train:  If not `None`, then the scores will be put through a batch norm layer before getting fed into the
@@ -255,10 +282,10 @@ def fully_connected(input, num_features, activation=tf.nn.relu, phase_train=None
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
     """
-    input_shape = input.shape.as_list()  # Don't deal with a TensorShape and instead use a list
+    input_shape = x.shape.as_list()  # Don't deal with a TensorShape and instead use a list
 
     if len(input_shape) < 2 or (None in input_shape[1:]):
-        raise ValueError("`input` must have shape [batch, features...]")
+        raise ValueError("`x` must have shape [batch, features...]")
 
     with tf.variable_scope(scope):
 
@@ -273,12 +300,12 @@ def fully_connected(input, num_features, activation=tf.nn.relu, phase_train=None
         # Flatten all but batch dims
         if len(input_shape) > 2:
             input_shape = [input_shape[0], np.prod(input_shape[1:])]
-            input = tf.reshape(input, [-1, input_shape[1]])
+            x = tf.reshape(x, [-1, input_shape[1]])
 
         weights = tf.get_variable('Weights', initializer=inits['Weights']([input_shape[-1], num_features]))
         vars = {'Weights': weights}
 
-        matmul = tf.matmul(input, weights)
+        matmul = tf.matmul(x, weights)
 
         # Do batch norm?
         if phase_train is not None:
