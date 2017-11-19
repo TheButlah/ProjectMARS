@@ -6,7 +6,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
+def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope=None):
     """Creates a batch normalization layer.
 
     Used to stabilize distribution of outputs from a layer. Typically used right before a non-linearity. Works on
@@ -21,8 +21,8 @@ def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
         decay:        Float. The decay to use for the exponential moving average.
         custom_inits: Dict from strings to functions that take a shape and return a tensor. These functions
                       are used to initialize the corresponding variable. If a variable is not in the dict, then it is
-                      initialized with the default initializer for that variable. If None, then default initial
-        scope:        String or VariableScope to use as the variable scope.
+                      initialized with the default initializer for that variable. If `None` use default initializers.
+        scope:        String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         normed, vars: `normed` is a tensor of the batch-normalized features, and has same shape as `input`.
                       `vars` is a dict of the variables.
@@ -34,7 +34,7 @@ def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
     if None in x_shape[1:] or len(x_shape) < 2:
         raise ValueError("`x.shape` must be [batch, ..., features].")
 
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='BN'):
         # Define default initializers for beta and gamma. These are functions from shape to tensor.
         inits = {
             'Beta': lambda shape: tf.constant(0., shape=shape),
@@ -71,7 +71,7 @@ def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope='BN'):
 bn = batch_norm
 
 
-def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
+def dropout(x, phase_train, keep_prob=0.75, scope=None):
     """Creates a dropout layer.
 
     Used to regularize Conv and FC layers by preventing co-adaptation of neurons. Works on n-dimensional data.
@@ -83,11 +83,11 @@ def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
         x:           Tensor, shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
         phase_train: Boolean tensor, true indicates training phase. If false, no neurons are dropped.
         keep_prob:   Float, probability of dropping a neuron.
-        scope:       String or VariableScope to use as the variable scope.
+        scope:       String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         A tensor with the neurons dropped.
     """
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='Dropout'):
         def train():
             # Figure out `shape` tensor for the dropout function
             dims = tf.unstack(tf.shape(x))
@@ -104,7 +104,7 @@ def dropout(x, phase_train, keep_prob=0.75, scope='Dropout'):
 drop = dropout
 
 
-def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope='Conv'):
+def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope=None):
     """"Creates a convolutional Layer.
 
     Works on n spatial dimensions, as long as 1<=n<=3 due to limitations in `tf.nn.convolution`. Optionally performs
@@ -120,7 +120,7 @@ def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_tr
                       is currently being trained or if it is inference time.
         custom_inits: The initializer to use for the weights of the kernel, and any other variables such as those in the
                       batch norm layer, if `phase_train` has been specified. If `None` then default parameters are used.
-        scope:        String or VariableScope to use as the variable scope.
+        scope:        String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
@@ -134,7 +134,7 @@ def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_tr
     if not x.dtype.is_floating:
         raise ValueError("`x` must be floating point.")
 
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='Conv'):
         # Figure out `kernel_shape`
         kernel_shape = [size]*num_spatial
         kernel_shape += [input_shape[-1], num_features]  # example: [size, size, input_features, num_features]
@@ -175,18 +175,18 @@ def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_tr
 conv = convolutional
 
 
-def _upscale(x, factor=2, scope='Upscale'):
+def _upscale(x, factor=2, scope=None):
     """Upscales the shape of a N-Dimensional tensor by duplicating adjacent entries.
 
     Args:
         x:      The tensor to upscale. Only the spatial dimensions (all but first and last dim) are upscaled.
         factor: The factory by which to upscale. This should be an integer.
-        scope:  A string or `VariableScope` object that will scope the upscale operations.
+        scope:  String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         The upscaled tensor. Shape is multiplied by `factor` on each spatial dimension (all but first and last dim).
     """
     x = tf.convert_to_tensor(x)
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='Upscale'):
         num_spatial = len(x.shape) - 2
         # Iterate over spatial dims in reverse order
         for dim in range(num_spatial, 0, -1):
@@ -204,7 +204,7 @@ def _upscale(x, factor=2, scope='Upscale'):
         return x
 
 
-def pool(x, compute_mask=True, pool_type="MAX", size=2, scope='Pool'):
+def pool(x, compute_mask=True, pool_type="MAX", size=2, scope=None):
     """Creates a pooling layer.
 
     Will work on N-Dimensional data. Can also compute a mask to indicate the selected pooling indices for max pooling.
@@ -216,7 +216,7 @@ def pool(x, compute_mask=True, pool_type="MAX", size=2, scope='Pool'):
                       be `True` when `pool_type` is "MAX".
         pool_type:    The type of pooling to use. Will be passed directly to `tf.nn.pool`. Should be "MAX" or "AVG".
         size:         The size of the pooling window to use.
-        scope:        A string or `VariableScope` object that will scope the pooling layer.
+        scope:        String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         A tensor of the pooled result if `compute_mask` is false, otherwise a tuple of `(pooled,mask)` where `mask` is
         a mask on `x` to identify which indices were selected in the max pooling operation.
@@ -225,7 +225,7 @@ def pool(x, compute_mask=True, pool_type="MAX", size=2, scope='Pool'):
     x = tf.convert_to_tensor(x)
     if pool_type is not "MAX" and compute_mask:
         raise ValueError("`compute_mask` cannot be `True` if `pool_type` is not \"MAX\"")
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='Pool'):
         window_shape = [size]*(len(x.shape)-2)  # 2 for all spatial dims
         pooled = tf.nn.pool(x, window_shape=window_shape, pooling_type=pool_type, strides=window_shape, padding="SAME")
 
@@ -238,7 +238,7 @@ def pool(x, compute_mask=True, pool_type="MAX", size=2, scope='Pool'):
             return pooled
 
 
-def unpool(x, mask, factor=2, scope='Unpool'):
+def unpool(x, mask, factor=2, scope=None):
     """Creates an unpooling layer.
 
     Unpooling takes `x` and upscales it, putting zeros in all locations except the indices selected in `mask`. Will work
@@ -251,19 +251,19 @@ def unpool(x, mask, factor=2, scope='Unpool'):
         mask:   A boolean tensor that indicates which indices in the output should be non-zero. Same shape as the
                 output tensor.
         factor: The factor by which to upscale `x` when unpooling.
-        scope:  A string or `VariableScope` object that will scope the pooling layer.
+        scope:  String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         A tensor for the result of the unpooling. Will have the same shape as `x` but the spatial dims will be
         multiplied by `factor`.
     """
     x = tf.convert_to_tensor(x)
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='Unpool'):
         upscaled = _upscale(x, factor)
         output = tf.multiply(upscaled, mask, name='Unpooled')  # Force all but the indices selected in `mask` to 0
         return output
 
 
-def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope='FC'):
+def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=None, custom_inits=None, scope=None):
     """Creates a fully connected (dense) layer.
 
     Optionally performs batch normalization and also intelligently initializes weights. Will flatten `input` correctly.
@@ -287,7 +287,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
     if len(input_shape) < 2 or (None in input_shape[1:]):
         raise ValueError("`x` must have shape [batch, features...]")
 
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, default_name='FC'):
 
         # Define default initializers for the weights. These are functions from shape to tensor.
         inits = {
