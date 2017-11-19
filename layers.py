@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import tensorflow as tf
 import numpy as np
+import math
 
 
 def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope=None):
@@ -16,7 +17,7 @@ def batch_norm(x, phase_train, decay=0.9, custom_inits=None, scope=None):
     Ref.: https://arxiv.org/pdf/1502.03167.pdf
 
     Args:
-        x:            Tensor,  shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
+        x:            Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
         phase_train:  Boolean tensor, true indicates training phase.
         decay:        Float. The decay to use for the exponential moving average.
         custom_inits: Dict from strings to functions that take a shape and return a tensor. These functions
@@ -80,7 +81,7 @@ def dropout(x, phase_train, keep_prob=0.75, scope=None):
     Ref.: https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf
 
     Args:
-        x:           Tensor, shaped [batch, features...] allowing it do be used with Conv or FC layers of any shape.
+        x:           Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
         phase_train: Boolean tensor, true indicates training phase. If false, no neurons are dropped.
         keep_prob:   Float, probability of dropping a neuron.
         scope:       String or VariableScope to use as the scope. If `None`, use default naming scheme.
@@ -111,7 +112,7 @@ def convolutional(x, num_features, size=3, activation=tf.nn.leaky_relu, phase_tr
     batch normalization and also intelligently initializes the weights via a xavier initializer by default.
 
     Args:
-        x:            Tensor, shaped [batch, spatial..., features]. Can have 1<=n<=3 spatial dimensions.
+        x:            Tensor, shaped `[batch, spatial..., features]`. Can have 1<=n<=3 spatial dimensions.
         num_features: The size of the feature dimension. This is the number of filters/neurons the layer will use.
         size:         The size of each convolutional filter.
         activation:   The activation function to use. If `None`, the raw scores are returned.
@@ -210,7 +211,7 @@ def pool(x, compute_mask=True, pool_type="MAX", size=2, scope=None):
     Will work on N-Dimensional data. Can also compute a mask to indicate the selected pooling indices for max pooling.
 
     Args:
-        x:            The tensor to perform pooling on. Should have shape `[batch, ..., features] where the middle dims
+        x:            The tensor to perform pooling on. Should have shape `[batch, ..., features]` where the middle dims
                       are spatial dimensions.
         compute_mask: Whether or not to compute a mask that indicates which indices were selected from `x`. Should only
                       be `True` when `pool_type` is "MAX".
@@ -246,7 +247,7 @@ def unpool(x, mask, factor=2, scope=None):
     https://arxiv.org/abs/1511.00561
 
     Args:
-        x:      The tensor to perform unpooling on. Should have shape `[batch, ..., features] where the middle
+        x:      The tensor to perform unpooling on. Should have shape `[batch, ..., features]` where the middle
                 dims are spatial dimensions.
         mask:   A boolean tensor that indicates which indices in the output should be non-zero. Same shape as the
                 output tensor.
@@ -269,7 +270,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
     Optionally performs batch normalization and also intelligently initializes weights. Will flatten `input` correctly.
 
     Args:
-        x:            Tensor of shape `[batch, features]` that this FC layer uses as its input features.
+        x:            Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
         num_features: The number of features that the layer will output.
         activation:   The activation function to use. If `None`, the raw scores are returned.
         phase_train:  If not `None`, then the scores will be put through a batch norm layer before getting fed into the
@@ -277,7 +278,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
                       is currently being trained or if it is inference time.
         custom_inits: The initializer to use for the weights, and any other variables such as those in the batch norm
                       layer, if `phase_train` has been specified. If `None` then default parameters are used.
-        scope:        String or VariableScope to use as the variable scope.
+        scope:        String or VariableScope to use as the scope. If `None`, use default naming scheme.
     Returns:
         output, vars: `output` is a tensor of the output of the layer.
                       `vars` is a dict of the variables, including those in the batch norm layer if present.
@@ -364,3 +365,59 @@ def xavier_initializer(shape, uniform=True, dtype=tf.float32, name='Xavier-Initi
     else:
         stddev = tf.sqrt(1.3 / n_avg)  # This corrects for the fact that we are using a truncated normal distribution.
         return tf.truncated_normal(shape, stddev=stddev, dtype=dtype, name=name)
+
+
+def k_competitive(x, phase_train, k, alpha=0, epsilon=0.0001, scope=None):
+    """Creates a k-competitive layer.
+
+    A K-Competitive layer encourages neurons in the network to specialize by only allowing the `k` most active neurons
+    to fire. It then takes the "energy" (L1 norm) of the weaker neurons and adds them to the active neurons. This allows
+    the gradients of the weaker neurons to still be updated even when not selected as the strongest. This method works
+    on n-dimensional data, with n>=0 spatial dimensions.
+
+    Ref.: https://arxiv.org/abs/1705.02033
+
+
+    Args:
+        x:           Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
+        phase_train: Boolean tensor, true indicates training phase.
+        k:           The number of neurons to select as the strongest during training. This can be a float from (0,1) to
+                     signify a fraction of neurons, or an int where `1<=k<=x.shape[-1]`
+        alpha:       Sets the intensity of the energy hyper-parameter.
+        epsilon:     A small number to perturb the divisor, avoiding division by zero.
+        scope:       String or VariableScope to use as the scope. If `None`, use default naming scheme.
+    Returns:
+        A tensor the same shape as input_volume with the top k matrices preserved and the rest set to zero
+    """
+    x = tf.convert_to_tensor(x)
+
+    with tf.variable_scope(scope, default_name='K-Comp'):
+        if k <= 0:
+            raise ValueError('`k` should be a float from (0,1) or an int larger than zero.')
+        elif k < 1:
+            k = math.ceil(k*x.shape[-1])  # Calculate how many neurons to drop if `k` is fraction.
+
+        def train():
+            # Get the shape and element-wise absolute value of the input volume
+            shape = x.shape.as_list()
+            ab = tf.abs(x)
+            # Calculate the base energy by taking the reduced sum of the feature dimension (L1 norm)
+            energy = tf.reduce_sum(ab, axis=-1)
+            # Find the top k indices in the feature dimension for each spatial dimension
+            _, ind = tf.nn.top_k(ab, k)
+            # Produce and apply a mask marking the winning indices
+            mask = tf.reduce_sum(tf.one_hot(ind, shape[-1], on_value=1.0, off_value=0.0, dtype=tf.float32), -2)
+            masked = x * mask
+            # Get the signs of `masked`. Add epsilon to avoid dividing by zero.
+            signs = masked / (tf.abs(masked) + epsilon)
+            # Calculate and add the energy term
+            energy_term = tf.expand_dims(energy, -1) * signs
+            return masked + alpha*energy_term
+
+        def test():
+            return x
+
+        return tf.identity(tf.cond(phase_train, train, test), name='Output')
+
+
+k_comp = k_competitive
