@@ -303,7 +303,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
         if len(input_shape) > 2:
             x = tf.reshape(x, [-1, np.prod(input_shape[1:])])
 
-        weights = tf.get_variable('Weights', initializer=inits['Weights']([input_shape[-1], num_features]))
+        weights = tf.get_variable('Weights', initializer=inits['Weights']([x.shape[-1], num_features]))
         vars = {'Weights': weights}
 
         matmul = tf.matmul(x, weights)
