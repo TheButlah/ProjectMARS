@@ -307,7 +307,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
         vars = {'Weights': weights}
 
         matmul = tf.matmul(x, weights)
-        matmul = tf.reshape(matmul, [-1] + input_shape[1:-1] + num_features)  # Reshape back into the original shape
+        matmul = tf.reshape(matmul, [-1] + input_shape[1:-1] + [num_features])  # Reshape back into the original shape
 
         # Do batch norm?
         if phase_train is not None:
