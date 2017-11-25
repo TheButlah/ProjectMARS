@@ -243,8 +243,9 @@ def unpool(x, mask, factor=2, scope=None):
     """Creates an unpooling layer.
 
     Unpooling takes `x` and upscales it, putting zeros in all locations except the indices selected in `mask`. Will work
-    on N-Dimensional data. The method is described in detail in the SegNet paper by Badrinarayanan et. al.:
-    https://arxiv.org/abs/1511.00561
+    on N-Dimensional data. The method is described in detail in the SegNet paper by Badrinarayanan et. al.
+
+    Ref.: https://arxiv.org/abs/1511.00561
 
     Args:
         x:      The tensor to perform unpooling on. Should have shape `[batch, ..., features]` where the middle
@@ -307,6 +308,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
         vars = {'Weights': weights}
 
         matmul = tf.matmul(x, weights)
+        matmul = tf.reshape(matmul, [-1] + input_shape[1:])  # Reshape back into the original shape
 
         # Do batch norm?
         if phase_train is not None:
@@ -334,6 +336,7 @@ def xavier_initializer(shape, uniform=True, dtype=tf.float32, name='Xavier-Initi
     """Outputs a random tensor initialized with the Xavier initializer. Ensures a variance of 1.
 
     This was already implemented in tf.contrib.layers, but it has been re-implemented here for simplification.
+
     Ref.: http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 
     Args:
@@ -376,7 +379,6 @@ def k_competitive(x, phase_train, k, alpha=0, epsilon=0.0001, scope=None):
     on n-dimensional data, with n>=0 spatial dimensions.
 
     Ref.: https://arxiv.org/abs/1705.02033
-
 
     Args:
         x:           Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
