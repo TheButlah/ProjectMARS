@@ -301,8 +301,7 @@ def fully_connected(x, num_features, activation=tf.nn.leaky_relu, phase_train=No
 
         # Flatten all but batch dims
         if len(input_shape) > 2:
-            input_shape = [input_shape[0], np.prod(input_shape[1:])]
-            x = tf.reshape(x, [-1, input_shape[1]])
+            x = tf.reshape(x, [-1, np.prod(input_shape[1:])])
 
         weights = tf.get_variable('Weights', initializer=inits['Weights']([input_shape[-1], num_features]))
         vars = {'Weights': weights}
