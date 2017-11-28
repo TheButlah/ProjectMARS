@@ -27,4 +27,4 @@ Layers is a library for Neural Networks in TensorFlow. It provides implementatio
   - Provides a novel generalization for it for N>=0 spatial dimensions.
 
 ## Permission for Use
-Please feel free to use this library in your own non-commercial work! Just be sure to cite me in the paper and code. If you found it especially useful and want it for commercial work, why not [hire me](mailto:rjbutler.main@gmail.com)! ( ͡ᵔ ͜ʖ ͡ᵔ )
+Please feel free to use this library in your own non-commercial work! Just be sure to cite me in the paper and code. If you found it especially useful and want it for commercial work, ask me first. Or even [hire me](mailto:rjbutler.main@gmail.com)! ( ͡ᵔ ͜ʖ ͡ᵔ )
