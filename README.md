@@ -1,5 +1,5 @@
 # Layers
-Layers is a library for Neural Networks in TensorFlow. It provides implementations for a variety of neural network layers and other helper functions in TensorFlow. It is designed with an emphasis on being well documented, cleanly written, and as generalizable as possible to new network architectures. To this end, many tricks and techniques are used to ensure the best-practice methods of defining these layers are used by default.
+Layers is a library for Neural Networks in TensorFlow. It provides implementations for a variety of neural network layers and other helper functions. It is designed with an emphasis on being well documented, cleanly written, and as generalizable as possible to new network architectures. To this end, many tricks and techniques are used to ensure the best-practice methods of defining these layers are used by default, and that the layers can be used with non-standard numbers of spatial dimensions, enabling them to be used for 1D, 2D, 3D and more.
 
 ## List of Functions Implemented
 - Fully Connected Layer
