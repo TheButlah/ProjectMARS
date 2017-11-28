@@ -205,7 +205,7 @@ def _upscale(x, factor=2, scope=None):
         return x
 
 
-def pool(x, compute_mask=True, pool_type="MAX", size=2, scope=None):
+def pool(x, compute_mask=False, pool_type="MAX", size=2, scope=None):
     """Creates a pooling layer.
 
     Will work on N-Dimensional data. Can also compute a mask to indicate the selected pooling indices for max pooling.
