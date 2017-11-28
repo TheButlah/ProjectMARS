@@ -1,7 +1,7 @@
 # Layers
 Layers is a library for Neural Networks in TensorFlow. It provides implementations for a variety of neural network layers and other helper functions in TensorFlow. It is designed with an emphasis on being well documented, cleanly written, and as generalizable as possible to new network architectures. To this end, many tricks and techniques are used to ensure the best-practice methods of defining these layers are used by default.
 
-# List of functions implemented
+## List of Functions Implemented
 - Fully Connected Layer
   - Generalizes to N>=0 spatial dimensions
   - Uses Xavier initialization by default
@@ -25,3 +25,6 @@ Layers is a library for Neural Networks in TensorFlow. It provides implementatio
 - K-Competitive Layer
   - Implements the k-competitive layer for fully connected networks described in the [KATE paper](https://arxiv.org/abs/1705.02033).
   - Provides a novel generalization for it for N>=0 spatial dimensions.
+
+## Permission for Use
+Please feel free to use this library in your own work! Just be sure to cite me in the paper and code. If you found it especially useful and want to use it in your work, why not [hire me](mailto:rjbutler.main@gmail.com)!
