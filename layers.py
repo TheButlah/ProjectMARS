@@ -380,7 +380,7 @@ def k_competitive(x, phase_train, k, alpha=0, epsilon=0.0001, scope=None):
     Ref.: https://arxiv.org/abs/1705.02033
 
     Args:
-        x:           Tensor, shaped `[batch, features...]` allowing it do be used with Conv or FC layers of any shape.
+        x:           Tensor, shaped `[batch, ..., features]` allowing it do be used with Conv or FC layers of any shape.
         phase_train: Boolean tensor, true indicates training phase.
         k:           The number of neurons to select as the strongest during training. This can be a float from (0,1) to
                      signify a fraction of neurons, or an int where `1<=k<=x.shape[-1]`
@@ -405,9 +405,13 @@ def k_competitive(x, phase_train, k, alpha=0, epsilon=0.0001, scope=None):
             # Calculate the base energy by taking the reduced sum of the feature dimension (L1 norm)
             energy = tf.reduce_sum(ab, axis=-1)
             # Find the top k indices in the feature dimension for each spatial dimension
-            _, ind = tf.nn.top_k(ab, k)
+            top, ind = tf.nn.top_k(ab, k)
+            # To get loser energy, subtract total energy by winner energy
+            energy -= tf.reduce_sum(top, axis=-1)
             # Produce and apply a mask marking the winning indices
-            mask = tf.reduce_sum(tf.one_hot(ind, shape[-1], on_value=1.0, off_value=0.0, dtype=tf.float32), -2)
+            # Sum along axis=-2 because we need to do bitwise or on the one-hot vectors
+            mask = tf.reduce_sum(tf.one_hot(ind, depth=shape[-1], on_value=1.0, off_value=0.0, dtype=tf.float32), -2)
+
             masked = x * mask
             # Get the signs of `masked`. Add epsilon to avoid dividing by zero.
             signs = masked / (tf.abs(masked) + epsilon)
