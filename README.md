@@ -15,9 +15,42 @@ After cloning, create the `build` directory.
 mkdir build
 ```
 
-After that, to build:
+## macOS and Linux
+
+The steps to build on macOS and Linux are the simplest. Run the following commands:
 ```
-cd build   # Assuming you're at the root of the project
-cmake ..   # Run CMake in the directory above???
-make       # PSYCH, CMake can't get the job done alone
+cd build   # Assuming you're at the root of the project.
+cmake ..   # Run CMake, and tell it to look for a CMakeLists.txt in the directory above.
+make       # CMake generates Makefiles for use to make.
+```
+
+## Windows 10 + MinGW (no Git Bash)
+
+On Windows 10 with MinGW *but no Git Bash*, CMake must be told to use the MinGW generator so it can take advantage of the MinGW toolset. The formal commands:
+```
+cmake .. -G "MinGW Makefiles"
+```
+which has been placed in `build-mingw.bat` for convenience.
+
+```
+cd build             # Assuming you're at the root of the project
+..\build-mingw.bat   # Run CMake, and specify that we need MinGW-compatible makefiles
+mingw32-make         # Use MinGW's make tool, which is called mingw32-make. Why? Lord knows.
+```
+
+
+## Windows 10 + MinGW + Git Bash
+
+On Windows 10 with MinGW and Git Bash, CMake will complain about how `sh.exe` is on the path when running the previous commands. We need to use the MSYS generator for CMake, but specify the `make` tool manually for CMake. Sounds overcomplicated? I agree.
+
+The command is:
+```
+cmake .. -DCMAKE_MAKE_PROGRAM=mingw32-make -G "MSYS Makefiles"
+```
+which has been placed in `build-mingw-sh.bat` for convenience
+
+```
+cd build                # Assuming you're at the root of the project
+..\build-mingw-sh.bat   # This is much shorter than above :D
+mingw32-make            # Use MinGW's make tool
 ```

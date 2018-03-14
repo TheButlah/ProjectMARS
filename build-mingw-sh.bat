@@ -1,0 +1,1 @@
+cmake .. -DCMAKE_MAKE_PROGRAM=mingw32-make -G "MSYS Makefiles"
