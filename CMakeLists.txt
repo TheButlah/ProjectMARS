@@ -3,6 +3,13 @@ project(mars)
 
 set (CMAKE_CXX_STANDARD 11)
 
+# Include and link SDL libraries for Windows 10
+if (WIN32)  
+  include_directories(sdl/include)
+  link_directories(sdl/lib)
+  file(COPY sdl/bin/SDL2.dll DESTINATION .)
+endif()
+
 # Include all header files in the "include" directory
 include_directories(include)
  
@@ -11,4 +18,5 @@ file(GLOB SOURCES "src/*.cpp")
 
 # Build an excutable with our sources (SOURCES) and a main file
 add_executable(run-tests ${SOURCES} main/tests.cpp)
-
+add_executable(run-sdl-test main/sdl-test.cpp)
+target_link_libraries(run-sdl-test mingw32 SDL2main SDL2)
