@@ -26,7 +26,7 @@ namespace MARS {
         num_rows(rows),
         num_cols(cols),
         matrixSharedPtr(new T[rows * cols], [](T* p) { delete[] p; }) {
-
+      
         matrix = matrixSharedPtr.get();
         // Take care to zero out memory
         std::memset(matrix, 0, num_rows * num_cols * sizeof(int));
