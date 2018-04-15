@@ -23,6 +23,7 @@ hs_err_pid*
 
 # Build directory
 build
+cmake-build-debug
 
 # SDL2 files
 sdl
