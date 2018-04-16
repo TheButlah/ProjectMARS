@@ -17,8 +17,8 @@ include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
 # Build an excutable with our sources (SOURCES) and a main file
-add_executable(run-tests ${SOURCES} main/tests.cpp)
-add_executable(run-sdl-test main/sdl-test.cpp)
+add_executable(run-tests ${SOURCES} main/tests.cpp include/PopulationGen.h)
+add_executable(run-sdl-test main/sdl-test.cpp include/PopulationGen.h)
 if (WIN32)  
   target_link_libraries(run-sdl-test mingw32 SDL2main SDL2)
 else()

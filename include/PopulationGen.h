@@ -5,6 +5,7 @@
 #ifndef MARS_POPULATIONGEN_H
 #define MARS_POPULATIONGEN_H
 
+#include <ctime>
 #include "Matrix.h"
 #include "PerlinNoise.h"
 
@@ -19,7 +20,7 @@ namespace MARS {
          * Constructor
          */
         PopulationGen() {
-            perlin = siv::PerlinNoise();
+            perlin = siv::PerlinNoise(time(NULL));
         }
 
         // Takes current population matrix as input

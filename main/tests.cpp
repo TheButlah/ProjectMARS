@@ -7,6 +7,8 @@
 #include "../include/Coord.h"
 #include "../include/Matrix.h"
 #include "../include/BitMatrix.h"
+#include "../include/PopulationGen.h"
+#include "../include/Terrain.h"
 
 using namespace MARS;
 
@@ -33,6 +35,27 @@ void matrixTest() {
   std::cout << "Matrix test successful" << std::endl;
 }
 
+void updatePopTest() {
+  int rows = 2;
+  int cols = 2;
+
+  Matrix<double> matrix(rows, cols);
+
+  for (int k=0; k<10; k++) {
+    std::cout <<"round " << k << std::endl;
+    Matrix<double> newPop = PopulationGen().genNewPop(matrix);
+    for (int i=0; i<rows; i++) {
+      for (int j=0; j<cols; j++ ) {
+        std::cout << "new pop value at  (" << i << "," << j << "):" << newPop.at(i,j) << std::endl;
+      }
+    }
+  }
+
+  std::cout << "Update population test finished" << std::endl;
+
+}
+
+
 void bitMatrixTest() {
   int rows = 32;
   int cols = 32;
@@ -57,6 +80,16 @@ void bitMatrixTest() {
   std::cout << "BitMatrix test successful" << std::endl;
 }
 
+void terrainTest() {
+    Terrain terrain(8, 8);
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            std::cout << terrain.weightAtXY(i,j) << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 void coordTest() {
   Coord c;
   Coord c2(2, 2);
@@ -71,4 +104,6 @@ void coordTest() {
 int main() {
   matrixTest();
   bitMatrixTest();
+  updatePopTest();
+    terrainTest();
 }
