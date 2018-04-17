@@ -50,12 +50,13 @@ TEST_F(MarsTest, PopulationGenUpdatesPop) {
   int cols = 2;
 
   MARS::Matrix<double> matrix(rows, cols);
+  MARS::PopulationGen popGenerator = MARS::PopulationGen();
 
   for (int k=0; k<10; k++) {
-    MARS::Matrix<double> newPop = MARS::PopulationGen().genNewPop(matrix);
+    matrix = popGenerator.generate(matrix);
     for (int i=0; i<rows; i++) {
       for (int j=0; j<cols; j++ ) {
-        EXPECT_FALSE(isnan(newPop.at(i,j)));
+        EXPECT_FALSE(isnan(matrix.at(i,j)));
       }
     }
   }

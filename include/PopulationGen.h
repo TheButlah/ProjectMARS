@@ -13,7 +13,7 @@ namespace MARS {
 
     class PopulationGen {
     private:
-        siv::PerlinNoise perlin; //instance of Perlin Noise generator
+        siv::PerlinNoise perlin; // instance of Perlin Noise generator
 
     public:
         /*
@@ -23,15 +23,17 @@ namespace MARS {
             perlin = siv::PerlinNoise(time(NULL));
         }
 
-        // Takes current population matrix as input
-        // Returns matrix of new population to be added
-        Matrix<double> genNewPop(Matrix<double> popMatrix) {
+        /* Takes current population matrix as input
+         * Returns matrix of new population to be added
+         */
+        Matrix<double> generate(Matrix<double> popMatrix) {
             int rows = popMatrix.numberRows();
             int cols = popMatrix.numberCols();
-            Matrix<double> newPop(rows, cols);
+            Matrix<double> newMatrix(rows, cols);
+            // zero out matrix to avoid NaNs
             for(int i = 0; i < rows; i++) {
                 for(int j = 0; j < cols; j++) {
-                    newPop.at(i, j) = 0;
+                    newMatrix.at(i, j) = 0;
                 }
             }
             for (int i = 0; i < rows; i++) {
@@ -39,12 +41,12 @@ namespace MARS {
                     double r = ((double) rand() / (RAND_MAX)) + 1;
                     double noise;
                     noise = perlin.noise(popMatrix.at(i,j) + r, popMatrix.at(i,j) - r);
-                    if (!isnan(noise) && noise > 0) {
-                            newPop.at(i, j) = ceil(10*noise);
+                    if (noise > 0) {
+                        newMatrix.at(i, j) = ceil(10*noise);
                     }
                 }
             }
-            return newPop;
+            return newMatrix;
         }
     };
 }
