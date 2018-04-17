@@ -29,13 +29,18 @@ namespace MARS {
             int rows = popMatrix.numberRows();
             int cols = popMatrix.numberCols();
             Matrix<double> newPop(rows, cols);
+            for(int i = 0; i < rows; i++) {
+                for(int j = 0; j < cols; j++) {
+                    newPop.at(i, j) = 0;
+                }
+            }
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
                     double r = ((double) rand() / (RAND_MAX)) + 1;
                     double noise;
                     noise = perlin.noise(popMatrix.at(i,j) + r, popMatrix.at(i,j) - r);
-                    if (noise > 0) {
-                        newPop.at(i, j) = ceil(10*noise);
+                    if (!isnan(noise) && noise > 0) {
+                            newPop.at(i, j) = ceil(10*noise);
                     }
                 }
             }

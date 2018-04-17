@@ -52,17 +52,13 @@ TEST_F(MarsTest, PopulationGenUpdatesPop) {
   MARS::Matrix<double> matrix(rows, cols);
 
   for (int k=0; k<10; k++) {
-    std::cout <<"round " << k << std::endl;
     MARS::Matrix<double> newPop = MARS::PopulationGen().genNewPop(matrix);
     for (int i=0; i<rows; i++) {
       for (int j=0; j<cols; j++ ) {
-        std::cout << "new pop value at  (" << i << "," << j << "):" << newPop.at(i,j) << std::endl;
+        EXPECT_FALSE(isnan(newPop.at(i,j)));
       }
     }
   }
-
-  std::cout << "Update population test finished" << std::endl;
-
 }
 
 
@@ -86,21 +82,16 @@ TEST_F(MarsTest, TerrainGen) {
     MARS::Terrain terrain(8, 8);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            std::cout << terrain.weightAtXY(i,j) << " ";
+            EXPECT_FALSE(isnan(terrain.weightAtXY(i,j)));
         }
-        std::cout << std::endl;
     }
 }
 
 TEST_F(MarsTest, Coords) {
-  MARS::Coord c;
+  MARS::Coord c1(2, 2);
   MARS::Coord c2(2, 2);
 
-  std::vector<MARS::Coord> vectorCoord;
-  vectorCoord.push_back(c2);
-
-  std::unordered_set<MARS::Coord> setCoord;
-  setCoord.insert(c2);
+  EXPECT_EQ(c1, c2);
 }
 
 }
