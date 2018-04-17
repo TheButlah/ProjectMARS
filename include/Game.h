@@ -2,6 +2,8 @@
 #define MARS_GAME_H
 
 #include "Matrix.h"
+#include "PopulationGen.h"
+#include "Terrain.h"
 
 namespace MARS {
   
@@ -23,6 +25,12 @@ namespace MARS {
       double plant_initial_cost;
       double plant_operating_cost;
       double plant_profit_margin;
+
+      // Game state
+      Terrain terrain;
+      PopulationGen populationGenerator;
+      Matrix<double> popMatrix;
+
     public:
       Game(
           int dx, 
@@ -33,6 +41,10 @@ namespace MARS {
           double operating_cost, 
           double profit_margin
         );
+
+      /* Advance the game's progress by one time step */
+      void step();
+
       ~Game();
   };
 }
