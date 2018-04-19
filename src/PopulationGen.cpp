@@ -1,7 +1,6 @@
 #include "../include/Matrix.h"
 #include "../include/PopulationGen.h"
 
-
 using namespace MARS;
 
 Matrix<double> PopulationGen::generate(Matrix<double> popMatrix) {
