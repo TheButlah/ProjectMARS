@@ -26,7 +26,7 @@ namespace MARS {
         /* Takes current population matrix as input
          * Returns matrix of new population to be added
          */
-        Matrix<double> generate(Matrix<double> popMatrix);
+        Matrix<int> generate(Matrix<int> popMatrix);
     };
 }
 

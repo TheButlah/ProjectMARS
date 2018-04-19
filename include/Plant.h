@@ -6,14 +6,14 @@
 #define MARS_PLANT_H
 #include "Coord.h"
 #include "Terrain.h"
-#include <list>
-#include <queue>
+#include "BitMatrix.h"
 
-namespace MARS{
+
+namespace MARS {
     /*
      * Abstraction of plant
      */
-    class Plant{
+    class Plant {
     public:
         Coord location; //coordinates of plant in map
         int inService; //number of people currently serviced by plant
@@ -25,78 +25,17 @@ namespace MARS{
         /*
          * Constructor
          */
-        Plant(int cap, double serve_dist, int x, int y, Terrain terrain) {
-            capacity = cap;
-            serviceable_distance = serve_dist;
-            location = Coord(x,y);
-            inService = 0;
-            serviceableArea = generateServiceableArea(terrain, location, serve_dist);
-            servicedMap = Matrix<std::tuple<Coord, int>>(x, y);
-        }
+        Plant(
+                int cap,
+                double serve_dist,
+                int x,
+                int y,
+                Terrain terrain);
 
-        std::vector<Coord> generateServiceableArea(Terrain terrain, Coord plantLoc, double serve_dist) {
-            BitMatrix visited = BitMatrix(terrain.sizeX,terrain.sizeY);
-            std::queue<std::tuple<Coord, double>> queue;
-            std::vector<Coord> serviceable;
-            queue.push(std::make_tuple(plantLoc, 0));
-            visited.set(plantLoc.x, plantLoc.y, 1);
-            while (queue.size() > 0) {
-                std::tuple<Coord, double> locInfo = queue.front();
-                Coord loc = std::get<0>(locInfo);
-                double weightedDist = std::get<1>(locInfo);
-                queue.pop();
-                if (loc.y - 1 >= 0) { //within bounds
-                    if (visited.get(loc.x, loc.y-1) ==0) { //has not been visited
-                        double terrainWeight = terrain.weightAtXY(loc.x, loc.y-1);
-                        if (weightedDist+terrainWeight <= serve_dist ) { //within service
-                            std::tuple<Coord, double> newLoc;
-                            newLoc = std::make_tuple(Coord(loc.x, loc.y-1), weightedDist+terrainWeight);
-                            serviceable.push_back(Coord(loc.x, loc.y-1));
-                            queue.push(newLoc);
-                            visited.set(loc.x, loc.y-1,1);
-                        }
-                    }
-                }
-                if (loc.y+1 < terrain.sizeY) {
-                    if (visited.get(loc.x, loc.y+1) ==0) {
-                        double terrainWeight = terrain.weightAtXY(loc.x, loc.y+1);
-                        if (weightedDist + terrainWeight <= serve_dist) {
-                            std::tuple<Coord, double> newLoc;
-                            newLoc = std::make_tuple(Coord(loc.x, loc.y+1), weightedDist+terrainWeight);
-                            serviceable.push_back(Coord(loc.x, loc.y+1));
-                            queue.push(newLoc);
-                            visited.set(loc.x, loc.y+1, 1);
-                        }
-                    }
-                }
-                if (loc.x-1 >= 0) {
-                    if (visited.get(loc.x-1, loc.y) == 0) {
-                        double terrainWeight = terrain.weightAtXY(loc.x-1, loc.y);
-                        if (weightedDist + terrainWeight <= serve_dist) {
-                            std::tuple<Coord, double> newLoc;
-                            newLoc = std::make_tuple(Coord(loc.x-1, loc.y), weightedDist+terrainWeight);
-                            serviceable.push_back(Coord(loc.x-1, loc.y));
-                            queue.push(newLoc);
-                            visited.set(loc.x-1, loc.y, 1);
-                        }
-                    }
-                }
-                if (loc.x+1 < terrain.sizeX) {
-                    if (visited.get(loc.x+1, loc.y) ==0) {
-                        double terrainWeight = terrain.weightAtXY(loc.x+1, loc.y);
-                        if (weightedDist + terrainWeight <= serve_dist) {
-                            std::tuple<Coord, double> newLoc;
-                            newLoc = std::make_tuple(Coord(loc.x+1, loc.y), weightedDist+terrainWeight);
-                            serviceable.push_back(Coord(loc.x+1, loc.y));
-                            queue.push(newLoc);
-                            visited.set(loc.x+1, loc.y, 1);
-                        }
-                    }
-                }
-            }
-            return serviceable;
-        }
+        std::vector<Coord> generateServiceableArea(Terrain terrain, Coord plantLoc, double serve_dist);
+
+
     };
 }
 
-#endif //MARS_PLANT_H
+#endif

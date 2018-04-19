@@ -57,7 +57,7 @@ namespace {
     int rows = 2;
     int cols = 2;
 
-    MARS::Matrix<double> matrix(rows, cols);
+    MARS::Matrix<int> matrix(rows, cols);
     MARS::PopulationGen popGenerator = MARS::PopulationGen();
 
     for (int k=0; k<10; k++) {

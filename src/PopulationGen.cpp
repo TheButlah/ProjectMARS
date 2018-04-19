@@ -3,10 +3,10 @@
 
 using namespace MARS;
 
-Matrix<double> PopulationGen::generate(Matrix<double> popMatrix) {
+Matrix<int> PopulationGen::generate(Matrix<int> popMatrix) {
     int rows = popMatrix.numberRows();
     int cols = popMatrix.numberCols();
-    Matrix<double> newMatrix(rows, cols);
+    Matrix<int> newMatrix(rows, cols);
     // zero out matrix to avoid NaNs
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
