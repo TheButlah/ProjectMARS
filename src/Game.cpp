@@ -30,6 +30,7 @@ Game::Game(
 void Game::step() {
 	this->popMatrix = populationGenerator.generate(this->popMatrix);
 }
+
 Game::~Game() {
 
 }

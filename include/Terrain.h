@@ -29,13 +29,8 @@ namespace MARS {
 
         Terrain(int dx, int dy);
 
-        double weightAtXY(int x, int y) {
-            return terrainMatrix.at(x, y);
-        }
-
-        double weightAtCoord(Coord c) {
-            return weightAtXY(c.x, c.y);
-        }
+        double weightAtXY(int x, int y);
+        double weightAtCoord(Coord c);
     };
 }
 

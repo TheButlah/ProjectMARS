@@ -13,7 +13,6 @@ namespace MARS {
     private:
       int num_rows; // Number of rows
       int num_cols; // Number of columns
-      std::shared_ptr<T> matrixSharedPtr; // Shared pointer to matrix memory
       T* matrix; // Matrix memory
     
     public:
@@ -25,12 +24,17 @@ namespace MARS {
       Matrix(int rows, int cols):
         num_rows(rows),
         num_cols(cols),
-        matrixSharedPtr(new T[rows * cols], [](T* p) { delete[] p; }) {
-      
-        matrix = matrixSharedPtr.get();
+        matrix(new T[rows * cols]) {
         // Take care to zero out memory
         std::memset(matrix, 0, num_rows * num_cols * sizeof(int));
       };
+
+      Matrix(const Matrix& other):
+        num_rows(other.num_rows),
+        num_cols(other.num_cols),
+        matrix(new T[other.num_rows * other.num_cols]) {
+        std::memcpy(matrix, other.matrix, other.num_rows * other.num_cols * sizeof(int));
+      }
 
       /*
        * Access reference to data at location
@@ -51,6 +55,10 @@ namespace MARS {
 
       int numberCols() {
         return num_cols;
+      }
+
+      ~Matrix() {
+        delete[] matrix;
       }
   };
 }

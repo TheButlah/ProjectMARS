@@ -44,6 +44,13 @@ namespace {
         EXPECT_EQ(matrix.at(i, j), i * j);
       }
     }
+
+    MARS::Matrix<int> matrix2 = matrix;
+    for (int i = 0; i < num_rows; i++) {
+      for (int j = 0; j < num_cols; j++) {
+        EXPECT_EQ(matrix2.at(i, j), i * j);
+      }
+    }
   }
 
   TEST_F(MarsTest, PopulationGenUpdatesPop) {

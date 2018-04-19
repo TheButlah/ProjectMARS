@@ -16,3 +16,10 @@ Terrain::Terrain(int dx, int dy): perlin(std::time(NULL)), sizeX(dx), sizeY(dy),
     }
 }
 
+double Terrain::weightAtXY(int x, int y) {
+    return terrainMatrix.at(x, y);
+}
+
+double Terrain::weightAtCoord(Coord c) {
+    return weightAtXY(c.x, c.y);
+}
