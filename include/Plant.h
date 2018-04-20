@@ -31,10 +31,7 @@ namespace MARS {
                 int x,
                 int y,
                 Terrain terrain);
-
         std::vector<Coord> generateServiceableArea(Terrain terrain, Coord plantLoc, double serve_dist);
-
-
     };
 }
 
