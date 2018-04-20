@@ -29,6 +29,10 @@ namespace MARS {
 
         Terrain(int dx, int dy);
 
+        Terrain(int dim);
+
+        Terrain(int dx, int dy, bool water);
+
         double weightAtXY(int x, int y);
         double weightAtCoord(Coord c);
     };
