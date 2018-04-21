@@ -109,9 +109,26 @@ namespace {
 
       std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
 
-
       EXPECT_EQ(10, serviceableArea.size());
+
     };
+
+    TEST_F(MarsTest, GenServicedMap_SomeUnreachable) {
+      MARS::Terrain terrain(4);
+
+      int cap = 10;
+      double serv_dist = 2.0;
+      int x = 1;
+      int y = 1;
+      MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
+
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
+
+      std::unordered_map<MARS::Coord, int> servicedMap = plant.servicedMap;
+
+      EXPECT_EQ(10, servicedMap.size());
+    }
+
 
     TEST_F(MarsTest, GenServiceableAreaTest4_SurroundedByWater) {
       MARS::Terrain terrain(4,4, true);

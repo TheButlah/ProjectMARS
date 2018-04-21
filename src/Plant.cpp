@@ -18,10 +18,21 @@ Plant::Plant(
         location(Coord(x,y)),
         inService(0),
         serviceableArea(generateServiceableArea(terrain, location, serve_dist)),
-        servicedMap(Matrix<std::tuple<Coord, int>>(terrain.sizeX, terrain.sizeY))
+        servicedMap(initializeServicedMap(serviceableArea))
 {
 
 }
+
+
+std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<Coord, double> serviceableArea) {
+  std::unordered_map<Coord, int> servicedMap;
+  for (std::pair<Coord, double> element : serviceableArea) {
+    Coord coord = element.first;
+    servicedMap[coord] = 0;
+  }
+  return servicedMap;
+}
+
 
 std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
   BitMatrix visited = BitMatrix(terrain.sizeX,terrain.sizeY);

@@ -21,8 +21,9 @@ namespace MARS {
         int capacity; //total number of people plant can service
         double serviceable_distance; //furthest distance at which the plant can service
         //std::vector<Coord> serviceableArea; //list of coordinates that plant can service
-        Matrix<std::tuple<Coord, int>> servicedMap; //(coord, int) pairs where int = # people serviced at coord
         std::unordered_map<Coord, double> serviceableArea;
+        std::unordered_map<Coord, int> servicedMap; //contains mapping from coordinate to number of people being
+                                                    // serviced at that coordinate
         /*
          * Constructor
          */
@@ -36,7 +37,7 @@ namespace MARS {
 
         std::unordered_map<Coord,double> generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist);
 
-
+        std::unordered_map<Coord, int> initializeServicedMap( std::unordered_map<Coord, double> serviceableArea);
 
         bool operator==(const Plant& other) const {
             return location == other.location;
