@@ -3,33 +3,34 @@
 using namespace MARS;
 
 BitMatrix::BitMatrix(int rows, int cols): 
-  num_rows(rows),
-  num_cols(cols),
-  matrix(rows, cols / (8 * sizeof(int)) + 1) {
+    num_rows(rows),
+    num_cols(cols),
+    matrix(rows, cols / (8 * sizeof(int)) + 1) 
+{
 }
 
 bool BitMatrix::get(int r, int c) {
-  int cd = c / (8 * sizeof(int));
-  int cr = c % (8 * sizeof(int));
+    int cd = c / (8 * sizeof(int));
+    int cr = c % (8 * sizeof(int));
 
-  return (matrix.at(r, cd) & (1 << cr)) != 0;
+    return (matrix.at(r, cd) & (1 << cr)) != 0;
 }
 
 void BitMatrix::set(int r, int c, bool val) {
-  int cd = c / (8 * sizeof(int));
-  int cr = c % (8 * sizeof(int));
+    int cd = c / (8 * sizeof(int));
+    int cr = c % (8 * sizeof(int));
 
-  if (val) {
-    matrix.at(r, cd) |= (1 << cr);
-  } else {
-    matrix.at(r, cd) &= ~(1 << cr);
-  }
+    if (val) {
+        matrix.at(r, cd) |= (1 << cr);
+    } else {
+        matrix.at(r, cd) &= ~(1 << cr);
+    }
 }
 
 int BitMatrix::numRows() {
-  return num_rows;
+    return num_rows;
 }
 
 int BitMatrix::numCols() {
-  return num_cols;
+    return num_cols;
 }

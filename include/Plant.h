@@ -30,12 +30,32 @@ namespace MARS {
                 double serve_dist,
                 int x,
                 int y,
+
                 Terrain &terrain);
 
         std::unordered_map<Coord,double> generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist);
 
 
+
+        bool operator==(const Plant& other) const {
+            return location == other.location;
+        }
     };
 }
 
+namespace std {
+    /*
+     * Hash a Coord instance
+     */
+    template <>
+    struct hash<MARS::Plant> {
+    
+        std::size_t operator()(const MARS::Plant& other) const {
+            std::hash<MARS::Coord> coordHash;
+            return coordHash(other.location);
+        }
+  
+    };
+
+}
 #endif

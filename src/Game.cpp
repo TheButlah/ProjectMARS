@@ -29,10 +29,10 @@ Game::Game(
 {
 
 }
+
 void Game::step() {
 	this->popMatrix = populationGenerator.generate(this->popMatrix);
 }
-
 
 double Game::calculateObjective() {
 	double objective;
@@ -42,7 +42,6 @@ double Game::calculateObjective() {
 	return objective;
 
 }
-
 
 Game::~Game() {
 
