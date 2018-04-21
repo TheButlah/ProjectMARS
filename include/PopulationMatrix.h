@@ -11,7 +11,7 @@ namespace MARS {
     private:
         Matrix<int> servicedPopMatrix;
         Matrix<int> unservicedPopMatrix;
-
+        
         /*
         int numberServicedAtCoord(Coord c);
         int numberUnservicedAtCoord(Coord c);

@@ -32,8 +32,27 @@ namespace MARS {
                 int y,
                 Terrain& terrain);
                 
-        std::vector<Coord> generateServiceableArea(Terrain terrain, Coord plantLoc, double serve_dist);
+        std::vector<Coord> generateServiceableArea(Terrain& terrain, Coord plantLoc, double serve_dist);
+
+        bool operator==(const Plant& other) const {
+            return location == other.location;
+        }
     };
 }
 
+namespace std {
+    /*
+     * Hash a Coord instance
+     */
+    template <>
+    struct hash<MARS::Plant> {
+    
+        std::size_t operator()(const MARS::Plant& other) const {
+            std::hash<MARS::Coord> coordHash;
+            return coordHash(other.location);
+        }
+  
+    };
+
+}
 #endif
