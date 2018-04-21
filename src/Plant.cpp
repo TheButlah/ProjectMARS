@@ -2,6 +2,7 @@
 #include <queue>
 #include <iostream>
 
+
 using namespace MARS;
 
 
@@ -56,7 +57,7 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
         double terrainWeight = terrain.weightAtXY(loc.x, loc.y-1);
         if (weightedDist+terrainWeight <= serve_dist ) { //within service
           std::tuple<Coord, double> newLoc = std::make_tuple(Coord(loc.x, loc.y-1), weightedDist+terrainWeight);
-          serviceable.push_back(Coord(loc.x, loc.y-1));
+          serviceable[Coord(loc.x, loc.y-1)] =  weightedDist+terrainWeight;
           queue.push(newLoc);
           visited.set(loc.x, loc.y-1,1);
           //std::cout << "Added to serviceable area." << std::endl;
@@ -70,7 +71,7 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
         double terrainWeight = terrain.weightAtXY(loc.x, loc.y+1);
         if (weightedDist + terrainWeight <= serve_dist) {
           std::tuple<Coord, double> newLoc = std::make_tuple(Coord(loc.x, loc.y+1), weightedDist+terrainWeight);
-          serviceable.push_back(Coord(loc.x, loc.y+1));
+          serviceable[Coord(loc.x, loc.y+1)] =  weightedDist+terrainWeight;
           queue.push(newLoc);
           visited.set(loc.x, loc.y+1, 1);
           //std::cout << "Added to serviceable area." << std::endl;
@@ -83,7 +84,7 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
         double terrainWeight = terrain.weightAtXY(loc.x-1, loc.y);
         if (weightedDist + terrainWeight <= serve_dist) {
           std::tuple<Coord, double> newLoc = std::make_tuple(Coord(loc.x-1, loc.y), weightedDist+terrainWeight);
-          serviceable.push_back(Coord(loc.x-1, loc.y));
+          serviceable[Coord(loc.x-1, loc.y)] =  weightedDist+terrainWeight;
           queue.push(newLoc);
           visited.set(loc.x-1, loc.y, 1);
           //std::cout << "Added to serviceable area." << std::endl;
@@ -97,7 +98,7 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
         //std::cout << "Terrain weight = " << terrainWeight << std::endl;
         if (weightedDist + terrainWeight <= serve_dist) {
           std::tuple<Coord, double> newLoc = std::make_tuple(Coord(loc.x+1, loc.y), weightedDist+terrainWeight);
-          serviceable.push_back(Coord(loc.x+1, loc.y));
+          serviceable[Coord(loc.x+1, loc.y)] =  weightedDist+terrainWeight;
           queue.push(newLoc);
           visited.set(loc.x+1, loc.y, 1);
           //std::cout << "Added to serviceable area." << std::endl;

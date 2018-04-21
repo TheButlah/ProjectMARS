@@ -7,6 +7,7 @@
 #include "Coord.h"
 #include "Terrain.h"
 #include "BitMatrix.h"
+#include <unordered_map>
 
 
 namespace MARS {

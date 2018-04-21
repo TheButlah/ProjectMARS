@@ -73,13 +73,8 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
 
-      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
 
-      for (int i=0; i<serviceableArea.size(); i++) {
-        MARS::Coord coord = serviceableArea[i];
-        std::cout << "(" << coord.x << "," << coord.y << ") ";
-      }
-      std::cout << std::endl;
 
       EXPECT_EQ(15, serviceableArea.size());
 
@@ -95,13 +90,8 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
 
-      /*for (int i=0; i<serviceableArea.size(); i++) {
-        MARS::Coord coord = serviceableArea[i];
-        std::cout << "(" << coord.x << "," << coord.y << ") ";
-      }
-      std::cout << std::endl;*/
 
       EXPECT_EQ(4, serviceableArea.size());
 
@@ -117,13 +107,8 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
 
-      /*for (int i = 0; i < serviceableArea.size(); i++) {
-        MARS::Coord coord = serviceableArea[i];
-        std::cout << "(" << coord.x << "," << coord.y << ") ";
-      }
-      std::cout << std::endl;*/
 
       EXPECT_EQ(10, serviceableArea.size());
     };
@@ -137,7 +122,7 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea;
 
       EXPECT_EQ(0, serviceableArea.size());
     };
