@@ -16,21 +16,26 @@ Plant::Plant(
         capacity(cap),
         serviceable_distance(serve_dist),
         location(Coord(x,y)),
-        inService(0),
-        serviceableArea(generateServiceableArea(terrain, location, serve_dist)),
-        servicedMap(initializeServicedMap(serviceableArea))
+        in_service(0),
+        serviceable_area(generateServiceableArea(terrain, location, serve_dist)),
+        serviced_map(initializeServicedMap(serviceable_area))
 {
 
 }
 
 
-std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<Coord, double> serviceableArea) {
-  std::unordered_map<Coord, int> servicedMap;
-  for (std::pair<Coord, double> element : serviceableArea) {
+void Plant::changeService(Plant other_plant, int pop) {
+  this->in_service += pop;
+  other_plant.in_service -= pop;
+}
+
+std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<Coord, double> serviceable_area) {
+  std::unordered_map<Coord, int> serviced_map;
+  for (std::pair<Coord, double> element : serviceable_area) {
     Coord coord = element.first;
-    servicedMap[coord] = 0;
+    serviced_map[coord] = 0;
   }
-  return servicedMap;
+  return serviced_map;
 }
 
 
