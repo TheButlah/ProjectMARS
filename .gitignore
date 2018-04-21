@@ -27,3 +27,6 @@ cmake-build-debug
 
 # SDL2 files
 sdl
+
+.idea
+.DS_Store

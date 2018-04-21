@@ -12,6 +12,7 @@
 #include "../include/Terrain.h"
 
 #include <gtest/gtest.h>
+#include <Plant.h>
 
 namespace {
 
@@ -51,9 +52,97 @@ namespace {
         EXPECT_EQ(matrix2.at(i, j), i * j);
       }
     }
-  }
+  };
 
-  TEST_F(MarsTest, PopulationGenUpdatesPop) {
+
+
+  TEST_F(MarsTest, GenerateServiceableAreaTest1_FlatLand) {
+      MARS::Terrain terrain(4);
+
+      //std::cout << "Outside constructor, printing weights:" << std::endl;
+      for (int i=0; i<terrain.sizeY; i++) {
+        for (int j=0; j<terrain.sizeX; j++) {
+          //std::cout << "Coordinate (" << j << "," << i << "):" << terrain.weightAtXY(j, i) << std::endl;
+        }
+        //std::cout << std::endl;
+      }
+
+      int cap = 10;
+      double servable_dist = 4.0;
+      int x = 1;
+      int y = 1;
+      MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
+
+      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+
+      for (int i=0; i<serviceableArea.size(); i++) {
+        MARS::Coord coord = serviceableArea[i];
+        std::cout << "(" << coord.x << "," << coord.y << ") ";
+      }
+      std::cout << std::endl;
+
+      EXPECT_EQ(15, serviceableArea.size());
+
+    }
+
+
+    TEST_F(MarsTest, GenServiceableAreaTest2_SomeUnreachable) {
+      MARS::Terrain terrain(4);
+
+      int cap = 10;
+      double serv_dist = 1.0;
+      int x = 1;
+      int y = 1;
+      MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
+
+      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+
+      /*for (int i=0; i<serviceableArea.size(); i++) {
+        MARS::Coord coord = serviceableArea[i];
+        std::cout << "(" << coord.x << "," << coord.y << ") ";
+      }
+      std::cout << std::endl;*/
+
+      EXPECT_EQ(4, serviceableArea.size());
+
+
+    };
+
+    TEST_F(MarsTest, GenServiceableAreaTest3_SomeUnreachable) {
+      MARS::Terrain terrain(4);
+
+      int cap = 10;
+      double serv_dist = 2.0;
+      int x = 1;
+      int y = 1;
+      MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
+
+      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+
+      /*for (int i = 0; i < serviceableArea.size(); i++) {
+        MARS::Coord coord = serviceableArea[i];
+        std::cout << "(" << coord.x << "," << coord.y << ") ";
+      }
+      std::cout << std::endl;*/
+
+      EXPECT_EQ(10, serviceableArea.size());
+    };
+
+    TEST_F(MarsTest, GenServiceableAreaTest4_SurroundedByWater) {
+      MARS::Terrain terrain(4,4, true);
+
+      int cap = 10;
+      double serv_dist = 4.0;
+      int x = 1;
+      int y = 1;
+      MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
+
+      std::vector<MARS::Coord> serviceableArea = plant.serviceableArea;
+
+      EXPECT_EQ(0, serviceableArea.size());
+    };
+
+/*  TEST_F(MarsTest, PopulationGenUpdatesPop) {
     int rows = 2;
     int cols = 2;
 
@@ -68,7 +157,7 @@ namespace {
         }
       }
     }
-  }
+  }*/
 
 
   TEST_F(MarsTest, BitMatrixStoresData) {
