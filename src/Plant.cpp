@@ -22,7 +22,7 @@ Plant::Plant(
 
 }
 
-std::vector<Coord> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
+std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
   BitMatrix visited = BitMatrix(terrain.sizeX,terrain.sizeY);
   for (int i=0; i<terrain.sizeX; i++) {
     for (int j=0; j<terrain.sizeY; j++) {
@@ -40,7 +40,7 @@ std::vector<Coord> Plant::generateServiceableArea(Terrain &terrain, Coord plantL
   }*/
 
   std::queue<std::tuple<Coord, double>> queue;
-  std::vector<Coord> serviceable;
+  std::unordered_map<Coord, double> serviceable;
   queue.push(std::make_tuple(plantLoc, 0.0));
   visited.set(plantLoc.x, plantLoc.y, 1);
   while (queue.size() > 0) {
