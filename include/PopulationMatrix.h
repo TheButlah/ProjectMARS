@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "Plant.h"
 #include "Matrix.h"
 
 namespace MARS {
@@ -11,15 +12,17 @@ namespace MARS {
     private:
         Matrix<int> servicedPopMatrix;
         Matrix<int> unservicedPopMatrix;
+        Matrix<std::unordered_map<Plant, int>> plantAssignMatrix;
         
-        /*
+        PopulationMatrix(int dx, int dy);
+        
         int numberServicedAtCoord(Coord c);
         int numberUnservicedAtCoord(Coord c);
         int numberServicedAtCoordByPlant(Coord c, Plant p);
-        std::pair<int, std::vector<Plant, int>> potentialPopForPlant(Plant p);
-        void moveCustomers(Plant src, int count, Plant dest);
-        void assignUnserviced(int count, Plant dest);
-        */
+        std::vector<std::pair<Coord, int>> potentialPopForPlant(Plant p);
+        void movePop(Plant from, Plant to, Coord c, int num_pop);
+        void assignUnserviced(Plant p, Coord c, int num_pop);
+        void addUnserviced(Matrix<int>& newUnserviced);
     };
 }
 
