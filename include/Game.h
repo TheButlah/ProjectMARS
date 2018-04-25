@@ -4,6 +4,7 @@
 #include "Matrix.h"
 #include "PopulationGen.h"
 #include "Terrain.h"
+#include "PopulationMatrix.h"
 
 namespace MARS {
 
@@ -18,16 +19,17 @@ namespace MARS {
         double funds; // The funds available for building plants
         Terrain terrain;
         PopulationGen populationGenerator;
+        std::vector<Plant> plants_in_service;
 
-        Matrix<int> popMatrix; //Integer matrix containing population density
-        int numberNewPlants; //Number of new plants built in current turn
-        int numberPlantsInService; //Number of plants in service, discluding newly built plants
-        int numberInService; //Number of people serviced by plants
+        PopulationMatrix pop_matrix; //Integer matrix containing population density
+        int number_new_plants; //Number of new plants built in current turn
+        int number_plants_in_service; //Number of plants in service, discluding newly built plants
+        int number_in_service; //Number of people serviced by plants
 
         // Game parameters - supplied to the game to determine its inital state and behavior
-        int sizeX;
-        int sizeY;
-        int numberTurns;
+        int size_x;
+        int size_y;
+        int number_turns;
         int plant_default_capacity;
         double plant_servable_distance;
         double plant_initial_cost;
@@ -39,7 +41,7 @@ namespace MARS {
         Game(
                 int dx,
                 int dy,
-                int numberTurns,
+                int number_turns,
                 int default_capacity,
                 double servable_distance,
                 double initial_cost,
@@ -53,6 +55,16 @@ namespace MARS {
         ~Game();
 
         double calculateObjective();
+
+        std::pair<Plant, bool> findBestPlant(Coord person_loc);
+
+        void processUnservicedPopulation();
+
+        void processUnservicedElement(int i, int j);
+
+        void processServicedPopulation();
+
+        void addToService(int);
     };
 }
 

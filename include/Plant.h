@@ -39,10 +39,14 @@ namespace MARS {
         std::unordered_map<Coord, int> initializeServicedMap( std::unordered_map<Coord, double> serviceable_area);
 
 
+        void addToService(int pop);
+
         //Adds integer to THIS plant's serviced population
         //Removes integer from inputted plant's serviced population
         //if int is negative, this is equivalent to removing population from THIS plant's serviced population
         void changeService(Plant, int pop);
+
+        void updateMapping(Plant plant, Coord person_loc, int pop);
 
         bool operator==(const Plant& other) const {
             return location == other.location;

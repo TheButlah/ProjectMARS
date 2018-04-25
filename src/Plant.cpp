@@ -38,6 +38,21 @@ std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<C
   return serviced_map;
 }
 
+void Plant::addToService(int pop) {
+  this->in_service += pop;
+};
+
+
+void Plant::updateMapping(Plant plant, Coord person_loc, int pop) {
+  std::unordered_map<Coord,int>::const_iterator iter = plant.serviced_map.find(person_loc);
+  if (iter == plant.serviced_map.end()) {
+    //add the entrance to the serviced map
+   plant.serviced_map.insert(std::pair<Coord,int>(person_loc, pop));
+  }
+  else {
+    plant.serviced_map[person_loc] += pop;
+  }
+}
 
 std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
   BitMatrix visited = BitMatrix(terrain.sizeX,terrain.sizeY);

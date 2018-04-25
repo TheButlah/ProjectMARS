@@ -10,6 +10,7 @@
 #include "../include/BitMatrix.h"
 #include "../include/PopulationGen.h"
 #include "../include/Terrain.h"
+#include "../include/PopulationMatrix.h"
 
 #include <gtest/gtest.h>
 #include <Plant.h>
@@ -53,7 +54,6 @@ namespace {
       }
     }
   };
-
 
 
   TEST_F(MarsTest, GenerateServiceableAreaTest1_FlatLand) {
