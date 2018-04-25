@@ -5,6 +5,7 @@
 #include "PopulationGen.h"
 #include "Terrain.h"
 #include "PopulationMatrix.h"
+#include <queue>
 
 namespace MARS {
 
@@ -62,9 +63,15 @@ namespace MARS {
 
         void processUnservicedElement(int i, int j);
 
-        void processServicedPopulation();
+        std::queue<Plant> processServicedPop(Plant, std::pair<Coord, std::unordered_map<Plant,int>>, std::queue<Plant>);
 
         void addToService(int);
+
+        std::queue<Plant> considerNewPlant(Plant, bool);
+
+        Plant createPlant(Coord);
+
+        void processTouchedPlants(std::queue<Plant>);
     };
 }
 
