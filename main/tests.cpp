@@ -26,8 +26,9 @@ namespace {
     virtual ~MarsTest() {
       // teardown for each test 
     }
-      
+  
     // can declare objects here used by all tests
+    MARS::PopulationMatrix popMat = MARS::PopulationMatrix(8, 8);
   };
 
   TEST_F(MarsTest, MatrixStoresData) {
@@ -192,6 +193,50 @@ namespace {
     MARS::Coord c2(2, 2);
 
     EXPECT_EQ(c1, c2);
+  }
+
+  TEST_F(MarsTest, PopulationMatrixServicedByPlant) {
+    // sum up all plants, check that it's equal to total num serviced
+    MARS::Terrain terrain(8, 8);
+    MARS::Plant p1(100, 5, 2, 3, terrain);
+    MARS::Plant p2(100, 3, 4, 4, terrain);
+    MARS::Coord c(2, 3);
+
+    popMat.assignUnserviced(p1, c, 5);
+    popMat.assignUnserviced(p2, c, 10);
+
+    EXPECT_EQ(
+        popMat.numberServicedAtCoord(c),
+        popMat.numberServicedAtCoordByPlant(c, p1) + popMat.numberServicedAtCoordByPlant(c, p2)
+    );
+  }
+
+  TEST_F(MarsTest, MovePopNonZero) {
+    // move x from one plant to another
+    // check that population for plant 'from' has decreased by x
+    // and that population for plant 'to' has increased by x
+    MARS::Terrain terrain(8, 8);
+    MARS::Plant p1(100, 5, 2, 3, terrain);
+    MARS::Plant p2(100, 3, 4, 4, terrain);
+    MARS::Coord c(2, 3);
+
+    popMat.assignUnserviced(p1, c, 5);
+    popMat.assignUnserviced(p2, c, 10);
+    
+    int oldPop1 = popMat.numberServicedAtCoordByPlant(c, p1);
+    int oldPop2 = popMat.numberServicedAtCoordByPlant(c, p2);
+    
+    popMat.movePop(p2, p1, c, 5);
+
+    int newPop1 = popMat.numberServicedAtCoordByPlant(c, p1);
+    int newPop2 = popMat.numberServicedAtCoordByPlant(c, p2);
+
+    EXPECT_EQ(
+        newPop1, oldPop1 + 5
+    );
+    EXPECT_EQ(
+        newPop2, oldPop2 - 5
+    );
   }
 
 }
