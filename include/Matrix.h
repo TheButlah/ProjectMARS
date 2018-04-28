@@ -27,7 +27,7 @@ namespace MARS {
             matrix(new T[rows * cols]) 
         {
             // Take care to zero out memory
-            std::memset(matrix, 0, num_rows * num_cols * sizeof(int));
+            std::memset(matrix, 0, num_rows * num_cols * sizeof(T));
         };
 
         Matrix(const Matrix& other):
@@ -35,7 +35,7 @@ namespace MARS {
             num_cols(other.num_cols),
             matrix(new T[other.num_rows * other.num_cols]) 
         {
-            std::memcpy(matrix, other.matrix, other.num_rows * other.num_cols * sizeof(int));
+            std::memcpy(matrix, other.matrix, other.num_rows * other.num_cols * sizeof(T));
         }
 
         /*

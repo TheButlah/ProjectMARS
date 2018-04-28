@@ -51,7 +51,7 @@ namespace MARS {
         );
 
         /* Advance the game's progress by one time step */
-        void step();
+        void step(bool add_plant, Coord plant_coord);
 
         ~Game();
 

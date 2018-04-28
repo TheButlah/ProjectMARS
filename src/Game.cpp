@@ -35,7 +35,7 @@ Game::Game(
 
 }
 
-void Game::step() {
+void Game::step(bool add_plant, Coord plant_coord) {
   Matrix<int> new_population = populationGenerator.generate(this->pop_matrix.computeCombinedPop());
   //this->popMatrix = populationGenerator.generate(this->popMatrix);
   pop_matrix.addUnserviced(new_population);
@@ -46,7 +46,11 @@ void Game::step() {
 
   processUnservicedPopulation();
   //if new plant was added
-  //createPlant()
+  if (add_plant) {
+    Plant new_plant = createPlant(plant_coord);
+    std::queue<Plant> touched_plant = considerNewPlant(new_plant, false);
+    processTouchedPlants(touched_plant);
+  }
   //considerNewPlant()
   //process queue of touched plants
   //calculate objective
@@ -157,7 +161,6 @@ std::queue<Plant> Game::considerNewPlant(Plant plant, bool touched) {
     return empty;
   }
 };
-
 
 void Game::processTouchedPlants(std::queue<Plant> touched_plants) {
   while (touched_plants.size() > 0) {//process each plant
