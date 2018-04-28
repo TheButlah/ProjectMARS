@@ -41,7 +41,6 @@ std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant, int>>> Popula
 
         }
         result[coord] = std::pair<int, std::unordered_map<Plant, int>>(num_unserviced, serviced_potential_pop);
-        //result.push_back(std::pair<Coord, int>(coord, num_unserviced + num_serviced));
     } 
     return result;
 }
