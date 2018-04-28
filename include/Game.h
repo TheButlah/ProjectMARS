@@ -67,6 +67,8 @@ namespace MARS {
 
         void addToService(int);
 
+        void addNewPlant(Plant);
+
         std::queue<Plant> considerNewPlant(Plant, bool);
 
         Plant createPlant(Coord);

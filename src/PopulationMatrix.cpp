@@ -52,6 +52,7 @@ void PopulationMatrix::movePop(Plant from, Plant to, Coord c, int num_pop) {
 
 void PopulationMatrix::assignUnserviced(Plant p, Coord c, int num_pop) {
     unservicedPopMatrix.at(c.x, c.y) -= num_pop;
+    servicedPopMatrix.at(c.x,c.y) += num_pop;
     plantAssignMatrix.at(c.x, c.y)[p] += num_pop;    
 }
 

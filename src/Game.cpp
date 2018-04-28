@@ -36,20 +36,22 @@ Game::Game(
 }
 
 void Game::step() {
-	Matrix<int> new_population = populationGenerator.generate(this->pop_matrix.computeCombinedPop());
+  Matrix<int> new_population = populationGenerator.generate(this->pop_matrix.computeCombinedPop());
   //this->popMatrix = populationGenerator.generate(this->popMatrix);
   pop_matrix.addUnserviced(new_population);
-  
+
   //add new plants from last round to number_plants
   this->number_plants_in_service += number_new_plants;
   this->number_new_plants = 0;
 
   processUnservicedPopulation();
   //if new plant was added
-    //createPlant()
-    //considerNewPlant()
-    //process queue of touched plants
+  //createPlant()
+  //considerNewPlant()
+  //process queue of touched plants
   //calculate objective
+  double objective = this->calculateObjective();
+  this->funds = objective;
   //return
 }
 
@@ -106,6 +108,11 @@ void Game::addToService(int new_serviced_pop) {
 }
 
 
+void Game::addNewPlant(Plant plant) {
+  this->plants_in_service.push_back(plant);
+};
+
+
 Plant Game::createPlant(Coord plant_loc) {
   //update number_new_plants
   this->number_new_plants++;
@@ -153,8 +160,7 @@ std::queue<Plant> Game::considerNewPlant(Plant plant, bool touched) {
 
 
 void Game::processTouchedPlants(std::queue<Plant> touched_plants) {
-  while (touched_plants.size() > 0) {
-    //process each plant
+  while (touched_plants.size() > 0) {//process each plant
     Plant plant = touched_plants.front();
     std::queue<Plant> empty = this->considerNewPlant(plant, true);
   }
