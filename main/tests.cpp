@@ -61,8 +61,8 @@ namespace {
       MARS::Terrain terrain(4);
 
       //std::cout << "Outside constructor, printing weights:" << std::endl;
-      for (int i=0; i<terrain.sizeY; i++) {
-        for (int j=0; j<terrain.sizeX; j++) {
+      for (int i=0; i<terrain.sizeY(); i++) {
+        for (int j=0; j<terrain.sizeX(); j++) {
           //std::cout << "Coordinate (" << j << "," << i << "):" << terrain.weightAtXY(j, i) << std::endl;
         }
         //std::cout << std::endl;
@@ -75,7 +75,6 @@ namespace {
       MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
 
       std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
-
 
       EXPECT_EQ(15, serviceableArea.size());
 
@@ -202,12 +201,12 @@ namespace {
     MARS::Plant p2(100, 3, 4, 4, terrain);
     MARS::Coord c(2, 3);
 
-    popMat.assignUnserviced(p1, c, 5);
-    popMat.assignUnserviced(p2, c, 10);
+    popMat.assignUnserviced(&p1, c, 5);
+    popMat.assignUnserviced(&p2, c, 10);
 
     EXPECT_EQ(
         popMat.numberServicedAtCoord(c),
-        popMat.numberServicedAtCoordByPlant(c, p1) + popMat.numberServicedAtCoordByPlant(c, p2)
+        popMat.numberServicedAtCoordByPlant(c, &p1) + popMat.numberServicedAtCoordByPlant(c, &p2)
     );
   }
 
@@ -220,16 +219,16 @@ namespace {
     MARS::Plant p2(100, 3, 4, 4, terrain);
     MARS::Coord c(2, 3);
 
-    popMat.assignUnserviced(p1, c, 5);
-    popMat.assignUnserviced(p2, c, 10);
+    popMat.assignUnserviced(&p1, c, 5);
+    popMat.assignUnserviced(&p2, c, 10);
     
-    int oldPop1 = popMat.numberServicedAtCoordByPlant(c, p1);
-    int oldPop2 = popMat.numberServicedAtCoordByPlant(c, p2);
+    int oldPop1 = popMat.numberServicedAtCoordByPlant(c, &p1);
+    int oldPop2 = popMat.numberServicedAtCoordByPlant(c, &p2);
     
-    popMat.movePop(p2, p1, c, 5);
+    popMat.movePop(&p2, &p1, c, 5);
 
-    int newPop1 = popMat.numberServicedAtCoordByPlant(c, p1);
-    int newPop2 = popMat.numberServicedAtCoordByPlant(c, p2);
+    int newPop1 = popMat.numberServicedAtCoordByPlant(c, &p1);
+    int newPop2 = popMat.numberServicedAtCoordByPlant(c, &p2);
 
     EXPECT_EQ(
         newPop1, oldPop1 + 5

@@ -19,13 +19,12 @@ namespace MARS {
         int time; // The current time in the game
         double funds; // The funds available for building plants
         Terrain terrain;
-        PopulationGen populationGenerator;
-        std::vector<Plant> plants_in_service;
-
+        PopulationGen pop_gen;
+        std::vector<Plant*> plants_in_service;
         PopulationMatrix pop_matrix; //Integer matrix containing population density
         int number_new_plants; //Number of new plants built in current turn
         int number_plants_in_service; //Number of plants in service, discluding newly built plants
-        int number_in_service; //Number of people serviced by plants
+        int number_pop_serviced; //Number of people serviced by plants
 
         // Game parameters - supplied to the game to determine its inital state and behavior
         int size_x;
@@ -40,14 +39,14 @@ namespace MARS {
 
     public:
         Game(
-                int dx,
-                int dy,
-                int number_turns,
-                int default_capacity,
-                double servable_distance,
-                double initial_cost,
-                double operating_cost,
-                double profit_margin
+            int dx,
+            int dy,
+            int number_turns,
+            int default_capacity,
+            double servable_distance,
+            double initial_cost,
+            double operating_cost,
+            double profit_margin
         );
 
         /* Advance the game's progress by one time step */
@@ -57,23 +56,23 @@ namespace MARS {
 
         double calculateObjective();
 
-        std::pair<Plant, bool> findBestPlant(Coord person_loc);
+        std::pair<Plant*, bool> findBestPlant(Coord person_loc);
 
         void processUnservicedPopulation();
 
         void processUnservicedElement(int i, int j);
 
-        std::queue<Plant> processServicedPop(Plant, std::pair<Coord, std::unordered_map<Plant,int>>, std::queue<Plant>);
+        std::queue<Plant*> processServicedPop(Plant*, std::pair<Coord, std::unordered_map<Plant*,int>>, std::queue<Plant*>);
 
         void addToService(int);
 
-        void addNewPlant(Plant);
+        void addNewPlant(Plant*);
 
-        std::queue<Plant> considerNewPlant(Plant, bool);
+        std::queue<Plant*> considerNewPlant(Plant*, bool);
 
-        Plant createPlant(Coord);
+        Plant* createPlant(Coord);
 
-        void processTouchedPlants(std::queue<Plant>);
+        void processTouchedPlants(std::queue<Plant*>);
     };
 }
 

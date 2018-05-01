@@ -18,7 +18,7 @@ namespace MARS {
          */
         Matrix<int> servicedPopMatrix;
         Matrix<int> unservicedPopMatrix;
-        Matrix<std::unordered_map<Plant, int>> plantAssignMatrix;
+        Matrix<std::unordered_map<Plant*, int>> plantAssignMatrix;
 
         /*
          * Constructor
@@ -38,23 +38,23 @@ namespace MARS {
         /*
          * Number of people serviced at a given coordinate by a given plant.
          */
-        int numberServicedAtCoordByPlant(Coord c, Plant p);
+        int numberServicedAtCoordByPlant(Coord c, Plant* p);
         
         /*
          * Returns a mapping of coordinates to (unserviced, {plant => serviced_by_plant})
          * pairs within a plant's serviceable area.
          */
-        std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant, int>>> potentialPopForPlant(Plant p);
+        std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> potentialPopForPlant(Plant* p);
         
         /*
          * Moves a population at a given coordinate from one plant to another.
          */
-        void movePop(Plant from, Plant to, Coord c, int num_pop);
+        void movePop(Plant* from, Plant* to, Coord c, int num_pop);
         
         /*
          * Assigns an unserviced population at a given coordinate to a given plant.
          */
-        void assignUnserviced(Plant p, Coord c, int num_pop);
+        void assignUnserviced(Plant* p, Coord c, int num_pop);
        
         /*
          * Matrix-adds a new unserviced population mapping to the existing unserviced population mapping.

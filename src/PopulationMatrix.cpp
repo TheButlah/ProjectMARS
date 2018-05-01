@@ -18,39 +18,38 @@ int PopulationMatrix::numberUnservicedAtCoord(Coord c) {
     return unservicedPopMatrix.at(c.x, c.y);    
 }
 
-int PopulationMatrix::numberServicedAtCoordByPlant(Coord c, Plant p) {
+int PopulationMatrix::numberServicedAtCoordByPlant(Coord c, Plant* p) {
     return plantAssignMatrix.at(c.x, c.y)[p];
 }
 
-std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant, int>>> PopulationMatrix::potentialPopForPlant(Plant p) {
-  std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant, int>>> result;
+std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> PopulationMatrix::potentialPopForPlant(Plant* p) {
+    std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> result;
     
-    std::unordered_map<Coord, double> serviceable_area = p.serviceable_area;
+    std::unordered_map<Coord, double> serviceable_area = p->serviceable_area;
     for (std::pair<Coord, double> element : serviceable_area) {
         Coord coord = element.first;
         int num_unserviced = unservicedPopMatrix.at(coord.x, coord.y);
-        int num_serviced = 0;
 
-        std::unordered_map<Plant, int> serviced_potential_pop;
+        std::unordered_map<Plant*, int> serviced_potential_pop;
 
-        for (std::pair<Plant, int> pairing : plantAssignMatrix.at(coord.x, coord.y)) {
-            Plant plant = pairing.first;
-            if (plant.serviceable_area[coord] > p.serviceable_area[coord]) {
+        for (std::pair<Plant*, int> pairing : plantAssignMatrix.at(coord.x, coord.y)) {
+            Plant* plant = pairing.first;
+            if (plant->serviceable_area[coord] > p->serviceable_area[coord]) {
               serviced_potential_pop[pairing.first] = pairing.second;
             }
 
         }
-        result[coord] = std::pair<int, std::unordered_map<Plant, int>>(num_unserviced, serviced_potential_pop);
+        result[coord] = std::pair<int, std::unordered_map<Plant*, int>>(num_unserviced, serviced_potential_pop);
     } 
     return result;
 }
 
-void PopulationMatrix::movePop(Plant from, Plant to, Coord c, int num_pop) {
+void PopulationMatrix::movePop(Plant* from, Plant* to, Coord c, int num_pop) {
     plantAssignMatrix.at(c.x, c.y)[from] -= num_pop;
     plantAssignMatrix.at(c.x, c.y)[to] += num_pop;
 }
 
-void PopulationMatrix::assignUnserviced(Plant p, Coord c, int num_pop) {
+void PopulationMatrix::assignUnserviced(Plant* p, Coord c, int num_pop) {
     unservicedPopMatrix.at(c.x, c.y) -= num_pop;
     servicedPopMatrix.at(c.x,c.y) += num_pop;
     plantAssignMatrix.at(c.x, c.y)[p] += num_pop;    

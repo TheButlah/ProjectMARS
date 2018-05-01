@@ -21,18 +21,20 @@
 namespace MARS {
 
     class Terrain {
-    public:
+    private:
         siv::PerlinNoise perlin;
         Matrix<double> terrainMatrix;
-        int sizeX;
-        int sizeY;
+        int size_x;
+        int size_y;
+    public:
+        
 
         Terrain(int dx, int dy);
-
         Terrain(int dim);
-
         Terrain(int dx, int dy, bool water);
 
+        int sizeX();
+        int sizeY();
         double weightAtXY(int x, int y);
         double weightAtCoord(Coord c);
     };

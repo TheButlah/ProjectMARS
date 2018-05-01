@@ -15,6 +15,8 @@ namespace MARS {
      * Abstraction of plant
      */
     class Plant {
+    private:
+        
     public:
         /*
          * location: coordinates of plant in map
@@ -22,24 +24,25 @@ namespace MARS {
          * capacity: total number of people plant can service
          * serviceable_distance: furthest distance which the plant can service
          * serviceable_area: coordinates that a plant can service
-         * serviced_map: mapping from a coordinate to number of people being serviced there
-         */
-        Coord location;
+         * customer_map: mapping from a coordinate to number of people being serviced there
+         */ 
+        Coord location;        
         int in_service; 
         int capacity;
         double serviceable_distance; 
         std::unordered_map<Coord, double> serviceable_area; 
-        std::unordered_map<Coord, int> serviced_map; 
+        std::unordered_map<Coord, int> serviced_map;
 
         /*
          * Constructor
          */
         Plant(
-                int cap,
-                double serve_dist,
-                int x,
-                int y,
-                Terrain &terrain);
+            int cap,
+            double serve_dist,
+            int x,
+            int y,
+            Terrain &terrain
+        );
 
         /*
          * Generate the plant's serviceable area given a terrain, location, and serviceable distance.
@@ -51,23 +54,10 @@ namespace MARS {
          */
         std::unordered_map<Coord, int> initializeServicedMap( std::unordered_map<Coord, double> serviceable_area);
 
-
         /*
-         * Adds `pop' to THIS plant's serviced population.
+         * Changes the size of population the plant services at a given location.
          */
-        void addToService(int pop);
-
-        /* Adds `pop' to THIS plant's serviced population and removes `pop' from the
-         * other plant's serviced population.
-         * If `pop' is negative, this is equivalent to removing population from THIS plant's 
-         * serviced population and adding it to the other.
-         */
-        void changeService(Plant, int pop);
-
-        /*
-         * Adds a population at a given location to the plant's serviced map.
-         */
-        void updateMapping(Plant plant, Coord person_loc, int pop);
+        void changeServicedPop(Coord person_loc, int pop);
 
         bool operator==(const Plant& other) const {
             return location == other.location;
