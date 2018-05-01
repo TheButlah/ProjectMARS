@@ -17,7 +17,7 @@ Plant::Plant(
     serviceable_distance(serve_dist),
     location(Coord(x,y)),
     in_service(0),
-    serviceable_area(generateServiceableArea(terrain, location, serve_dist)),
+    serviceable_area(generateServiceableArea(terrain, Coord(x,y), serve_dist)),
     serviced_map(initializeServicedMap(serviceable_area))
 {
 

@@ -172,5 +172,7 @@ double Game::calculateObjective() {
 }
 
 Game::~Game() {
-
+    for (Plant* p: plants_in_service) {
+        delete p;
+    }
 }

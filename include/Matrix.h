@@ -27,8 +27,9 @@ namespace MARS {
             num_cols(cols),
             matrix(new T[rows * cols]) 
         {
-            // Take care to zero out memory
-            std::memset(matrix, 0, num_rows * num_cols * sizeof(T));
+            for (int i = 0; i < rows * cols; i++) {
+                matrix[i] = T();
+            }
         };
 
         Matrix(const Matrix& other):

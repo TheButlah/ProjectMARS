@@ -64,9 +64,7 @@ namespace {
       double servable_dist = 4.0;
       int x = 1;
       int y = 1;
-      std::cout << "before" << std::endl;
       MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
-      std::cout << "after" << std::endl;
 
       std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
       EXPECT_EQ(15, serviceableArea.size());
