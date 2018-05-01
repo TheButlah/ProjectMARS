@@ -7,7 +7,6 @@ BitMatrix::BitMatrix(int rows, int cols):
     num_cols(cols),
     matrix(rows, cols / (8 * sizeof(int)) + 1) 
 {
-    std::cout << "bit matrix" << std::endl;
 }
 
 bool BitMatrix::get(int r, int c) {

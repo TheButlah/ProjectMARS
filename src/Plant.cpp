@@ -24,7 +24,6 @@ Plant::Plant(
 }
 
 std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
-    std::cout << "yyyy" << std::endl;
     BitMatrix visited = BitMatrix(terrain.sizeX(), terrain.sizeY());
 
     std::queue<std::tuple<Coord, double>> queue;
@@ -32,21 +31,19 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
     queue.push(std::make_tuple(plantLoc, 0.0));
     visited.set(plantLoc.x, plantLoc.y, true);
 
-    std::cout << "yyyy" << std::endl;
     while (queue.size() > 0) {
         std::tuple<Coord, double> locInfo = queue.front();
         double weightedDist = std::get<1>(locInfo);
         Coord loc = std::get<0>(locInfo);
         queue.pop();
 
-        std::cout << "yyyy" << std::endl;
         std::vector<Coord> neighbors {
             Coord(loc.x, loc.y-1), 
             Coord(loc.x, loc.y+1), 
             Coord(loc.x-1, loc.y), 
             Coord(loc.x+1, loc.y)
         };
-        std::cout << "yyyy" << std::endl;
+
         for (int i = 0; i < neighbors.size(); i++) {
             Coord neighbor = neighbors[i];
             if (!(neighbor.x >= 0 && neighbor.y >= 0 
