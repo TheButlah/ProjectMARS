@@ -37,7 +37,9 @@ namespace MARS {
             num_cols(other.num_cols),
             matrix(new T[other.num_rows * other.num_cols]) 
         {
-            std::memcpy(matrix, other.matrix, other.num_rows * other.num_cols * sizeof(T));
+            for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+                matrix[i] = T(other.matrix[i]);
+            }
         }
 
         /*
