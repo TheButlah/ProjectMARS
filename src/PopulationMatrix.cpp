@@ -25,7 +25,7 @@ int PopulationMatrix::numberServicedAtCoordByPlant(Coord c, Plant* p) {
 std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> PopulationMatrix::potentialPopForPlant(Plant* p) {
     std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> result;
     
-    std::unordered_map<Coord, double> serviceable_area = p->serviceable_area;
+    std::unordered_map<Coord, double> serviceable_area = p->serviceableArea();
     for (std::pair<Coord, double> element : serviceable_area) {
         Coord coord = element.first;
         int num_unserviced = unservicedPopMatrix.at(coord.x, coord.y);
@@ -34,7 +34,7 @@ std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> Popul
 
         for (std::pair<Plant*, int> pairing : plantAssignMatrix.at(coord.x, coord.y)) {
             Plant* plant = pairing.first;
-            if (plant->serviceable_area[coord] > p->serviceable_area[coord]) {
+            if (plant->distanceToCoord(coord) > element.second) {
               serviced_potential_pop[pairing.first] = pairing.second;
             }
 

@@ -60,22 +60,15 @@ namespace {
   TEST_F(MarsTest, GenerateServiceableAreaTest1_FlatLand) {
       MARS::Terrain terrain(4);
 
-      //std::cout << "Outside constructor, printing weights:" << std::endl;
-      for (int i=0; i<terrain.sizeY(); i++) {
-        for (int j=0; j<terrain.sizeX(); j++) {
-          //std::cout << "Coordinate (" << j << "," << i << "):" << terrain.weightAtXY(j, i) << std::endl;
-        }
-        //std::cout << std::endl;
-      }
-
       int cap = 10;
       double servable_dist = 4.0;
       int x = 1;
       int y = 1;
+      std::cout << "before" << std::endl;
       MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
+      std::cout << "after" << std::endl;
 
-      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
-
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
       EXPECT_EQ(15, serviceableArea.size());
 
     }
@@ -90,7 +83,7 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
 
 
       EXPECT_EQ(4, serviceableArea.size());
@@ -107,7 +100,7 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
 
       EXPECT_EQ(10, serviceableArea.size());
 
@@ -122,9 +115,9 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
 
-      std::unordered_map<MARS::Coord, int> servicedMap = plant.serviced_map;
+      std::unordered_map<MARS::Coord, int> servicedMap = plant.servicedMap();
 
       EXPECT_EQ(10, servicedMap.size());
     }
@@ -139,7 +132,7 @@ namespace {
       int y = 1;
       MARS::Plant plant = MARS::Plant(cap, serv_dist, x, y, terrain);
 
-      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceable_area;
+      std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
 
       EXPECT_EQ(0, serviceableArea.size());
     };

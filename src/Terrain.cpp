@@ -5,7 +5,7 @@ using namespace MARS;
 
 Terrain::Terrain(int dx, int dy): perlin(std::time(NULL)), size_x(dx), size_y(dy), terrainMatrix(dx, dy) {
     for (int i = 0; i < size_x; i++) {
-        for (int j = 0; j <size_y; j++) {
+        for (int j = 0; j < size_y; j++) {
             double value = perlin.noise0_1(i+0.5, j+0.5);
             if (value >= MOUNTAIN_THRESHOLD)
                 terrainMatrix.at(i,j) = MOUNTAIN_WEIGHT;
