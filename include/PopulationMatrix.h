@@ -9,17 +9,18 @@
 namespace MARS {
 
     class PopulationMatrix {
-    public:
+    private:
         /*
          * servicedPopMatrix: matrix containing serviced populations
          * unservicedPopMatrix: matrix containining unserviced populations
          * plantAssignMatrix: assignment of plants to populations
          *
          */
-        Matrix<int> servicedPopMatrix;
-        Matrix<int> unservicedPopMatrix;
-        Matrix<std::unordered_map<Plant*, int>> plantAssignMatrix;
-
+        Matrix<int> serviced_pop_matrix;
+        Matrix<int> unserviced_pop_matrix;
+        Matrix<std::unordered_map<Plant*, int>> plant_assign_matrix;
+    public:
+        
         /*
          * Constructor
          */
@@ -49,23 +50,25 @@ namespace MARS {
         /*
          * Moves a population at a given coordinate from one plant to another.
          */
-        void movePop(Plant* from, Plant* to, Coord c, int num_pop);
+        void moveServicedPopBetweenPlants(Plant* from, Plant* to, Coord c, int num_pop);
         
         /*
          * Assigns an unserviced population at a given coordinate to a given plant.
          */
-        void assignUnserviced(Plant* p, Coord c, int num_pop);
+        void assignUnservicedPop(Plant* p, Coord c, int num_pop);
        
         /*
          * Matrix-adds a new unserviced population mapping to the existing unserviced population mapping.
          */
-        void addUnserviced(Matrix<int>& newUnserviced);
+        void addUnservicedPop(Matrix<int>& newUnserviced);
         
         /*
          * Combines unserviced and serviced population mappings into a single population matrix. 
          */
         Matrix<int> computeCombinedPop();
 
+        int sizeX();
+        int sizeY();
     };
 }
 

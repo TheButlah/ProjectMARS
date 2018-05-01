@@ -64,7 +64,7 @@ namespace MARS {
 
         std::queue<Plant*> processServicedPop(Plant*, Coord, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
 
-        void addToService(int);
+        void addServicedPop(int);
 
         std::queue<Plant*> considerNewPlant(Plant*, bool);
 

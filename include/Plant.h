@@ -16,6 +16,9 @@ namespace MARS {
      */
     class Plant {
     private:
+        /*
+         * location: coordinates of plant in map
+         */ 
         int in_service; 
         int capacity;
         double serviceable_distance;
@@ -24,11 +27,6 @@ namespace MARS {
     public:
         /*
          * location: coordinates of plant in map
-         * in_service: number of people currently serviced by plant
-         * capacity: total number of people plant can service
-         * serviceable_distance: furthest distance which the plant can service
-         * serviceable_area: coordinates that a plant can service
-         * customer_map: mapping from a coordinate to number of people being serviced there
          */ 
         Coord location;        
         

@@ -39,7 +39,7 @@ Game::Game(
 
 void Game::step(bool add_plant, Coord plant_coord) {
     Matrix<int> new_population = pop_gen.generate(this->pop_matrix.computeCombinedPop());
-    pop_matrix.addUnserviced(new_population);
+    pop_matrix.addUnservicedPop(new_population);
 
     processUnservicedPopulation();
     
@@ -78,14 +78,15 @@ std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) {
 }
 
 void Game::processUnservicedElement(int i, int j) {
-    if (pop_matrix.unservicedPopMatrix.at(i, j) > 0) {
-        int number_to_service = pop_matrix.unservicedPopMatrix.at(i,j);
+    int number_to_service = pop_matrix.numberUnservicedAtCoord(Coord(i, j));
+    if (number_to_service > 0) {
+        int number_to_service = pop_matrix.numberUnservicedAtCoord(Coord(i, j));
         std::pair<Plant*, bool> result = findBestPlant(Coord(i,j));
         while (number_to_service > 0 or !(result.second)) {
             Plant* new_plant = result.first;
             int add_to_service = std::min(new_plant->remainingCapacity(), number_to_service);
-            this->addToService(add_to_service);
-            this->pop_matrix.assignUnserviced(new_plant, Coord(i,j), add_to_service);
+            this->addServicedPop(add_to_service);
+            this->pop_matrix.assignUnservicedPop(new_plant, Coord(i,j), add_to_service);
             new_plant->changeServicedPop(Coord(i,j), add_to_service);
             number_to_service -= add_to_service;
             result = findBestPlant(Coord(i,j));
@@ -94,14 +95,14 @@ void Game::processUnservicedElement(int i, int j) {
 }
 
 void Game::processUnservicedPopulation() {
-    for (int i = 0; i < this->pop_matrix.unservicedPopMatrix.numberRows(); i++) {
-        for (int j = 0; j < this->pop_matrix.unservicedPopMatrix.numberCols(); j++) {
+    for (int i = 0; i < this->pop_matrix.sizeX(); i++) {
+        for (int j = 0; j < this->pop_matrix.sizeY(); j++) {
         this->processUnservicedElement(i,j);
         }
     }
 }
 
-void Game::addToService(int new_serviced_pop) {
+void Game::addServicedPop(int new_serviced_pop) {
   this->number_pop_serviced += new_serviced_pop;
 }
 
@@ -119,13 +120,18 @@ Plant* Game::createPlant(Coord plant_loc) {
     return new_plant;
 };
 
-std::queue<Plant*> Game::processServicedPop(Plant* plant, Coord coord, std::unordered_map<Plant*, int> serviced_map, std::queue<Plant*>& queue) {
+std::queue<Plant*> Game::processServicedPop(
+    Plant* plant, 
+    Coord coord, 
+    std::unordered_map<Plant*, int> serviced_map, 
+    std::queue<Plant*>& queue) 
+{
     for (std::pair<Plant*, int> mapping : serviced_map) {
         if (plant->remainingCapacity() > 0) {
             Plant* old_plant = mapping.first;
             if (plant->distanceToCoord(coord) < old_plant->distanceToCoord(coord)) {
                 int add_to_service = std::min(plant->remainingCapacity(), mapping.second);
-                this->pop_matrix.movePop(old_plant, plant, coord, add_to_service);
+                this->pop_matrix.moveServicedPopBetweenPlants(old_plant, plant, coord, add_to_service);
                 plant->changeServicedPop(coord, add_to_service);
                 old_plant->changeServicedPop(coord, -add_to_service);                
                 queue.push(old_plant);

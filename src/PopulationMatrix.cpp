@@ -3,23 +3,23 @@
 using namespace MARS;
 
 PopulationMatrix::PopulationMatrix(int dx, int dy):
-    servicedPopMatrix(dx, dy),
-    unservicedPopMatrix(dx, dy),
-    plantAssignMatrix(dx, dy) 
+    serviced_pop_matrix(dx, dy),
+    unserviced_pop_matrix(dx, dy),
+    plant_assign_matrix(dx, dy) 
 {
 
 }
 
 int PopulationMatrix::numberServicedAtCoord(Coord c) {
-    return servicedPopMatrix.at(c.x, c.y);
+    return serviced_pop_matrix.at(c.x, c.y);
 }
 
 int PopulationMatrix::numberUnservicedAtCoord(Coord c) {
-    return unservicedPopMatrix.at(c.x, c.y);    
+    return unserviced_pop_matrix.at(c.x, c.y);    
 }
 
 int PopulationMatrix::numberServicedAtCoordByPlant(Coord c, Plant* p) {
-    return plantAssignMatrix.at(c.x, c.y)[p];
+    return plant_assign_matrix.at(c.x, c.y)[p];
 }
 
 std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> PopulationMatrix::potentialPopForPlant(Plant* p) {
@@ -28,11 +28,11 @@ std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> Popul
     std::unordered_map<Coord, double> serviceable_area = p->serviceableArea();
     for (std::pair<Coord, double> element : serviceable_area) {
         Coord coord = element.first;
-        int num_unserviced = unservicedPopMatrix.at(coord.x, coord.y);
+        int num_unserviced = unserviced_pop_matrix.at(coord.x, coord.y);
 
         std::unordered_map<Plant*, int> serviced_potential_pop;
 
-        for (std::pair<Plant*, int> pairing : plantAssignMatrix.at(coord.x, coord.y)) {
+        for (std::pair<Plant*, int> pairing : plant_assign_matrix.at(coord.x, coord.y)) {
             Plant* plant = pairing.first;
             if (plant->distanceToCoord(coord) > element.second) {
               serviced_potential_pop[pairing.first] = pairing.second;
@@ -44,31 +44,39 @@ std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> Popul
     return result;
 }
 
-void PopulationMatrix::movePop(Plant* from, Plant* to, Coord c, int num_pop) {
-    plantAssignMatrix.at(c.x, c.y)[from] -= num_pop;
-    plantAssignMatrix.at(c.x, c.y)[to] += num_pop;
+void PopulationMatrix::moveServicedPopBetweenPlants(Plant* from, Plant* to, Coord c, int num_pop) {
+    plant_assign_matrix.at(c.x, c.y)[from] -= num_pop;
+    plant_assign_matrix.at(c.x, c.y)[to] += num_pop;
 }
 
-void PopulationMatrix::assignUnserviced(Plant* p, Coord c, int num_pop) {
-    unservicedPopMatrix.at(c.x, c.y) -= num_pop;
-    servicedPopMatrix.at(c.x,c.y) += num_pop;
-    plantAssignMatrix.at(c.x, c.y)[p] += num_pop;    
+void PopulationMatrix::assignUnservicedPop(Plant* p, Coord c, int num_pop) {
+    unserviced_pop_matrix.at(c.x, c.y) -= num_pop;
+    serviced_pop_matrix.at(c.x,c.y) += num_pop;
+    plant_assign_matrix.at(c.x, c.y)[p] += num_pop;    
 }
 
-void PopulationMatrix::addUnserviced(Matrix<int>& newUnserviced) {
-    for (int i = 0; i < unservicedPopMatrix.numberRows(); i++) {
-        for (int j = 0; j < unservicedPopMatrix.numberCols(); j++) {
-            unservicedPopMatrix.at(i,j) += newUnserviced.at(i,j);
+void PopulationMatrix::addUnservicedPop(Matrix<int>& newUnserviced) {
+    for (int i = 0; i < unserviced_pop_matrix.numberRows(); i++) {
+        for (int j = 0; j < unserviced_pop_matrix.numberCols(); j++) {
+            unserviced_pop_matrix.at(i,j) += newUnserviced.at(i,j);
         }
     }
 }
 
 Matrix<int> PopulationMatrix::computeCombinedPop(){
-    Matrix<int> combinedPopMatrix = Matrix<int>(servicedPopMatrix.numberRows(), servicedPopMatrix.numberCols());
-    for (int i = 0; i < servicedPopMatrix.numberRows(); i++) {
-        for (int j = 0; j < servicedPopMatrix.numberCols(); j++) {
-            combinedPopMatrix.at(i,j) = servicedPopMatrix.at(i,j)+ unservicedPopMatrix.at(i,j);
+    Matrix<int> combinedPopMatrix = Matrix<int>(serviced_pop_matrix.numberRows(), serviced_pop_matrix.numberCols());
+    for (int i = 0; i < serviced_pop_matrix.numberRows(); i++) {
+        for (int j = 0; j < serviced_pop_matrix.numberCols(); j++) {
+            combinedPopMatrix.at(i,j) = serviced_pop_matrix.at(i,j)+ unserviced_pop_matrix.at(i,j);
         }
     }
     return combinedPopMatrix;
+}
+
+int PopulationMatrix::sizeX() {
+    return serviced_pop_matrix.numberRows();
+}
+
+int PopulationMatrix::sizeY() {
+    return serviced_pop_matrix.numberRows();    
 }

@@ -192,8 +192,8 @@ namespace {
     MARS::Plant p2(100, 3, 4, 4, terrain);
     MARS::Coord c(2, 3);
 
-    popMat.assignUnserviced(&p1, c, 5);
-    popMat.assignUnserviced(&p2, c, 10);
+    popMat.assignUnservicedPop(&p1, c, 5);
+    popMat.assignUnservicedPop(&p2, c, 10);
 
     EXPECT_EQ(
         popMat.numberServicedAtCoord(c),
@@ -210,13 +210,13 @@ namespace {
     MARS::Plant p2(100, 3, 4, 4, terrain);
     MARS::Coord c(2, 3);
 
-    popMat.assignUnserviced(&p1, c, 5);
-    popMat.assignUnserviced(&p2, c, 10);
+    popMat.assignUnservicedPop(&p1, c, 5);
+    popMat.assignUnservicedPop(&p2, c, 10);
     
     int oldPop1 = popMat.numberServicedAtCoordByPlant(c, &p1);
     int oldPop2 = popMat.numberServicedAtCoordByPlant(c, &p2);
     
-    popMat.movePop(&p2, &p1, c, 5);
+    popMat.moveServicedPopBetweenPlants(&p2, &p1, c, 5);
 
     int newPop1 = popMat.numberServicedAtCoordByPlant(c, &p1);
     int newPop2 = popMat.numberServicedAtCoordByPlant(c, &p2);
