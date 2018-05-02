@@ -3,7 +3,7 @@
 
 using namespace MARS;
 
-Matrix<int> PopulationGen::generate(Matrix<int> popMatrix) {
+Matrix<int> PopulationGen::generate(Matrix<int> popMatrix, Terrain terrain) {
     int rows = popMatrix.numberRows();
     int cols = popMatrix.numberCols();
     Matrix<int> newMatrix(rows, cols);
@@ -20,6 +20,9 @@ Matrix<int> PopulationGen::generate(Matrix<int> popMatrix) {
             noise = perlin.noise(popMatrix.at(i,j) + r, popMatrix.at(i,j) - r);
             if (noise > 0) {
                 newMatrix.at(i, j) = ceil(10*noise);
+            }
+            if (terrain.weightAtXY(i,j) == WATER_WEIGHT or terrain.weightAtXY(i,j) == MOUNTAIN_WEIGHT) {
+                newMatrix.at(i,j) = 0;
             }
         }
     }

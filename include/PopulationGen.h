@@ -8,6 +8,7 @@
 #include <ctime>
 #include "Matrix.h"
 #include "PerlinNoise.h"
+#include "Terrain.h"
 
 namespace MARS {
 
@@ -26,7 +27,7 @@ namespace MARS {
         /* Takes current population matrix as input
          * Returns matrix of new population to be added
          */
-        Matrix<int> generate(Matrix<int> popMatrix);
+        Matrix<int> generate(Matrix<int> popMatrix, Terrain terrain);
     };
 }
 
