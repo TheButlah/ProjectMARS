@@ -15,15 +15,18 @@ Matrix<int> PopulationGen::generate(Matrix<int> popMatrix, Terrain terrain) {
     }
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
+          if (terrain.weightAtXY(i,j) == WATER_WEIGHT or terrain.weightAtXY(i,j) == MOUNTAIN_WEIGHT) {
+            newMatrix.at(i,j) = 0;
+          }
+          else {
             double r = ((double) rand() / (RAND_MAX)) + 1;
             double noise;
-            noise = perlin.noise(popMatrix.at(i,j) + r, popMatrix.at(i,j) - r);
+            noise = perlin.noise(popMatrix.at(i, j) + r, popMatrix.at(i, j) - r);
             if (noise > 0) {
-                newMatrix.at(i, j) = ceil(10*noise);
+              newMatrix.at(i, j) = ceil(10 * noise);
             }
-            if (terrain.weightAtXY(i,j) == WATER_WEIGHT or terrain.weightAtXY(i,j) == MOUNTAIN_WEIGHT) {
-                newMatrix.at(i,j) = 0;
-            }
+          }
+
         }
     }
     return newMatrix;
