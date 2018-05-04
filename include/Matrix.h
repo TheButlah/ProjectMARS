@@ -42,6 +42,48 @@ namespace MARS {
             }
         }
 
+        Matrix(Matrix& other):
+            num_rows(other.num_rows),
+            num_cols(other.num_cols),
+            matrix(new T[other.num_rows * other.num_cols]) 
+        {
+            for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+                matrix[i] = T(other.matrix[i]);
+            }
+        }
+
+        Matrix(const Matrix&& other):
+            num_rows(other.num_rows),
+            num_cols(other.num_cols),
+            matrix(new T[other.num_rows * other.num_cols]) 
+        {
+            for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+                matrix[i] = T(other.matrix[i]);
+            }
+        }
+
+        Matrix(Matrix&& other):
+            num_rows(other.num_rows),
+            num_cols(other.num_cols),
+            matrix(new T[other.num_rows * other.num_cols]) 
+        {
+            for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+                matrix[i] = T(other.matrix[i]);
+            }
+        }
+
+        Matrix& operator=(const Matrix& other)
+        {
+            num_rows = other.num_rows;
+            num_cols = other.num_cols;
+            delete[] matrix;
+            matrix = new T[num_rows * num_cols];
+            for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+                matrix[i] = T(other.matrix[i]);
+            }
+            return *this;
+        }
+
         /*
          * Access reference to data at location
          */

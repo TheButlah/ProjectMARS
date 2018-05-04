@@ -137,25 +137,26 @@ namespace {
       EXPECT_EQ(0, serviceableArea.size());
     }
 
-    /*
-  TEST_F(MarsTest, PopulationGenUpdatesPop) {
-    int rows = 2;
-    int cols = 2;
+  
+    TEST_F(MarsTest, PopulationGenUpdatesPop) {
+        int rows = 2;
+        int cols = 2;
 
-    MARS::Matrix<int> matrix(rows, cols);
-    MARS::PopulationGen popGenerator = MARS::PopulationGen();
-    MARS::Terrain terrain = MARS::Terrain(rows,cols);
+        MARS::Matrix<int> matrix(rows, cols);
+        MARS::PopulationGen popGenerator = MARS::PopulationGen();
+        MARS::Terrain terrain = MARS::Terrain(rows,cols);
 
-    for (int k=0; k<10; k++) {
-      matrix = popGenerator.generate(matrix, terrain);
-      for (int i=0; i<rows; i++) {
-        for (int j=0; j<cols; j++ ) {
-          EXPECT_FALSE(std::isnan(matrix.at(i,j)));
+        for (int k=0; k<10; k++) {
+            matrix = popGenerator.generate(matrix, terrain);
+            for (int i=0; i<rows; i++) {
+                for (int j=0; j<cols; j++ ) {
+                    EXPECT_FALSE(std::isnan(matrix.at(i,j)));
+                }
+            }
         }
-      }
+        std::cout << "before" << std::endl;
     }
-  }
-     */
+    
 
 
     TEST_F(MarsTest, BitMatrixStoresData) {
@@ -317,7 +318,7 @@ namespace {
     EXPECT_NE(game.get_number_pop_serviced(), 0);
   }
 
-/*
+
 
   TEST_F(MarsTest, ObjectiveFunctionValid) {
     for(int i = 0; i < 50; i++) {
@@ -332,7 +333,7 @@ namespace {
     EXPECT_NE(game.calculateObjective(), 0);
   }
 
-*/
+
 }
 
 
