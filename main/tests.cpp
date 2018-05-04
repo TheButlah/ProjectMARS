@@ -6,6 +6,7 @@
 #include <unordered_set>
 
 #include "../include/Coord.h"
+#include "../include/Game.h"
 #include "../include/Matrix.h"
 #include "../include/BitMatrix.h"
 #include "../include/PopulationGen.h"
@@ -29,6 +30,7 @@ namespace {
   
     // can declare objects here used by all tests
     MARS::PopulationMatrix popMat = MARS::PopulationMatrix(8, 8);
+    MARS::Game game = MARS::Game(8, 8, 100, 100, 50, 200, 200, 200);
   };
 
   TEST_F(MarsTest, MatrixStoresData) {
@@ -227,6 +229,67 @@ namespace {
     EXPECT_EQ(
         newPop2, oldPop2 - 5
     );
+  }
+
+  TEST_F(MarsTest, StepNoPlant) {
+    // Stepping without a plant added
+    game.step(false, MARS::Coord(NULL, NULL));
+    EXPECT_EQ(game.plants_in_service, 0);
+  }
+
+  TEST_F(MarsTest, StepWithPlant) {
+    // Stepping with a plant added
+    game.step(true, MARS::Coord(3, 4));
+    EXPECT_NE(game.plants_in_service, 0);
+  }
+
+  TEST_F(MarsTest, FindBestPlantNoPlants) {
+    // No best plant if there are no plants
+    MARS::Coord arbitrary_coord(3, 4);
+    std::pair<MARS::Plant, bool> expected_result = std::pair<MARS::Plant, bool>(NULL, false);
+    EXPECT_EQ(
+        game.findBestPlant(arbitrary_coord), expected_result 
+    );
+  }
+
+  TEST_F(MarsTest, FindBestPlant) {
+    for(int i = 0; i < 100; i++) {
+        game.step(false, NULL);
+    }
+    game.step(true, MARS::Coord(5, 5));
+    // after 100 steps, check to see if there's a "best plant" for some coord
+    bool foundPlant = false;
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            foundPlant = foundPlant || game.findBestPlant(MARS::Coord(i, j)).second;
+        }
+    }
+    EXPECT_TRUE(foundPlant);
+  }
+
+  TEST_F(MarsTest, UnservicedPopulationProcessed) {
+    // check to see that number in service goes up over time
+    for(int i = 0; i < 50; i++) {
+        if(i % 5 == 0) {
+            game.step(true, MARS::Coord(i/5, i/5));
+        }
+        else {
+            game.step(false, MARS::Coord(NULL, NULL));
+        }
+    }
+    EXPECT_NE(game.number_in_service, 0);
+  }
+
+  TEST_F(MarsTest, ObjectiveFunctionValid) {
+    for(int i = 0; i < 50; i++) {
+        if(i % 5 == 0) {
+            game.step(true, MARS::Coord(i/5, i/5));
+        }
+        else {
+            game.step(false, MARS::Coord(NULL, NULL));
+        }
+    }
+    EXPECT_FALSE(std::isnan(game.calculateObjective()));
   }
 
 }
