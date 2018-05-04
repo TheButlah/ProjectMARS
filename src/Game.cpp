@@ -37,6 +37,14 @@ Game::Game(
 
 }
 
+int Game::get_number_plants_in_service() {
+    return this->number_plants_in_service;
+}
+
+int Game::get_number_pop_serviced() {
+    return this->number_pop_serviced;
+}
+
 void Game::step(bool add_plant, Coord plant_coord) {
     Matrix<int> new_population = pop_gen.generate(this->pop_matrix.computeCombinedPop(), this->terrain);
     pop_matrix.addUnservicedPop(new_population);

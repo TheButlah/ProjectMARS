@@ -234,27 +234,30 @@ namespace {
   TEST_F(MarsTest, StepNoPlant) {
     // Stepping without a plant added
     game.step(false, MARS::Coord(NULL, NULL));
-    EXPECT_EQ(game.plants_in_service, 0);
+    EXPECT_EQ(game.get_number_plants_in_service(), 0);
   }
 
   TEST_F(MarsTest, StepWithPlant) {
     // Stepping with a plant added
     game.step(true, MARS::Coord(3, 4));
-    EXPECT_NE(game.plants_in_service, 0);
+    EXPECT_NE(game.get_number_plants_in_service(), 0);
   }
 
-  TEST_F(MarsTest, FindBestPlantNoPlants) {
+  /* Q: what is in the first element of the pair when there is no plant? (not NULL since
+    NULL is a number not a Plant instance) */
+  // Commenting this test out for now
+  /* TEST_F(MarsTest, FindBestPlantNoPlants) {
     // No best plant if there are no plants
     MARS::Coord arbitrary_coord(3, 4);
     std::pair<MARS::Plant, bool> expected_result = std::pair<MARS::Plant, bool>(NULL, false);
     EXPECT_EQ(
         game.findBestPlant(arbitrary_coord), expected_result 
     );
-  }
+  } */
 
   TEST_F(MarsTest, FindBestPlant) {
     for(int i = 0; i < 100; i++) {
-        game.step(false, NULL);
+        game.step(false, MARS::Coord(NULL, NULL));
     }
     game.step(true, MARS::Coord(5, 5));
     // after 100 steps, check to see if there's a "best plant" for some coord
@@ -277,7 +280,7 @@ namespace {
             game.step(false, MARS::Coord(NULL, NULL));
         }
     }
-    EXPECT_NE(game.number_in_service, 0);
+    EXPECT_NE(game.get_number_pop_serviced(), 0);
   }
 
   TEST_F(MarsTest, ObjectiveFunctionValid) {

@@ -52,6 +52,10 @@ namespace MARS {
         /* Advance the game's progress by one time step */
         void step(bool add_plant, Coord plant_coord);
 
+        int get_number_plants_in_service();
+
+        int get_number_pop_serviced();
+
         ~Game();
 
         double calculateObjective();
