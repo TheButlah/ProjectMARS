@@ -231,6 +231,8 @@ namespace {
     );
   }
 
+  // Q: are NULLs the best way to pass in nonexistent coords?
+
   TEST_F(MarsTest, StepNoPlant) {
     // Stepping without a plant added
     game.step(false, MARS::Coord(NULL, NULL));
@@ -243,9 +245,10 @@ namespace {
     EXPECT_NE(game.get_number_plants_in_service(), 0);
   }
 
-  /* Q: what is in the first element of the pair when there is no plant? (not NULL since
-    NULL is a number not a Plant instance) */
+  /* Q: what is in the first element of the pair when there is no plant? (cannot be NULL as NULL is numeric) */
+  
   // Commenting this test out for now
+
   /* TEST_F(MarsTest, FindBestPlantNoPlants) {
     // No best plant if there are no plants
     MARS::Coord arbitrary_coord(3, 4);
@@ -293,6 +296,7 @@ namespace {
         }
     }
     EXPECT_FALSE(std::isnan(game.calculateObjective()));
+    EXPECT_NE(game.calculateObjective(), 0);
   }
 
 }
