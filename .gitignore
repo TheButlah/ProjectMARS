@@ -30,3 +30,5 @@ sdl
 
 .idea
 .DS_Store
+
+config.ini

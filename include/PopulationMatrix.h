@@ -69,6 +69,9 @@ namespace MARS {
 
         int sizeX();
         int sizeY();
+        Matrix<int> servicedPopMatrix();
+        Matrix<int> unservicedPopMatrix();        
+    
     };
 }
 

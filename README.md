@@ -24,6 +24,19 @@ After cloning, create the `build` directory.
 mkdir build
 ```
 
+And create a basic configuration for running the simulator as a CLI.
+```
+cp config.ini.in config.ini
+```
+
+## Running the CLI
+
+When running the command line interface, we must pass in a configuration file as an argument to the program. If you created the configuration file as described by the Build section, and you compiled the `cli` program in the `build` directory, then running the CLI should be as simple as:
+
+```
+./cli ../config.ini
+```
+
 ## macOS and Linux
 
 The steps to build on macOS and Linux are the simplest. Run the following commands:

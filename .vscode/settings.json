@@ -40,6 +40,8 @@
     "type_traits": "cpp",
     "typeinfo": "cpp",
     "utility": "cpp",
-    "map": "cpp"
+    "map": "cpp",
+    "cstdarg": "cpp",
+    "cstddef": "cpp"
   }
 }

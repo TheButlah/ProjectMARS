@@ -52,15 +52,25 @@ namespace MARS {
         /* Advance the game's progress by one time step */
         void step(bool add_plant, Coord plant_coord);
 
-        int get_population_at(int, int);
+        int getPopulationAt(int, int);
 
-        bool check_if_plant_present(Coord);
+        bool checkIfPlantPresent(Coord);
 
-        int get_number_plants_in_service();
+        int getNumberPlantsInService();
 
-        int get_number_pop_serviced();
+        int getNumberPopServiced();
 
-        int get_number_new_plants();
+        int getNumberPopUnserviced();        
+
+        std::vector<Coord> getPlantLocations();
+
+        int getNumberNewPlants();
+
+        Terrain getTerrain();
+
+        Matrix<int> servicedPopMatrix();
+
+        Matrix<int> unservicedPopMatrix();
 
         ~Game();
 

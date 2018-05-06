@@ -80,3 +80,11 @@ int PopulationMatrix::sizeX() {
 int PopulationMatrix::sizeY() {
     return serviced_pop_matrix.numberRows();    
 }
+
+Matrix<int> PopulationMatrix::servicedPopMatrix() {
+    return serviced_pop_matrix;
+}
+
+Matrix<int> PopulationMatrix::unservicedPopMatrix() {
+    return unserviced_pop_matrix;
+}
