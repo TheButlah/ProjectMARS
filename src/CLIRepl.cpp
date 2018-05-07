@@ -2,6 +2,7 @@
 #include "../include/INIReader.h"
 #include "../include/Matrix.h"
 #include "../include/Terrain.h"
+#include "../include/Coord.h"
 
 #include <algorithm>
 #include <iostream>
@@ -12,6 +13,7 @@ using namespace MARS;
 using namespace cimg_library;
 
 #define BOX_SIZE 20
+#define POP_SCALE 20.0
 
 CLIRepl::CLIRepl(std::string inifile)
 {
@@ -89,7 +91,6 @@ void CLIRepl::draw() {
         }
     }
     
-    
     Terrain terrain = game->getTerrain();
     for (int i = 0; i < terrain.sizeX(); i++) {
         for (int j = 0; j < terrain.sizeY(); j++) {
@@ -119,7 +120,6 @@ void CLIRepl::draw() {
                 1.0);
         }
     }
-    
 
     Matrix<int> unserviced_pop_matrix = game->unservicedPopMatrix();
     for (int i = 0; i < unserviced_pop_matrix.numberRows(); i++) {
@@ -137,9 +137,9 @@ void CLIRepl::draw() {
                 0, 
                 color,
                 1.0);
-            color[0] = (unsigned char) (255.0*std::min(1.0, unserviced_pop_matrix.at(i, j)/20.0));
+            color[0] = (unsigned char) (255.0*std::min(1.0, unserviced_pop_matrix.at(i, j)/POP_SCALE));
             color[1] = 0;
-            color[2] = (unsigned char) (255.0*std::min(1.0, unserviced_pop_matrix.at(i, j)/20.0));
+            color[2] = (unsigned char) (255.0*std::min(1.0, unserviced_pop_matrix.at(i, j)/POP_SCALE));
             img->draw_rectangle(
                 13+(j)*BOX_SIZE+1, 
                 13+i*BOX_SIZE+1, 
@@ -164,6 +164,25 @@ void CLIRepl::draw() {
                 1.0);
         }
     }
+    
+    std::vector<Coord> locs = game->getPlantLocations();
+    for (Coord c : locs) {
+        unsigned char color[3];
+        color[0] = 255;
+        color[1] = 0;
+        color[2] = 0;
+        int i = c.x;
+        int j = c.y;
+        img->draw_rectangle(
+            13+(j)*BOX_SIZE, 
+            13+(i+size_x)*BOX_SIZE, 
+            0,
+            13+(j+1)*BOX_SIZE, 
+            13+(i+size_x+1)*BOX_SIZE, 
+            0, 
+            color,
+            1.0);
+    }
 
     Matrix<int> serviced_pop_matrix = game->servicedPopMatrix();
     for (int i = 0; i < serviced_pop_matrix.numberRows(); i++) {
@@ -184,14 +203,65 @@ void CLIRepl::draw() {
         }
     }
 
+    unsigned char text_color[3];
+    text_color[0] = 255;
+    text_color[1] = 255;
+    text_color[2] = 0;
+    std::string time_string = "Time: " + std::to_string(game->getCurrentTime());
+    std::string funds_string = "Funds: " + std::to_string(game->currentFunds());
+    std::string plants_string = "Plants in service: " + std::to_string(game->getNumberPlantsInService());
+    std::string unserviced_string = "Number of unserviced pop: " + std::to_string(game->getNumberPopUnserviced());
+    std::string serviced_string = "Number of serviced pop: " + std::to_string(game->getNumberPopServiced());
+    
+    img->draw_text(
+        23+size_y*BOX_SIZE,
+        23+size_x*BOX_SIZE,
+        time_string.c_str(),
+        text_color,
+        0,
+        1.0
+    );
+    img->draw_text(
+        23+size_y*BOX_SIZE,
+        23+size_x*BOX_SIZE+20,
+        funds_string.c_str(),
+        text_color,
+        0,
+        1.0
+    );
+    img->draw_text(
+        23+size_y*BOX_SIZE,
+        23+size_x*BOX_SIZE+40,
+        plants_string.c_str(),
+        text_color,
+        0,
+        1.0
+    );
+    img->draw_text(
+        23+size_y*BOX_SIZE,
+        23+size_x*BOX_SIZE+60,
+        unserviced_string.c_str(),
+        text_color,
+        0,
+        1.0
+    );
+    img->draw_text(
+        23+size_y*BOX_SIZE,
+        23+size_x*BOX_SIZE+80,
+        serviced_string.c_str(),
+        text_color,
+        0,
+        1.0
+    );
+
     img->display(*display);
 }
 
 void CLIRepl::printUsage() {
     std::cout << "Commands:" << std::endl;
     std::cout << "step - steps the game without making a plant" << std::endl;
-    std::cout << "step r c - steps the game while making a plant at location (r, c)" << std::endl;
-    std::cout << "stats - print statistics about game state" << std::endl;
+    std::cout << "step x - steps the game `x' times without making a plant" << std::endl;
+    std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
     std::cout << "help - print this list of commands" << std::endl;
 }
 
@@ -208,9 +278,14 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     } else if (command == "step") {
         if (tokens.size() == 1) {
             game->step(false, Coord(0, 0));
-        } else if (tokens.size() == 3) {
-            int r = std::stoi(tokens[1]);
-            int c = std::stoi(tokens[2]);
+        } else if (tokens.size() == 2) {
+            int times = std::stoi(tokens[1]);
+            for (int i = 0; i < times; i++) {
+                game->step(false, Coord(0, 0));                
+            }
+        } else if (tokens.size() == 4 && tokens[1] == "place") {
+            int r = std::stoi(tokens[2]);
+            int c = std::stoi(tokens[3]);
             game->step(true, Coord(r, c));
         } else {
             std::cout << "Did not provide correct number of arguments" << std::endl;

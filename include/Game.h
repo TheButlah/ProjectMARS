@@ -66,6 +66,10 @@ namespace MARS {
 
         int getNumberNewPlants();
 
+        double currentFunds();
+
+        int getCurrentTime();
+
         Terrain getTerrain();
 
         Matrix<int> servicedPopMatrix();

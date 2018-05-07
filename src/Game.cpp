@@ -84,6 +84,14 @@ int Game::getNumberPlantsInService() {
     return this->number_plants_in_service;
 }
 
+double Game::currentFunds() {
+  return this->funds;
+}
+
+int Game::getCurrentTime() {
+  return this->time;
+}
+
 Terrain Game::getTerrain() {
   return terrain;
 }
@@ -118,7 +126,7 @@ void Game::step(bool add_plant, Coord plant_coord) {
     //add new plants from last round to number_plants
     this->number_plants_in_service += getNumberNewPlants();
     this->number_new_plants = 0;
-
+    this->time++;
 }
 
 std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) {
