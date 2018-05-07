@@ -261,7 +261,7 @@ void CLIRepl::printUsage() {
     std::cout << "Commands:" << std::endl;
     std::cout << "step - steps the game without making a plant" << std::endl;
     std::cout << "step x - steps the game `x' times without making a plant" << std::endl;
-    std::cout << "step place r c - steps the game while making a plant at location (r, c)" << std::endl;
+    std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
     std::cout << "help - print this list of commands" << std::endl;
 }
 
@@ -283,7 +283,7 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
             for (int i = 0; i < times; i++) {
                 game->step(false, Coord(0, 0));                
             }
-        } else if (tokens.size() == 4 && tokens[1] == "place") {
+        } else if (tokens.size() == 4 && tokens[1] == "plant") {
             int r = std::stoi(tokens[2]);
             int c = std::stoi(tokens[3]);
             game->step(true, Coord(r, c));
