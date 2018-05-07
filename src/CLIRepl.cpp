@@ -261,7 +261,7 @@ void CLIRepl::printUsage() {
     std::cout << "Commands:" << std::endl;
     std::cout << "step - steps the game without making a plant" << std::endl;
     std::cout << "step x - steps the game `x' times without making a plant" << std::endl;
-    std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
+    std::cout << "step place r c - steps the game while making a plant at location (r, c)" << std::endl;
     std::cout << "help - print this list of commands" << std::endl;
 }
 
