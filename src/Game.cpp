@@ -105,9 +105,12 @@ void Game::step(bool add_plant, Coord plant_coord) {
     //if new plant was added
     if (add_plant) {
       if (!checkIfPlantPresent(plant_coord)) {
-        Plant* new_plant = createPlant(plant_coord);
-        std::queue<Plant*> touched_plants = considerNewPlant(new_plant, false);
-        processTouchedPlants(touched_plants);
+        if (terrain.weightAtXY(plant_coord.x, plant_coord.y) != WATER_WEIGHT &&
+            terrain.weightAtXY(plant_coord.x, plant_coord.y) != MOUNTAIN_WEIGHT) {
+          Plant* new_plant = createPlant(plant_coord);
+          std::queue<Plant*> touched_plants = considerNewPlant(new_plant, false);
+          processTouchedPlants(touched_plants);
+        }
       }
     }
 
