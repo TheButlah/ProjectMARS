@@ -7,12 +7,22 @@ set (CMAKE_CXX_STANDARD 11)
 
 # Include all header files in the "include" directory
 include_directories(include)
- 
+if(APPLE)
+  find_package(X11 REQUIRED)
+  link_libraries(${X11_LIBRARIES})
+  include_directories(${X11_INCLUDE_DIR})
+endif()
+
 # We glob all the source files using a wildcard, and store the in the SOURCES variable
 file(GLOB SOURCES "src/*.cpp")
 
 # Build an excutable with our sources (SOURCES) and a main file
 add_executable(cli ${SOURCES} main/cli.cpp)
+if (APPLE)
+  #target_include_directories(cli PUBLIC /opt/X11/include)
+  #target_link_libraries(cli)
+endif()
+
 
 ##############
 # GoogleTest #

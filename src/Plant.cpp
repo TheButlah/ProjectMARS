@@ -28,6 +28,7 @@ std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain
 
     std::queue<std::tuple<Coord, double>> queue;
     std::unordered_map<Coord, double> serviceable;
+    serviceable[plantLoc] = 0.0;
     queue.push(std::make_tuple(plantLoc, 0.0));
     visited.set(plantLoc.x, plantLoc.y, true);
 
