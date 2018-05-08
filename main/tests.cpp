@@ -147,7 +147,7 @@ namespace {
         MARS::Terrain terrain = MARS::Terrain(rows,cols);
 
         for (int k=0; k<10; k++) {
-            matrix = popGenerator.generate(matrix, terrain);
+            matrix = popGenerator.generate(matrix, terrain, 0);
             for (int i=0; i<rows; i++) {
                 for (int j=0; j<cols; j++ ) {
                     EXPECT_FALSE(std::isnan(matrix.at(i,j)));
@@ -312,7 +312,7 @@ namespace {
             game.step(true, MARS::Coord(i/5, i/5));
         }
         else {
-            game.step(false, MARS::Coord(NULL, NULL));
+            game.step(false, MARS::Coord(0, 0));
         }
     }
     EXPECT_NE(game.getNumberPopServiced(), 0);
@@ -326,7 +326,7 @@ namespace {
             game.step(true, MARS::Coord(i/5, i/5));
         }
         else {
-            game.step(false, MARS::Coord(NULL, NULL));
+            game.step(false, MARS::Coord(0, 0));
         }
     }
     EXPECT_FALSE(std::isnan(game.calculateObjective()));

@@ -40,17 +40,17 @@ Game::Game(
 }
 
 bool Game::checkIfPlantPresent(Coord coord) {
-  for (int i =0; i < this->plants_in_service.size(); i++) {
-    Plant* plant = this->plants_in_service[i];
-    if (coord==(plant->location)) {
-      return true;
+    for (int i =0; i < this->plants_in_service.size(); i++) {
+        Plant* plant = this->plants_in_service[i];
+        if (coord==(plant->location)) {
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 };
 
 int Game::getPopulationAt(int i, int j) {
-  return this->pop_matrix.computeCombinedPop().at(i,j);
+    return this->pop_matrix.computeCombinedPop().at(i,j);
 }
 
 int Game::getNumberNewPlants() {
@@ -85,41 +85,41 @@ int Game::getNumberPlantsInService() {
 }
 
 double Game::currentFunds() {
-  return this->funds;
+    return this->funds;
 }
 
 int Game::getCurrentTime() {
-  return this->time;
+    return this->time;
 }
 
 Terrain Game::getTerrain() {
-  return terrain;
+    return terrain;
 }
 
 Matrix<int> Game::servicedPopMatrix() {
-  return pop_matrix.servicedPopMatrix();
+    return pop_matrix.servicedPopMatrix();
 }
 
 Matrix<int> Game::unservicedPopMatrix() {
-  return pop_matrix.unservicedPopMatrix();
+    return pop_matrix.unservicedPopMatrix();
 }
 
 void Game::step(bool add_plant, Coord plant_coord) {
 
-    Matrix<int> new_population = pop_gen.generate(this->pop_matrix.computeCombinedPop(), this->terrain);
+    Matrix<int> new_population = pop_gen.generate(this->pop_matrix.computeCombinedPop(), this->terrain, this->time);
     pop_matrix.addUnservicedPop(new_population);
     processUnservicedPopulation();
     
     //if new plant was added
     if (add_plant) {
-      if (!checkIfPlantPresent(plant_coord)) {
-        if (terrain.weightAtXY(plant_coord.x, plant_coord.y) != WATER_WEIGHT &&
-            terrain.weightAtXY(plant_coord.x, plant_coord.y) != MOUNTAIN_WEIGHT) {
-          Plant* new_plant = createPlant(plant_coord);
-          std::queue<Plant*> touched_plants = considerNewPlant(new_plant, false);
-          processTouchedPlants(touched_plants);
+        if (!checkIfPlantPresent(plant_coord)) {
+            if (terrain.weightAtXY(plant_coord.x, plant_coord.y) != WATER_WEIGHT &&
+                terrain.weightAtXY(plant_coord.x, plant_coord.y) != MOUNTAIN_WEIGHT) {
+                Plant* new_plant = createPlant(plant_coord);
+                std::queue<Plant*> touched_plants = considerNewPlant(new_plant, false);
+                processTouchedPlants(touched_plants);
+            }
         }
-      }
     }
 
     //calculate objective
@@ -133,44 +133,42 @@ void Game::step(bool add_plant, Coord plant_coord) {
 }
 
 std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) {
-  if (getNumberPlantsInService() == 0) {
-    return std::pair<Plant*, bool> (NULL, false);
-  }
-  else {
-    std::pair<Plant*, double> best_plant(this->plants_in_service.front(), std::numeric_limits<double>::max());
-    bool found_plant = false;
-    for (Plant* plant : this->plants_in_service) {
-      if (plant->isServiceableCoord(person_loc)) {
-        if (best_plant.second > plant->distanceToCoord(person_loc)) {
-          if (plant->remainingCapacity() > 0) {
-            //this plant has room to take new person
-            best_plant.second = plant->distanceToCoord(person_loc);
-            best_plant.first = plant;
-            found_plant = true;
-          }
+    if (getNumberPlantsInService() == 0) {
+        return std::pair<Plant*, bool> (NULL, false);
+    } else {
+        std::pair<Plant*, double> best_plant(this->plants_in_service.front(), std::numeric_limits<double>::max());
+        bool found_plant = false;
+        for (Plant* plant : this->plants_in_service) {
+            if (plant->isServiceableCoord(person_loc)) {
+                if (best_plant.second > plant->distanceToCoord(person_loc)) {
+                    if (plant->remainingCapacity() > 0) {
+                        //this plant has room to take new person
+                        best_plant.second = plant->distanceToCoord(person_loc);
+                        best_plant.first = plant;
+                        found_plant = true;
+                    }
+                }
+            }
         }
-      }
+        return std::pair<Plant*, bool>(best_plant.first, found_plant);
     }
-    return std::pair<Plant*, bool>(best_plant.first, found_plant);
-  }
-
 }
 
 void Game::processUnservicedElement(int i, int j) {
-  int number_to_service = pop_matrix.numberUnservicedAtCoord(Coord(i, j));
-  if (number_to_service > 0) {
     int number_to_service = pop_matrix.numberUnservicedAtCoord(Coord(i, j));
-    std::pair<Plant*, bool> result = findBestPlant(Coord(i,j));
-    while (number_to_service > 0 and (result.second)) {
-      Plant* new_plant = result.first;
-      int add_to_service = std::min(new_plant->remainingCapacity(), number_to_service);
-      this->addServicedPop(add_to_service);
-      this->pop_matrix.assignUnservicedPop(new_plant, Coord(i,j), add_to_service);
-      new_plant->changeServicedPop(Coord(i,j), add_to_service);
-      number_to_service -= add_to_service;
-      result = findBestPlant(Coord(i,j));
+    if (number_to_service > 0) {
+        int number_to_service = pop_matrix.numberUnservicedAtCoord(Coord(i, j));
+        std::pair<Plant*, bool> result = findBestPlant(Coord(i,j));
+        while (number_to_service > 0 and (result.second)) {
+            Plant* new_plant = result.first;
+            int add_to_service = std::min(new_plant->remainingCapacity(), number_to_service);
+            this->addServicedPop(add_to_service);
+            this->pop_matrix.assignUnservicedPop(new_plant, Coord(i,j), add_to_service);
+            new_plant->changeServicedPop(Coord(i,j), add_to_service);
+            number_to_service -= add_to_service;
+            result = findBestPlant(Coord(i,j));
+        }
     }
-  }
 }
 
 void Game::processUnservicedPopulation() {
@@ -186,65 +184,64 @@ void Game::addServicedPop(int new_serviced_pop) {
 }
 
 Plant* Game::createPlant(Coord plant_loc) {
-  this->number_new_plants++;
-  Plant* new_plant = new Plant(
-          plant_default_capacity,
-          plant_servable_distance,
-          plant_loc.x,
-          plant_loc.y,
-          this->terrain
-  );
-  this->plants_in_service.push_back(new_plant);
-  return new_plant;
-
+    this->number_new_plants++;
+    Plant* new_plant = new Plant(
+        plant_default_capacity,
+        plant_servable_distance,
+        plant_loc.x,
+        plant_loc.y,
+        this->terrain
+    );
+    this->plants_in_service.push_back(new_plant);
+    return new_plant;
 };
 
 std::queue<Plant*> Game::processServicedPop(
-  Plant* plant,
-  Coord coord,
-  std::unordered_map<Plant*, int> serviced_map,
-  std::queue<Plant*>& queue)
+    Plant* plant,
+    Coord coord,
+    std::unordered_map<Plant*, int> serviced_map,
+    std::queue<Plant*>& queue)
 {
-  for (std::pair<Plant*, int> mapping : serviced_map) {
-    if (plant->remainingCapacity() > 0) {
-      Plant* old_plant = mapping.first;
-      if (plant->distanceToCoord(coord) < old_plant->distanceToCoord(coord)) {
-        int add_to_service = std::min(plant->remainingCapacity(), mapping.second);
-        this->pop_matrix.moveServicedPopBetweenPlants(old_plant, plant, coord, add_to_service);
-        plant->changeServicedPop(coord, add_to_service);
-        old_plant->changeServicedPop(coord, -add_to_service);
-        queue.push(old_plant);
-      }
+    for (std::pair<Plant*, int> mapping : serviced_map) {
+        if (plant->remainingCapacity() > 0) {
+        Plant* old_plant = mapping.first;
+            if (plant->distanceToCoord(coord) < old_plant->distanceToCoord(coord)) {
+                int add_to_service = std::min(plant->remainingCapacity(), mapping.second);
+                this->pop_matrix.moveServicedPopBetweenPlants(old_plant, plant, coord, add_to_service);
+                plant->changeServicedPop(coord, add_to_service);
+                old_plant->changeServicedPop(coord, -add_to_service);
+                queue.push(old_plant);
+            }
+        }
     }
-  }
-  return queue;
+    return queue;
 }
 
 std::queue<Plant*> Game::considerNewPlant(Plant* plant, bool touched) {
-  std::queue<Plant*> touched_plants;
-  std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> pop_to_consider
-          = this->pop_matrix.potentialPopForPlant(plant);
-  for (std::pair<Coord, std::pair<int, std::unordered_map<Plant*,int>>> element : pop_to_consider) {
-    Coord coord = element.first;
-    int unserviced = element.second.first;
-    std::unordered_map<Plant*, int> serviced_map = element.second.second;
-    processUnservicedElement(coord.x, coord.y);
-    processServicedPop(plant, coord, serviced_map, touched_plants);
-  }
-  if (!touched) {  //return queue of "touched" plants
-    return touched_plants;
-  } else { //processing a "touched" plant
-    std::queue<Plant*> empty;
-    return empty;
-  }
+    std::queue<Plant*> touched_plants;
+    std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> pop_to_consider
+            = this->pop_matrix.potentialPopForPlant(plant);
+    for (std::pair<Coord, std::pair<int, std::unordered_map<Plant*,int>>> element : pop_to_consider) {
+        Coord coord = element.first;
+        int unserviced = element.second.first;
+        std::unordered_map<Plant*, int> serviced_map = element.second.second;
+        processUnservicedElement(coord.x, coord.y);
+        processServicedPop(plant, coord, serviced_map, touched_plants);
+    }
+    if (!touched) {  //return queue of "touched" plants
+        return touched_plants;
+    } else { //processing a "touched" plant
+        std::queue<Plant*> empty;
+        return empty;
+    }
 };
 
 void Game::processTouchedPlants(std::queue<Plant*> touched_plants) {
-  while (touched_plants.size() > 0) {//process each plant
-    Plant* plant = touched_plants.front();
-    std::queue<Plant*> empty = this->considerNewPlant(plant, true);
-    touched_plants.pop();
-  }
+    while (touched_plants.size() > 0) {//process each plant
+        Plant* plant = touched_plants.front();
+        std::queue<Plant*> empty = this->considerNewPlant(plant, true);
+        touched_plants.pop();
+    }
 }
 
 double Game::calculateObjective() {

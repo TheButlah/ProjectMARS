@@ -12,8 +12,8 @@
 using namespace MARS;
 using namespace cimg_library;
 
-#define BOX_SIZE 20
-#define POP_SCALE 20.0
+#define BOX_SIZE 15
+#define POP_SCALE 50.0
 
 CLIRepl::CLIRepl(std::string inifile)
 {

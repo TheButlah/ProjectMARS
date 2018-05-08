@@ -15,7 +15,7 @@ namespace MARS {
     class PopulationGen {
     private:
         siv::PerlinNoise perlin; // instance of Perlin Noise generator
-
+        double curr_thresh;
     public:
         /*
          * Constructor
@@ -27,7 +27,7 @@ namespace MARS {
         /* Takes current population matrix as input
          * Returns matrix of new population to be added
          */
-        Matrix<int> generate(Matrix<int> popMatrix, Terrain terrain);
+        Matrix<int> generate(Matrix<int> popMatrix, Terrain terrain, int t);
     };
 }
 

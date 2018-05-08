@@ -1,32 +1,31 @@
 #include "../include/Matrix.h"
 #include "../include/PopulationGen.h"
 
+#include <cmath>
+
 using namespace MARS;
 
-Matrix<int> PopulationGen::generate(Matrix<int> popMatrix, Terrain terrain) {
+#define CURR_THRESH_INC 0.02
+#define POP_MAX 50
+
+Matrix<int> PopulationGen::generate(Matrix<int> popMatrix, Terrain terrain, int t) {
     int rows = popMatrix.numberRows();
     int cols = popMatrix.numberCols();
     Matrix<int> newMatrix(rows, cols);
-    // zero out matrix to avoid NaNs
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
-            newMatrix.at(i, j) = 0;
-        }
-    }
+    
+    if (t % 10 != 0) return newMatrix;
+    curr_thresh += CURR_THRESH_INC;
+    
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-          if (terrain.weightAtXY(i,j) == WATER_WEIGHT or terrain.weightAtXY(i,j) == MOUNTAIN_WEIGHT) {
-            newMatrix.at(i,j) = 0;
-          }
-          else {
-            double r = ((double) rand() / (RAND_MAX)) + 1;
-            double noise;
-            noise = perlin.noise(popMatrix.at(i, j) + r, popMatrix.at(i, j) - r);
-            if (noise > 0) {
-              newMatrix.at(i, j) = ceil(10 * noise);
+            if (terrain.weightAtXY(i,j) == WATER_WEIGHT or terrain.weightAtXY(i,j) == MOUNTAIN_WEIGHT) {
+                newMatrix.at(i,j) = 0;
+            } else {
+                double noise = perlin.noise0_1(i/std::log2(rows), j/std::log2(cols));
+                if (noise <= curr_thresh) {
+                    newMatrix.at(i,j) = (int) ((POP_MAX*(curr_thresh-noise)) - popMatrix.at(i, j));
+                }
             }
-          }
-
         }
     }
     return newMatrix;
