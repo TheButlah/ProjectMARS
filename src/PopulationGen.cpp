@@ -1,4 +1,3 @@
-#include "../include/Matrix.h"
 #include "../include/PopulationGen.h"
 
 #include <cmath>
@@ -23,7 +22,9 @@ Matrix<int> PopulationGen::generate(Matrix<int> popMatrix, Terrain terrain, int 
             } else {
                 double noise = perlin.noise0_1(i/std::log2(rows), j/std::log2(cols));
                 if (noise <= curr_thresh) {
-                    newMatrix.at(i,j) = (int) ((POP_MAX*(curr_thresh-noise)) - popMatrix.at(i, j));
+                    int pop =  (int) (POP_MAX*(curr_thresh-noise));
+                    pop = std::min(POP_MAX, pop);
+                    newMatrix.at(i,j) = pop - popMatrix.at(i, j);
                 }
             }
         }

@@ -35,7 +35,7 @@ namespace MARS {
         double plant_initial_cost;
         double plant_operating_cost;
         double plant_profit_margin;
-
+        double unserviced_pop_penalty;
 
     public:
         Game(
@@ -46,7 +46,8 @@ namespace MARS {
             double servable_distance,
             double initial_cost,
             double operating_cost,
-            double profit_margin
+            double profit_margin,
+            double unserviced_penalty
         );
 
         /* Advance the game's progress by one time step */
@@ -77,6 +78,8 @@ namespace MARS {
         Matrix<int> unservicedPopMatrix();
 
         ~Game();
+
+        double fundsForCurrentStep();
 
         double calculateObjective();
 
