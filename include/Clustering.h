@@ -10,6 +10,7 @@ namespace MARS {
 	class Clustering {
 	private:
 		int k;
+		bool clusteredBefore;
 		std::vector<std::vector<Coord>> clusters;
 		std::vector<Coord> centroids;
 		void run(PopulationMatrix popMatrix);
