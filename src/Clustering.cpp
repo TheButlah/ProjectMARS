@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#define PLACE_PLANT_THRESHOLD = 10;
+
 using namespace MARS;
 
 Clustering::Clustering(int k)
@@ -96,9 +98,44 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
 }
 
-Coord Clustering::placePlant() {
-	// Take the most "compact" unserviced cluster above a certain size, if it exists,
+int sparsity(std::vector<Coord> cluster, Coord centroid) {
+	// Sum up all the distances from the centroid
+
+	int total = 0;
+
+	for(int i = 0; i < cluster.size(); i++) {
+		total += (cluster.x - centroid.x)*(cluster.x - centroid.x) + (cluster.y - centroid.y)*(cluster.y - centroid.y);
+	}
+
+	return total;
+
+}
+
+std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
+	// Take the least "sparse" unserviced cluster above a certain size, if it exists,
 	// and place a plant at its center
 
-	return Coord(0, 0);
+	this->run(popMatrix);
+
+	std::vector<int> clusterSparsity;
+
+	for(int i = 0; i < this->clusters.size(); i++) {
+		std::vector<Coord> cluster = this->clusters.at(i);
+		Coord centroid = this->centroids.at(i);
+		if(cluster.size() > PLACE_PLANT_THRESHOLD) {
+			clusterSparsity.push(sparsity(cluster, centroid));
+		}
+	}
+
+	int minSparsityIndex;
+	int minSparsity = -1;
+
+	for(int i = 0; i < clusterSparsity.size(); i++) {
+		if(minSparsity == -1 || clusterSparsity.at(i) < minSparsity) {
+			minSparsity = clusterSparsity.at(i);
+			minSparsityIndex = i;
+		}
+	}
+
+	return this->centroids[minSparsityIndex];
 }
