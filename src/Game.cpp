@@ -17,7 +17,8 @@ Game::Game(
     double serveable_distance,
     double initial_cost,
     double operating_cost,
-    double profit_margin
+    double profit_margin,
+    double unserviced_penalty
 ) :
     size_x(dx),
     size_y(dy),
@@ -32,6 +33,7 @@ Game::Game(
     plant_operating_cost(operating_cost),
     plant_profit_margin(profit_margin),
     plants_in_service(std::vector<Plant*>() ),
+    unserviced_pop_penalty(unserviced_penalty),
     pop_matrix(PopulationMatrix(dx, dy)),
     terrain(Terrain(dx, dy)),
     pop_gen(PopulationGen())
@@ -123,7 +125,7 @@ void Game::step(bool add_plant, Coord plant_coord) {
     }
 
     //calculate objective
-    double objective = this->calculateObjective();
+    double objective = this->fundsForCurrentStep();
     this->funds = objective;
 
     //add new plants from last round to number_plants
@@ -244,13 +246,19 @@ void Game::processTouchedPlants(std::queue<Plant*> touched_plants) {
     }
 }
 
-double Game::calculateObjective() {
-	double objective;
+double Game::fundsForCurrentStep() {
+    double objective;
 	objective = this->funds - (this->plant_operating_cost)*(this->number_plants_in_service)
-							-(this->number_new_plants * this->plant_initial_cost)
+							- (this->number_new_plants * this->plant_initial_cost)
 							+ (this->number_pop_serviced * this->plant_profit_margin);
 	return objective;
+}
 
+double Game::calculateObjective() {
+    double objective = (this->number_pop_serviced*this->plant_profit_margin)
+        - (this->plant_operating_cost*this->number_plants_in_service)  
+        - (this->getNumberPopUnserviced() * this->unserviced_pop_penalty);
+    return objective;
 }
 
 Game::~Game() {

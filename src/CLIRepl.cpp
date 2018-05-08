@@ -22,10 +22,11 @@ CLIRepl::CLIRepl(std::string inifile)
     int dy = ini.GetInteger("Default", "SizeY", 16);
     int number_of_turns = ini.GetInteger("Default", "NumberOfTurns", 1000000);
     int default_capacity = ini.GetInteger("Default", "PlantCapacity", 25);
-    double servable_distance = ini.GetInteger("Default", "PlantServableDistance", 3.0);
-    double initial_cost = ini.GetInteger("Default", "PlantInitialCost", 50.0);
-    double operating_cost = ini.GetInteger("Default", "PlantOperatingCost", 25.0);            
-    double profit_margin = ini.GetInteger("Default", "PlantProfitMargin", 5.0);
+    double servable_distance = ini.GetReal("Default", "PlantServableDistance", 3.0);
+    double initial_cost = ini.GetReal("Default", "PlantInitialCost", 50.0);
+    double operating_cost = ini.GetReal("Default", "PlantOperatingCost", 25.0);            
+    double profit_margin = ini.GetReal("Default", "PlantProfitMargin", 5.0);
+    double unserviced_penalty = ini.GetReal("Default", "UnservicedPenalty", 1.0);
     size_x = dx;
     size_y = dy;
     game = new Game(
@@ -36,7 +37,8 @@ CLIRepl::CLIRepl(std::string inifile)
         servable_distance, 
         initial_cost, 
         operating_cost, 
-        profit_margin); 
+        profit_margin,
+        unserviced_penalty); 
     img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0); 
     display = new CImgDisplay(*img, "Project MARS");
 }
@@ -208,7 +210,7 @@ void CLIRepl::draw() {
     text_color[1] = 255;
     text_color[2] = 0;
     std::string time_string = "Time: " + std::to_string(game->getCurrentTime());
-    std::string funds_string = "Funds: " + std::to_string(game->currentFunds());
+    std::string funds_string = "Objective value: " + std::to_string(game->calculateObjective());
     std::string plants_string = "Plants in service: " + std::to_string(game->getNumberPlantsInService());
     std::string unserviced_string = "Number of unserviced pop: " + std::to_string(game->getNumberPopUnserviced());
     std::string serviced_string = "Number of serviced pop: " + std::to_string(game->getNumberPopServiced());

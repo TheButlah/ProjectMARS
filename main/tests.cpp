@@ -31,7 +31,7 @@ namespace {
 
         // can declare objects here used by all tests
         MARS::PopulationMatrix popMat = MARS::PopulationMatrix(8, 8);
-        MARS::Game game = MARS::Game(8, 8, 100, 100, 50, 200, 200, 200);
+        MARS::Game game = MARS::Game(8, 8, 100, 100, 50, 200, 200, 200, 1.0);
     };
 
     TEST_F(MarsTest, MatrixStoresData) {
@@ -238,7 +238,7 @@ namespace {
 
 
     TEST_F(MarsTest, InitializationTest) {
-      MARS::Game game2 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200);
+      MARS::Game game2 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
       EXPECT_EQ(game2.getNumberPlantsInService(), 0);
     }
     // Q: are NULLs the best way to pass in nonexistent coords?
@@ -246,7 +246,7 @@ namespace {
 
     TEST_F(MarsTest, StepNoPlant) {
       // Stepping without a plant added
-      MARS::Game game1 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200);
+      MARS::Game game1 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
       game1.step(false, MARS::Coord(1, 1));
       EXPECT_EQ(game1.getNumberPlantsInService(), 0);
     }

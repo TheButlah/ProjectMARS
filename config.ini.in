@@ -7,3 +7,4 @@ PlantServableDistance=3
 PlantInitialCost=50
 PlantOperatingCost=25
 PlantProfitMargin=5
+UnservicedPenalty=1.0

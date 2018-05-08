@@ -22,6 +22,7 @@ namespace MARS {
          */
         PopulationGen() {
             perlin = siv::PerlinNoise(time(NULL));
+            curr_thresh = GRASSLAND_THRESHOLD;
         }
 
         /* Takes current population matrix as input
