@@ -4,6 +4,7 @@
 #include "PopulationMatrix.h"
 #include "Coord.h"
 
+#include <utility>
 #include <vector>
 
 namespace MARS {
@@ -16,7 +17,7 @@ namespace MARS {
 		void run(PopulationMatrix popMatrix);
 	public:
 		Clustering(int k, int dx, int dy);
-		Coord placePlant();
+		std::pair<bool, Coord> placePlant(PopulationMatrix popMatrix); // Do we place a plant at this step, and where do we place it?
 	};
 }
 
