@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <gtest/gtest.h>
 
+#include "../include/Clustering.h"
 #include "../include/Coord.h"
 #include "../include/Game.h"
 #include "../include/Matrix.h"
