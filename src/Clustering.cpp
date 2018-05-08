@@ -64,7 +64,7 @@ void Clustering::run(PopulationMatrix popMatrix) {
 		int nearestCentroidDistance = -1;
 
 		for(int c = 0; c < this->centroids->size(); c++) {
-			Coord centroid = this->centroids[c];
+			Coord centroid = this->centroids.at(c);
 			int dist = (dataPoint.x - centroid.x)*(dataPoint.x - centroid.x) + (dataPoint.y - centroid.y)*(dataPoint.y - centroid.y)
 			if(nearestCentroidDistance == -1 || dist < nearestCentroidDistance) {
 				nearestCentroidDistance = dist;
@@ -77,10 +77,28 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
 	// Compute new centroids
 
+	for(int i = 0; i < this->clusters.size(); i++) {
+		float sumX = 0.0;
+		float sumY = 0.0;
+		
+		std::vector<Coord> currentCluster = this->clusters.at(i);
+
+		for(int j = 0; j < currentCluster.size(); j++) {
+			sumX += currentCluster.at(j).x;
+			sumY += currentCluster.at(j).y;
+		}
+
+		this->centroids[i] = Coord(
+			sumX/this->clusters.at(i).size(), 
+			sumY/this->clusters.at(i).size()
+		);
+	}
+
 }
 
 Coord Clustering::placePlant() {
 	// Take the most "compact" unserviced cluster above a certain size, if it exists,
 	// and place a plant at its center
+
 	return Coord(0, 0);
 }
