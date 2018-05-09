@@ -18,6 +18,7 @@ file(GLOB SOURCES "src/*.cpp")
 
 # Build an excutable with our sources (SOURCES) and a main file
 add_executable(cli ${SOURCES} main/cli.cpp)
+add_executable(clustering ${SOURCES} main/clustering.cpp)
 if (APPLE)
   #target_include_directories(cli PUBLIC /opt/X11/include)
   #target_link_libraries(cli)

@@ -181,6 +181,11 @@ void Game::processUnservicedPopulation() {
   }
 }
 
+
+PopulationMatrix Game::getPopMatrix() {
+    return this->pop_matrix;
+};
+
 void Game::addServicedPop(int new_serviced_pop) {
   this->number_pop_serviced += new_serviced_pop;
 }

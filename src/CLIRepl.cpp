@@ -3,6 +3,7 @@
 #include "../include/Matrix.h"
 #include "../include/Terrain.h"
 #include "../include/Coord.h"
+#include "../include/Clustering.h"
 
 #include <algorithm>
 #include <iostream>
@@ -264,6 +265,7 @@ void CLIRepl::printUsage() {
     std::cout << "step - steps the game without making a plant" << std::endl;
     std::cout << "step x - steps the game `x' times without making a plant" << std::endl;
     std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
+    std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
     std::cout << "help - print this list of commands" << std::endl;
 }
 
@@ -294,7 +296,13 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
         }
     } else if (command == "stats") {
         this->printUsage();
-    } else {
+    } else if (tokens.size() == 2 && tokens[0] == "cluster") {
+        int k = std::stoi(tokens[1]);
+        MARS::Clustering cluster(k);
+        std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
+        game->step(res.first, res.second);
+    }
+    else {
         this->printUsage();
     }
     draw();

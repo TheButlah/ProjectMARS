@@ -65,6 +65,8 @@ namespace MARS {
 
         std::vector<Coord> getPlantLocations();
 
+        PopulationMatrix getPopMatrix();
+
         int getNumberNewPlants();
 
         double currentFunds();

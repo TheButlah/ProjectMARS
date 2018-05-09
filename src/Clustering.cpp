@@ -128,6 +128,7 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
 		}
 	}
 
+
 	int minSparsityIndex;
 	int minSparsity = -1;
 
@@ -138,7 +139,6 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
 		}
 	}
 
-  //unsure about how to define this boolean? assuming the return type is necessary...
   bool unservicedClusterExists = clusterSparsity.size()>0;
 
 	return std::pair<bool,Coord>(unservicedClusterExists, this->centroids[minSparsityIndex]);
