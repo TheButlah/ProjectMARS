@@ -4,15 +4,15 @@
 #include <cstdlib>
 #include <ctime>
 
-#define PLACE_PLANT_THRESHOLD = 10;
-
 using namespace MARS;
+
+#define PLACE_PLANT_THRESHOLD 10
 
 Clustering::Clustering(int k)
 	{
 		this->k = k;
-		this->clusters = std::vector<std::vector<std::pair>>();
-		this->centroids = std::vector<Coord>;
+    this->clusters = std::vector<std::vector<Coord>>();
+		this->centroids = std::vector<Coord>();
 		this->clusteredBefore = false;
 	}
 
@@ -32,13 +32,13 @@ void Clustering::run(PopulationMatrix popMatrix) {
 			while(std::find(this->centroids.begin(), this->centroids.end(), randomCentroid) != this->centroids.end()) {
 				randomCentroid = Coord(rand() % dx, rand() % dy);
 			}
-			this->centroids.push(randomCentroid);
+			this->centroids.push_back(randomCentroid);
 		}
 
 		// Create vectors for each cluster and push them to this->clusters
 
 		for(int i = 0; i < k; i++) {
-			this->clusters.push(std::vector<Coord>());
+			this->clusters.push_back(std::vector<Coord>());
 		}
 	}	
 	
@@ -48,9 +48,9 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
 	for(int i = 0; i < dx; i++) {
 		for(int j = 0; j < dy; j++) {
-			int peopleHere = popMatrix.unserviced_pop_matrix.at(i, j);
+      int peopleHere = popMatrix.numberUnservicedAtCoord(MARS::Coord(i,j));
 			for(int k = 0; k < peopleHere; k++) {
-				dataPoints.push(Coord(i, j));
+				dataPoints.push_back(Coord(i, j));
 			}
 		}
 	}
@@ -60,21 +60,22 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
 	for(int i = 0; i < dataPoints.size(); i++) {
 
-		Coord point = dataPoints.at(i);
+		Coord dataPoint = dataPoints.at(i);
 
-		Coord nearestCentroidIndex;
+		//Coord nearestCentroidIndex;
+    int nearestCentroidIndex;
 		int nearestCentroidDistance = -1;
 
-		for(int c = 0; c < this->centroids->size(); c++) {
+		for(int c = 0; c < this->centroids.size(); c++) {
 			Coord centroid = this->centroids.at(c);
-			int dist = (dataPoint.x - centroid.x)*(dataPoint.x - centroid.x) + (dataPoint.y - centroid.y)*(dataPoint.y - centroid.y)
+			int dist = (dataPoint.x - centroid.x)*(dataPoint.x - centroid.x) + (dataPoint.y - centroid.y)*(dataPoint.y - centroid.y);
 			if(nearestCentroidDistance == -1 || dist < nearestCentroidDistance) {
 				nearestCentroidDistance = dist;
 				nearestCentroidIndex = c;
 			}
 		}
 
-		this->clusters[nearestCentroidIndex].push(point);
+		this->clusters[nearestCentroidIndex].push_back(dataPoint);
 	}
 
 	// Compute new centroids
@@ -104,7 +105,7 @@ int sparsity(std::vector<Coord> cluster, Coord centroid) {
 	int total = 0;
 
 	for(int i = 0; i < cluster.size(); i++) {
-		total += (cluster.x - centroid.x)*(cluster.x - centroid.x) + (cluster.y - centroid.y)*(cluster.y - centroid.y);
+		total += (cluster[i].x - centroid.x)*(cluster[i].x - centroid.x) + (cluster[i].y - centroid.y)*(cluster[i].y - centroid.y);
 	}
 
 	return total;
@@ -123,7 +124,7 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
 		std::vector<Coord> cluster = this->clusters.at(i);
 		Coord centroid = this->centroids.at(i);
 		if(cluster.size() > PLACE_PLANT_THRESHOLD) {
-			clusterSparsity.push(sparsity(cluster, centroid));
+			clusterSparsity.push_back(sparsity(cluster, centroid));
 		}
 	}
 
@@ -137,5 +138,8 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
 		}
 	}
 
-	return this->centroids[minSparsityIndex];
+  //unsure about how to define this boolean? assuming the return type is necessary...
+  bool unservicedClusterExists = clusterSparsity.size()>0;
+
+	return std::pair<bool,Coord>(unservicedClusterExists, this->centroids[minSparsityIndex]);
 }

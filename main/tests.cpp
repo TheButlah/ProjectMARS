@@ -334,7 +334,6 @@ namespace {
     EXPECT_NE(game.calculateObjective(), 0);
   }
 
-
 }
 
 
