@@ -268,7 +268,7 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
-  std::cout << "log x s k /path/to/file - steps the game x times while running clustering (with k clusters) every s steps. logs to output file" << std::endl;
+  std::cout << "log x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
   std::cout << "exit/quit - quit" << std::endl;
 }
 
@@ -276,22 +276,37 @@ void CLIRepl::printStats() {
 
 }
 
-void CLIRepl::runClustering(int k) {
+void CLIRepl::stepWithClustering(int k) {
   MARS::Clustering cluster(k);
   std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
   game->step(res.first, res.second);
 }
 
-void CLIRepl::loggingLoop(int steps, int decisionInterval, int k, std::string path) {
+void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string path) {
   std::ofstream out;
 
+  out.open(path, std::ios_base::app);
+  out << "Time,Ran Clustering?,Number of Plants,Objective" << std::endl;
+
   for(int i = 0; i < steps; i++) {
-    if(i != 0 && i % decisionInterval == 0) {
+    /* Step, clustering if necessary. */
+
+    bool run_clustering = i != 0 && i % decision_interval == 0;
+
+    if(run_clustering) {
       game->step(false, Coord(0, 0));
     }
     else {
-      this->runClustering(k);
+      this->stepWithClustering(k);
     }
+
+    std::string ran_clustering_s = run_clustering ? "yes" : "";
+
+    std::string data = std::to_string(i) + "," + ran_clustering_s + "," 
+      + std::to_string(game->getNumberPlantsInService()) + "," 
+      + std::to_string(game->calculateObjective());
+    out << data << std::endl;
+
   }
 }
 
@@ -319,7 +334,7 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->printUsage();
   } else if (tokens.size() == 2 && tokens[0] == "cluster") {
     int k = std::stoi(tokens[1]);
-    this->runClustering(k);
+    this->stepWithClustering(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
   } else if(tokens.size() == 5 && tokens[0] == "log") {
