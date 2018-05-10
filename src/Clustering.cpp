@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cassert>
+#include <iostream>
 
 using namespace MARS;
 
@@ -19,95 +20,111 @@ Clustering::Clustering(int k)
 
 void Clustering::run(PopulationMatrix popMatrix) {
 
+  this->clusters = std::vector<std::vector<Coord>>();
+  this->centroids = std::vector<Coord>();
+  this->clusteredBefore = false;
+
   int dx = popMatrix.sizeX();
   int dy = popMatrix.sizeY();
 
   assert(this->k < dx * dy);
-  if(!this->clusteredBefore) {
-    // We don't have existing centroids to work with - randomly initialize them
-    srand(time(0)); // Seed for random number generator
 
-    for(int i = 0; i < k; i++) {
-      Coord randomCentroid = Coord(rand() % dx, rand() % dy);
+  int totalCentroidDifference = dx+dy;
 
-      while(std::find(this->centroids.begin(), this->centroids.end(), randomCentroid) != this->centroids.end()) {
-        randomCentroid = Coord(rand() % dx, rand() % dy);
+  while(totalCentroidDifference > 0.5) {
+    std::cout << totalCentroidDifference << std::endl;
+    totalCentroidDifference = 0;
+
+    if(!this->clusteredBefore) {
+      // We don't have existing centroids to work with - randomly initialize them
+      srand(time(0)); // Seed for random number generator
+
+      for(int i = 0; i < k; i++) {
+        Coord randomCentroid = Coord(rand() % dx, rand() % dy);
+
+        while(std::find(this->centroids.begin(), this->centroids.end(), randomCentroid) != this->centroids.end()) {
+          randomCentroid = Coord(rand() % dx, rand() % dy);
+        }
+        this->centroids.push_back(randomCentroid);
       }
-      this->centroids.push_back(randomCentroid);
-    }
 
-    // Create vectors for each cluster and push them to this->clusters
+      // Create vectors for each cluster and push them to this->clusters
 
-    for(int i = 0; i < k; i++) {
-      this->clusters.push_back(std::vector<Coord>());
-    }
-  }	
+      for(int i = 0; i < k; i++) {
+        this->clusters.push_back(std::vector<Coord>());
+      }
+
+      this->clusteredBefore = true;
+    } 
   
-  assert(this->clusters.size() == this->centroids.size());
+    assert(this->clusters.size() == this->centroids.size());
 
-  // Create one data point for each person (unit of population density) in the matrix
+    // Create one data point for each person (unit of population density) in the matrix
 
-  std::vector<Coord> dataPoints = std::vector<Coord>();
+    std::vector<Coord> dataPoints = std::vector<Coord>();
 
-  for(int i = 0; i < dx; i++) {
-    for(int j = 0; j < dy; j++) {
-      int peopleHere = popMatrix.numberUnservicedAtCoord(MARS::Coord(i,j));
-      for(int k = 0; k < peopleHere; k++) {
-        dataPoints.push_back(Coord(i, j));
-      }
-    }
-  }
-
-  // For each coord in the dataset, add it to the cluster
-  // corresponding to its closest centroid (k-means)
-
-  for(int i = 0; i < dataPoints.size(); i++) {
-
-    Coord dataPoint = dataPoints.at(i);
-
-    int nearestCentroidIndex = 0;
-    int nearestCentroidDistance = -1;
-
-    for(int c = 0; c < this->centroids.size(); c++) {
-      Coord centroid = this->centroids.at(c);
-      int dist = (dataPoint.x - centroid.x)*(dataPoint.x - centroid.x) + (dataPoint.y - centroid.y)*(dataPoint.y - centroid.y);
-      if(nearestCentroidDistance == -1 || dist < nearestCentroidDistance) {
-        nearestCentroidDistance = dist;
-        nearestCentroidIndex = c;
+    for(int i = 0; i < dx; i++) {
+      for(int j = 0; j < dy; j++) {
+        int peopleHere = popMatrix.numberUnservicedAtCoord(MARS::Coord(i,j));
+        for(int k = 0; k < peopleHere; k++) {
+          dataPoints.push_back(Coord(i, j));
+        }
       }
     }
 
-    assert(nearestCentroidIndex < this->clusters.size());
-    this->clusters.at(nearestCentroidIndex).push_back(dataPoint);
-  }
+    // For each coord in the dataset, add it to the cluster
+    // corresponding to its closest centroid (k-means)
 
-  // Compute new centroids
+    for(int i = 0; i < dataPoints.size(); i++) {
 
-  for(int i = 0; i < this->clusters.size(); i++) {
-    float sumX = 0.0;
-    float sumY = 0.0;
-    
-    std::vector<Coord> currentCluster = this->clusters.at(i);
+      Coord dataPoint = dataPoints.at(i);
 
-    for(int j = 0; j < currentCluster.size(); j++) {
-      sumX += currentCluster.at(j).x;
-      sumY += currentCluster.at(j).y;
+      int nearestCentroidIndex = 0;
+      int nearestCentroidDistance = -1;
+
+      for(int c = 0; c < this->centroids.size(); c++) {
+        Coord centroid = this->centroids.at(c);
+        int dist = (dataPoint.x - centroid.x)*(dataPoint.x - centroid.x) + (dataPoint.y - centroid.y)*(dataPoint.y - centroid.y);
+        if(nearestCentroidDistance == -1 || dist < nearestCentroidDistance) {
+          nearestCentroidDistance = dist;
+          nearestCentroidIndex = c;
+        }
+      }
+
+      assert(nearestCentroidIndex < this->clusters.size());
+      this->clusters.at(nearestCentroidIndex).push_back(dataPoint);
     }
 
-    int clusterSize = this->clusters.at(i).size();
-    assert(i < this->centroids.size());
+    // Compute new centroids
 
-    if(clusterSize != 0) {
-      this->centroids.at(i) = Coord(
-        sumX/clusterSize, 
-        sumY/clusterSize
-      );
+    for(int i = 0; i < this->clusters.size(); i++) {
+      float sumX = 0.0;
+      float sumY = 0.0;
+      
+      std::vector<Coord> currentCluster = this->clusters.at(i);
+
+      for(int j = 0; j < currentCluster.size(); j++) {
+        sumX += currentCluster.at(j).x;
+        sumY += currentCluster.at(j).y;
+      }
+
+      int clusterSize = this->clusters.at(i).size();
+      assert(i < this->centroids.size());
+
+      if(clusterSize != 0) {
+
+        totalCentroidDifference += this->centroids.at(i).x - (sumX/clusterSize);
+        totalCentroidDifference += this->centroids.at(i).y - (sumY/clusterSize);
+
+        this->centroids.at(i) = Coord(
+          sumX/clusterSize, 
+          sumY/clusterSize
+        );
+      }
+      
     }
-    
   }
-
-  this->clusteredBefore = true;
-
+  
 }
 
 int sparsity(std::vector<Coord> cluster, Coord centroid) {
