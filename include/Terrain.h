@@ -20,24 +20,24 @@
 
 namespace MARS {
 
-    class Terrain {
-    private:
-        siv::PerlinNoise perlin;
-        Matrix<double> terrainMatrix;
-        int size_x;
-        int size_y;
-    public:
-        
+  class Terrain {
+  private:
+    siv::PerlinNoise perlin;
+    Matrix<double> terrainMatrix;
+    int size_x;
+    int size_y;
+  public:
+    
 
-        Terrain(int dx, int dy);
-        Terrain(int dim);
-        Terrain(int dx, int dy, bool water);
+    Terrain(int dx, int dy);
+    Terrain(int dim);
+    Terrain(int dx, int dy, bool water);
 
-        int sizeX();
-        int sizeY();
-        double weightAtXY(int x, int y);
-        double weightAtCoord(Coord c);
-    };
+    int sizeX();
+    int sizeY();
+    double weightAtXY(int x, int y);
+    double weightAtCoord(Coord c);
+  };
 }
 
 #endif //MARS_TERRAIN_H
