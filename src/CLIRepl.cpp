@@ -269,8 +269,7 @@ void CLIRepl::printUsage() {
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
   std::cout << "log x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
-  std::cout << "log /path/to/params.txt /path/to/dir - runs the 'log' command with parameters defined in params.txt, writes output in dir. check sample_params.txt for example" << std::endl;  
-  std::cout << "exit/quit - quit" << std::endl;
+  std::cout << "log /path/to/params.txt /path/to/dir - log using params.txt, writing output in dir" << std::endl;  
 }
 
 void CLIRepl::printStats() {
@@ -343,7 +342,7 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
       int c = std::stoi(tokens[3]);
       game->step(true, Coord(r, c));
     } else {
-      std::cout << "Did not provide correct number of arguments" << std::endl;
+      std::cout << "step: Did not provide correct number of arguments" << std::endl;
     }
   } else if (command == "stats") {
     this->printUsage();
@@ -352,16 +351,20 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->stepWithClustering(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
-  } else if(tokens.size() == 3 && tokens[0] == "log") {
-    std::string params_path = tokens[1];
-    std::string output_dir_path = tokens[2];
-    this->loggingFromFile(params_path, output_dir_path);
-  } else if(tokens.size() == 5 && tokens[0] == "log") {
-    int x = std::stoi(tokens[1]);
-    int s = std::stoi(tokens[2]);
-    int k = std::stoi(tokens[3]);
-    std::string path = tokens[4];
-    this->loggingLoop(x, s, k, path);
+  } else if(command == "log") {
+    if(tokens.size() == 3) {
+      std::string params_path = tokens[1];
+      std::string output_dir_path = tokens[2];
+      this->loggingFromFile(params_path, output_dir_path);
+    } else if(tokens.size() == 5) {
+      int x = std::stoi(tokens[1]);
+      int s = std::stoi(tokens[2]);
+      int k = std::stoi(tokens[3]);
+      std::string path = tokens[4];
+      this->loggingLoop(x, s, k, path);
+    } else {
+      std::cout << "log: Did not provide correct number of arguments" << std::endl;
+    }
   }
   else {
     this->printUsage();
