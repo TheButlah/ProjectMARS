@@ -43,6 +43,8 @@ void Clustering::run(PopulationMatrix popMatrix) {
     }
   }	
   
+  assert(this->clusters.size() == this->centroids.size());
+
   // Create one data point for each person (unit of population density) in the matrix
 
   std::vector<Coord> dataPoints = std::vector<Coord>();
@@ -63,8 +65,7 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
     Coord dataPoint = dataPoints.at(i);
 
-    //Coord nearestCentroidIndex;
-    int nearestCentroidIndex;
+    int nearestCentroidIndex = 0;
     int nearestCentroidDistance = -1;
 
     for(int c = 0; c < this->centroids.size(); c++) {
@@ -76,7 +77,8 @@ void Clustering::run(PopulationMatrix popMatrix) {
       }
     }
 
-    this->clusters[nearestCentroidIndex].push_back(dataPoint);
+    assert(nearestCentroidIndex < this->clusters.size());
+    this->clusters.at(nearestCentroidIndex).push_back(dataPoint);
   }
 
   // Compute new centroids
@@ -92,11 +94,19 @@ void Clustering::run(PopulationMatrix popMatrix) {
       sumY += currentCluster.at(j).y;
     }
 
-    this->centroids[i] = Coord(
-      sumX/this->clusters.at(i).size(), 
-      sumY/this->clusters.at(i).size()
-    );
+    int clusterSize = this->clusters.at(i).size();
+    assert(i < this->centroids.size());
+
+    if(clusterSize != 0) {
+      this->centroids.at(i) = Coord(
+        sumX/clusterSize, 
+        sumY/clusterSize
+      );
+    }
+    
   }
+
+  this->clusteredBefore = true;
 
 }
 
@@ -106,7 +116,7 @@ int sparsity(std::vector<Coord> cluster, Coord centroid) {
   int total = 0;
 
   for(int i = 0; i < cluster.size(); i++) {
-    total += (cluster[i].x - centroid.x)*(cluster[i].x - centroid.x) + (cluster[i].y - centroid.y)*(cluster[i].y - centroid.y);
+    total += (cluster.at(i).x - centroid.x)*(cluster.at(i).x - centroid.x) + (cluster.at(i).y - centroid.y)*(cluster.at(i).y - centroid.y);
   }
 
   return total;
@@ -123,12 +133,12 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
 
   for(int i = 0; i < this->clusters.size(); i++) {
     std::vector<Coord> cluster = this->clusters.at(i);
+    assert(i < this->centroids.size());
     Coord centroid = this->centroids.at(i);
     if(cluster.size() > PLACE_PLANT_THRESHOLD) {
       clusterSparsity.push_back(sparsity(cluster, centroid));
     }
   }
-
 
   int minSparsityIndex;
   int minSparsity = -1;
@@ -141,6 +151,15 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix) {
   }
 
   bool unservicedClusterExists = clusterSparsity.size()>0;
+  Coord placement;
+  assert(minSparsityIndex < this->centroids.size());
 
-  return std::pair<bool,Coord>(unservicedClusterExists, this->centroids[minSparsityIndex]);
+  if(unservicedClusterExists) {
+    placement = Coord(0, 0);
+  }
+  else {
+    placement = this->centroids.at(minSparsityIndex);
+  }
+
+  return std::pair<bool,Coord>(unservicedClusterExists, placement);
 }
