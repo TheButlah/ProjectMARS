@@ -15,6 +15,8 @@ namespace MARS {
     Game *game;
     cimg_library::CImg<unsigned char>* img;
     cimg_library::CImgDisplay* display;
+    void loggingLoop(int steps, int decisionInterval, int k, std::string path);
+    void runClustering(int k);
   public:
     CLIRepl(std::string inifile);
     ~CLIRepl();
@@ -25,7 +27,6 @@ namespace MARS {
     void printStats();
     void doCommand(std::vector<std::string> tokens);
     void startCLI();
-    void loggingLoop(int steps, int decisionInterval, std::string path);
   };
 }
 

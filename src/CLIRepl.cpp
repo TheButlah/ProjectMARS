@@ -6,6 +6,7 @@
 #include "../include/Clustering.h"
 
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -267,7 +268,7 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
-  std::cout << "log x s /path/to/file - steps the game x times while running clustering every s steps + logs to output file" << std::endl;
+  std::cout << "log x s k /path/to/file - steps the game x times while running clustering (with k clusters) every s steps. logs to output file" << std::endl;
   std::cout << "exit/quit - quit" << std::endl;
 }
 
@@ -275,9 +276,22 @@ void CLIRepl::printStats() {
 
 }
 
-void CLIRepl::loggingLoop(int steps, int decisionInterval, std::string path) {
+void CLIRepl::runClustering(int k) {
+  MARS::Clustering cluster(k);
+  std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
+  game->step(res.first, res.second);
+}
+
+void CLIRepl::loggingLoop(int steps, int decisionInterval, int k, std::string path) {
+  std::ofstream out;
+
   for(int i = 0; i < steps; i++) {
-    game->step(false, Coord(0, 0));
+    if(i != 0 && i % decisionInterval == 0) {
+      game->step(false, Coord(0, 0));
+    }
+    else {
+      this->runClustering(k);
+    }
   }
 }
 
@@ -305,16 +319,15 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->printUsage();
   } else if (tokens.size() == 2 && tokens[0] == "cluster") {
     int k = std::stoi(tokens[1]);
-    MARS::Clustering cluster(k);
-    std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
-    game->step(res.first, res.second);
+    this->runClustering(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
-  } else if(tokens.size() == 4 && tokens[0] == "log") {
+  } else if(tokens.size() == 5 && tokens[0] == "log") {
     int x = std::stoi(tokens[1]);
     int s = std::stoi(tokens[2]);
-    std::string path = tokens[3];
-    this->loggingLoop(x, s, path);
+    int k = std::stoi(tokens[3]);
+    std::string path = tokens[4];
+    this->loggingLoop(x, s, k, path);
   }
   else {
     this->printUsage();
