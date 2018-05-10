@@ -32,7 +32,6 @@ void Clustering::run(PopulationMatrix popMatrix) {
   int totalCentroidDifference = dx+dy;
 
   while(totalCentroidDifference > 0.5) {
-    std::cout << totalCentroidDifference << std::endl;
     totalCentroidDifference = 0;
 
     if(!this->clusteredBefore) {
