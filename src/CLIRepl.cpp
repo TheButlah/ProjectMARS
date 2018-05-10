@@ -269,6 +269,7 @@ void CLIRepl::printUsage() {
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
   std::cout << "log x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
+  std::cout << "log /path/to/params.txt /path/to/dir - runs the 'log' command with parameters defined in params.txt, writes output in dir. check sample_params.txt for example" << std::endl;  
   std::cout << "exit/quit - quit" << std::endl;
 }
 
@@ -289,8 +290,6 @@ void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string p
   out << "Time,Ran Clustering?,Number of Plants,Objective" << std::endl;
 
   for(int i = 0; i < steps; i++) {
-    /* Step, clustering if necessary. */
-
     bool run_clustering = i != 0 && i % decision_interval == 0;
 
     if(run_clustering) {
@@ -308,6 +307,22 @@ void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string p
     out << data << std::endl;
 
   }
+}
+
+void CLIRepl::loggingFromFile(std::string params_path, std::string output_dir_path) {
+  std::ifstream in;
+
+  in.open(params_path);
+
+  int x, s, k;
+
+  while(in >> x >> s >> k) {
+    std::string path = output_dir_path + "/" + "kmeans" + "_" 
+      + std::to_string(x) + "_" + std::to_string(s) + "_" + std::to_string(k) + ".csv";
+    std::cout << "Running: k-means x=" << x << " s=" << s << " k=" << k << std::endl;
+    this->loggingLoop(x, s, k, path);
+  }
+
 }
 
 void CLIRepl::doCommand(std::vector<std::string> tokens) {
@@ -337,6 +352,10 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->stepWithClustering(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
+  } else if(tokens.size() == 3 && tokens[0] == "log") {
+    std::string params_path = tokens[1];
+    std::string output_dir_path = tokens[2];
+    this->loggingFromFile(params_path, output_dir_path);
   } else if(tokens.size() == 5 && tokens[0] == "log") {
     int x = std::stoi(tokens[1]);
     int s = std::stoi(tokens[2]);
