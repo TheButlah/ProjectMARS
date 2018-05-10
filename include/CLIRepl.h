@@ -25,6 +25,7 @@ namespace MARS {
     void printStats();
     void doCommand(std::vector<std::string> tokens);
     void startCLI();
+    void loggingLoop(int steps, int decisionInterval, std::string path);
   };
 }
 

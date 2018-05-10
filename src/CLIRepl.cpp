@@ -267,12 +267,19 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
+  std::cout << "log x s /path/to/file - steps the game x times while running clustering every s steps + logs to output file" << std::endl;
+  std::cout << "exit/quit - quit" << std::endl;
 }
 
 void CLIRepl::printStats() {
 
 }
 
+void CLIRepl::loggingLoop(int steps, int decisionInterval, std::string path) {
+  for(int i = 0; i < steps; i++) {
+    game->step(false, Coord(0, 0));
+  }
+}
 
 void CLIRepl::doCommand(std::vector<std::string> tokens) {
   if (tokens.size() == 0) return;
@@ -301,6 +308,13 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     MARS::Clustering cluster(k);
     std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
     game->step(res.first, res.second);
+  } else if(command == "exit" || command == "quit") {
+    exit(0);
+  } else if(tokens.size() == 4 && tokens[0] == "log") {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    std::string path = tokens[3];
+    this->loggingLoop(x, s, path);
   }
   else {
     this->printUsage();
