@@ -9,6 +9,7 @@
 using namespace MARS;
 
 #define PLACE_PLANT_THRESHOLD 10
+#define MIN_CENTROID_DIFFERENCE 0.5
 
 Clustering::Clustering(int k)
   {
@@ -31,7 +32,7 @@ void Clustering::run(PopulationMatrix popMatrix) {
 
   int totalCentroidDifference = dx+dy;
 
-  while(totalCentroidDifference > 0.5) {
+  while(totalCentroidDifference > MIN_CENTROID_DIFFERENCE) {
     totalCentroidDifference = 0;
 
     if(!this->clusteredBefore) {
