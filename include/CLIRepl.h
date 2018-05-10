@@ -6,6 +6,7 @@
 
 #include "CImg.h"
 #include "Game.h"
+#include "Clustering.h"
 
 namespace MARS {
   class CLIRepl {
@@ -18,6 +19,7 @@ namespace MARS {
     void loggingLoop(int steps, int decision_interval, int k, std::string path);
     void loggingFromFile(std::string params_path, std::string output_dir_path);
     void stepWithClustering(int k);
+    std::unordered_map<int, Clustering> clusterers;
   public:
     CLIRepl(std::string inifile);
     ~CLIRepl();

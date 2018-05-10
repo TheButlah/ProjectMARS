@@ -43,6 +43,7 @@ CLIRepl::CLIRepl(std::string inifile)
     unserviced_penalty); 
   img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0); 
   display = new CImgDisplay(*img, "Project MARS");
+  std::unordered_map<int, Clustering> clusterers;
 }
 
 CLIRepl::~CLIRepl() {
@@ -277,8 +278,17 @@ void CLIRepl::printStats() {
 }
 
 void CLIRepl::stepWithClustering(int k) {
-  MARS::Clustering cluster(k);
-  std::pair<bool, Coord> res = cluster.placePlant(game->getPopMatrix());
+
+  Clustering clusterer = Clustering(k);
+
+  if(this->clusterers.find(k) != this->clusterers.end()) {
+    clusterer = this->clusterers.find(k)->first;
+  }
+  else {
+    this->clusterers.insert({k, clusterer});
+  }
+
+  std::pair<bool, Coord> res = clusterer.placePlant(game->getPopMatrix());
   game->step(res.first, res.second);
 }
 
