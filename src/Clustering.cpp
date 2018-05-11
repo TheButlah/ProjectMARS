@@ -94,7 +94,7 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
       int clusterSize = clusters.at(i).size();
       assert(i < centroids.size());
 
-      if(clusterSize != 0) {
+      if(clusterSize > 0) {
         // Add to 'centroid difference' (for convergence condition)
         totalCentroidDifference += abs(centroids.at(i).x - (sumX/clusterSize));
         totalCentroidDifference += abs(centroids.at(i).y - (sumY/clusterSize));
@@ -197,13 +197,15 @@ std::pair <std::vector<Coord>, std::vector<std::vector<Coord>>>
       std::sort(currentX.begin(), currentX.end());
       std::sort(currentY.begin(), currentY.end());
 
-      int medianX = currentX.at(currentX.size()/2);
-      int medianY = currentY.at(currentY.size()/2);
 
-      int clusterSize = clusters.at(i).size();
       assert(i < centroids.size());
+      assert(i < clusters.size());
+      int clusterSize = clusters.at(i).size();
 
-      if(clusterSize != 0) {
+      if(clusterSize > 0) {
+        int medianX = currentX.at(currentX.size()/2);
+        int medianY = currentY.at(currentY.size()/2);
+
         // Add to 'centroid difference' (for convergence condition)
         totalCentroidDifference += abs(centroids.at(i).x - medianX);
         totalCentroidDifference += abs(centroids.at(i).y - medianY);
