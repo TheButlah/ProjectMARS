@@ -295,8 +295,7 @@ void CLIRepl::printStats() {
 }
 
 void CLIRepl::stepWithClustering(int k) {
-  Clustering clusterer = Clustering(k);
-  std::pair<bool, Coord> res = clusterer.placePlant(game->getPopMatrix());
+  std::pair<bool, Coord> res = Clustering::placePlant(game->getPopMatrix(), k);
   game->step(res.first, res.second);
 }
 
