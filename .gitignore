@@ -25,6 +25,9 @@ hs_err_pid*
 build
 cmake-build-debug
 
+# setup.py
+project_mars.*
+
 # SDL2 files
 sdl
 

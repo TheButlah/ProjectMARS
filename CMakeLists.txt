@@ -3,25 +3,25 @@ project(mars)
 
 set (CMAKE_CXX_STANDARD 11)
 
+# Include all header files in the "include" directory
+include_directories(include)
+
 # We glob all the source files using a wildcard, and store the in the SOURCES variable
 file(GLOB SOURCES "src/*.cpp")
 
-# Build an excutable with our sources (SOURCES) and a main file
-add_executable(cli ${SOURCES} main/cli.cpp)
-add_executable(clustering ${SOURCES} main/clustering.cpp)
-
-# Include all header files in the "include" directory
-include_directories(cli PRIVATE include)
-
 #X11
 find_package(X11 REQUIRED)
-target_link_libraries(cli ${X11_LIBRARIES})
-target_include_directories(cli PRIVATE ${X11_INCLUDE_DIR})
+link_libraries(${X11_LIBRARIES})
+include_directories(${X11_INCLUDE_DIR})
 
 #pthreads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(cli Threads::Threads)
+link_libraries(Threads::Threads)
+
+# Build an excutable with our sources (SOURCES) and a main file
+add_executable(cli ${SOURCES} main/cli.cpp)
+add_executable(clustering ${SOURCES} main/clustering.cpp)
 
 
 if (APPLE)
