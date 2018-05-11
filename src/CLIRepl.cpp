@@ -29,7 +29,7 @@ CLIRepl::CLIRepl(std::string inifile)
   int dx = ini.GetInteger("Default", "SizeX", 16);
   int dy = ini.GetInteger("Default", "SizeY", 16);
   int number_of_turns = ini.GetInteger("Default", "NumberOfTurns", 1000000);
-  int default_capacity = ini.GetInteger("Default", "PlantCapacity", 25);
+  int default_capacity = ini.GetInteger("Default", "PlantCapacity", 2500);
   double servable_distance = ini.GetReal("Default", "PlantServableDistance", 3.0);
   double initial_cost = ini.GetReal("Default", "PlantInitialCost", 50.0);
   double operating_cost = ini.GetReal("Default", "PlantOperatingCost", 25.0);            
