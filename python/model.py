@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
-from builtins import range
 
 import tensorflow as tf
 import numpy as np
@@ -33,7 +32,10 @@ class QMap:
   final prediction vector.
   """
 
-  def __init__(self, state_shape, n_actions, seed=None, load_model=None):
+  def __init__(
+    self, state_shape, n_actions,
+    seed=None, load_model=None,
+    learning_rate=0.001):
     """Initializes the architecture for the model.
 
     Args:
@@ -56,46 +58,117 @@ class QMap:
         checkpoint file containing the saved state of the model. It will be
         used to initialize the parameters of the model. Typically used when
         loading a pre-trained model, or resuming a previous training session.
+
+      learning_rate:  The initial learning rate to use for gradient descent.
     """
-    pass
+    self._graph = tf.Graph()
+    self._seed = seed
+    with self._graph.as_default():
+      tf.set_random_seed(seed)
 
-    def update(self, state, target_q, mu, num_epochs=1):
-      """Updates the model parameters using the provided target batch.
+      with tf.variable_scope('Inputs'):
+        # Compute shape info
+        state_shape = (None,) + state_shape
 
-      Args:
+        # Setup placeholders
+        self._states = tf.placeholder(
+          tf.float32, shape=state_shape, name='States')
+        self._q_targets = tf.placeholder(
+          tf.float32, shape=(None,), name='Q-Targets')
+        self._mu = tf.placeholder(
+          tf.float32, shape=(None,), name='Mu')
 
-        state:  A numpy ndarray that represents the state of the environment(s).
-          Should should have a shape of [batch_size, height, width, channels].
+        self._phase_train = tf.placeholder(
+          tf.bool, shape=(), name='Phase-Train')
 
-        target_q:  A numpy ndarray that contains the target output of the q
-          function. Should have a shape of [batch_size].
+        self._lr = tf.placeholder(tf.float32, shape=(), name='Learning-Rate')
 
-        mu:  A numpy ndarray that contains a weighting factor in range [0,1] for
-          each state in the batch. States we care more about approximating
-          accurately should be given a higher weight. For example, mu could be
-          the fraction of time spent in a given state, which would mean that
-          states we pass through often should be more important to approximate
-          correctly.
+      with tf.variable_scope('ConvLayers'):
+        # For debugging purposes, make this a simple function
+        self._qmap = tf.tile(
+          tf.maximum(self._states, axis=-1)[..., tf.newaxis],
+          multiples=[1, 1, 1, n_actions])
 
-        num_epochs:  The number of iterations over the provided batch to perform
-          for this update step. Probably keep this as 1 so that the model
-          doesn't become too biased due to the small size of the batch.
+        print(self._qmap.get_shape())
 
-      Returns:
-        The loss value after the update.
-      """
+      with tf.variable_scope('Training'):
+        '''In order to enable us to only take the gradient on the values for 
+        the particular action, we need to keep the loss the same shape as the
+        q-map. However we do want to average over the batch so we reduce 
+        along that axis.'''
+        self._loss_map = tf.reduce_mean(
+          tf.nn.l2_loss(self._qmap - self._q_targets),
+          axis=0)
+
+        self._train_step = tf.train.AdamOptimizer(
+          learning_rate=self._lr).minimize(self._loss_map)
+
+      self._sess = tf.Session()
       with self._sess.as_default():
-        # Training loop for parameter tuning
-        assert(num_epochs >= 1)
+        self._saver = tf.train.Saver()
 
-        for epoch in range(num_epochs):
-          _, loss_val = self._sess.run(
-            [self._train_step, self._loss],
-            feed_dict={self._state: state, self._target_q: target_q, self._mu: mu, self._phase_train: True})
+        if load_model is not None:
+          print("Restoring Model...")
+          load_model = os.path.abspath(load_model)
+          self._saver.restore(self._sess, load_model)
+          print("Model Restored!")
 
-        return loss_val
+        else:
+          print("Initializing model...")
+          self._sess.run(tf.global_variables_initializer())
+          print("Model Initialized!")
 
-  def predict_q(self, states, actions, is_training_phase=False):
+  def update(self, states, actions, q_targets, mu, num_epochs=1):
+    """Updates the model parameters using the provided target batch.
+
+    Args:
+
+      states:  A numpy ndarray that represents the states of the environment.
+        Should should have a shape of [batch_size, height, width, channels].
+
+      actions: An optional numpy ndarray indicating which actions will be
+        taken. If provided, should have a shape of [batch_size, 3], where the
+        last dimension corresponds to a tuple of (x_pos, y_pos, action_type).
+        Each element of the tuple must be within the ranges of their
+        corresponding shapes defined in the initializer of the model. If
+        `None`, the action selected will be the best one possible, and the
+        return type of the function will be a tuple of
+        `(best_qs, (best_action_tuples))`.
+
+      q_targets:  A numpy ndarray that contains the target outputs of the q
+        function. Should have a shape of [batch_size].
+
+      mu:  A numpy ndarray that contains a weighting factor in range [0,1] for
+        each state in the batch. States we care more about approximating
+        accurately should be given a higher weight. For example, mu could be
+        the fraction of time spent in a given state, which would mean that
+        states we pass through often should be more important to approximate
+        correctly.
+
+      num_epochs:  The number of iterations over the provided batch to perform
+        for this update step. Probably keep this as 1 so that the model
+        doesn't become too biased due to the small size of the batch.
+
+    Returns:
+      The loss value after the update.
+    """
+    # TODO: Index loss and train_step by action
+    with self._sess.as_default():
+      # Training loop for parameter tuning
+      assert(num_epochs >= 1)
+
+      for epoch in range(num_epochs):
+        _, loss_val = self._sess.run(
+          [self._train_step, self._loss],
+          feed_dict={
+            self._states: states,
+            self._q_targets: q_targets,
+            self._mu: mu,
+            self._phase_train: True})
+
+      return loss_val
+
+  def predict_q(self, states, actions=None, is_training_phase=False):
     """Uses the model to predict the q function for the given state-action pair.
 
     Args:
@@ -103,29 +176,50 @@ class QMap:
       states:  A numpy ndarray that represents the states of the environment.
         Should should have a shape of [batch_size, height, width, channels].
 
-      actions: A numpy ndarray indicating which actions will be taken. Should
-        have a shape of [batch_size, 3], where the last dimension corresponds to
-        a tuple of (x_pos, y_pos, action_type). Each element of the tuple must
-        be within the ranges of their corresponding shapes defined in the
-        initializer of the model.
+      actions: An optional numpy ndarray indicating which actions will be
+        taken. If provided, should have a shape of [batch_size, 3], where the
+        last dimension corresponds to a tuple of (x_pos, y_pos, action_type).
+        Each element of the tuple must be within the ranges of their
+        corresponding shapes defined in the initializer of the model. If
+        `None`, the action selected will be the best one possible, and the
+        return type of the function will be a tuple of
+        `(best_qs, (best_action_tuples))`.
 
       is_training_phase:  A boolean value indicating whether we are currently
         training the network or not.
 
     Returns:
-      A numpy ndarray of the q values, shaped [batch_size].
+      A numpy ndarray of the q values, shaped [batch_size] if `actions` is not
+      `None. Otherwise, provides a tuple of the q values and the actions
+      selected.
     """
+    # TODO: Index loss, train_step by action, figure out if action logic works
     with self._sess.as_default():
+
+      batch_size = states.shape[0]
+      assert(actions.shape[0] == batch_size if actions else True)
+
       qmap = self._sess.run(
-        self._q,
-        feed_dict={self._state: states, self._phase_train: is_training_phase})
-      # Numpy expects indexing format to be like [(x0, x1, x2), (y0,y1,y2)]
-      # Instead of [(x0,y0), (x1,y1), (x2,y2)]
-      inds_array = np.moveaxis(actions, -1, 0)
-      assert(inds_array.shape == (actions.shape[1], actions.shape[0]))
-      indexer = np.index_exp[:] + tuple(inds_array)
-      result = qmap[indexer]
-      assert(result.shape == actions.shape[0])
+        self._qmap,
+        feed_dict={self._states: states, self._phase_train: is_training_phase})
+
+      assert(qmap.shape[0] == batch_size)
+
+      if actions is not None:
+        actions = np.array(actions)
+        # Numpy expects indexing format to be like [(x0, x1, x2), (y0,y1,y2)]
+        # Instead of [(x0,y0), (x1,y1), (x2,y2)]
+        inds_array = np.moveaxis(actions, -1, 0)
+        assert(inds_array.shape == (actions.shape[1], actions.shape[0]))
+        indexer = np.index_exp[:] + tuple(inds_array)
+        result = qmap[indexer]
+        assert(result.shape == actions.shape[0])
+      else:
+        # Select best action to use
+        q_flat = qmap.reshape(qmap.shape[0], -1)
+        idxs_flat = np.argmax(qmap, axis=-1)
+
+        q_vals = q_flat[:, idxs_flat]
 
   def save_model(self, save_path=None):
     """Saves the model in the specified file.
