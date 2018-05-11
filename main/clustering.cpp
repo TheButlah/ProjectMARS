@@ -34,8 +34,7 @@ int main() {
       game->step(false, Coord(0, 0));
     }
     else { //cluster
-      MARS::Clustering clustering(k);
-      std::pair<bool, Coord> res = clustering.placePlant(game->getPopMatrix());
+      std::pair<bool, Coord> res = Clustering::placePlant(game->getPopMatrix(), k);
       game->step(res.first, res.second);
     }
   }

@@ -149,7 +149,7 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix, int k)
     }
   }
 
-  int minSparsityIndex;
+  int minSparsityIndex = 0;
   int minSparsity = -1;
 
   for(int i = 0; i < clusterSparsity.size(); i++) {
