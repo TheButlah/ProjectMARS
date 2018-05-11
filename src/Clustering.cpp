@@ -25,6 +25,19 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
 
   int totalCentroidDifference = dx+dy;
 
+  // Create one data point for each person (unit of population density) in the matrix
+
+  std::vector<Coord> dataPoints = std::vector<Coord>();
+
+  for(int i = 0; i < dx; i++) {
+    for(int j = 0; j < dy; j++) {
+      int peopleHere = popMatrix.numberUnservicedAtCoord(MARS::Coord(i,j));
+      for(int k = 0; k < peopleHere; k++) {
+        dataPoints.push_back(Coord(i, j));
+      }
+    }
+  }
+
   while(totalCentroidDifference > MIN_CENTROID_DIFFERENCE) {
     totalCentroidDifference = 0;
 
@@ -43,20 +56,7 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
       clusteredBefore = true;
     }
 
-    // Create one data point for each person (unit of population density) in the matrix
-
-    std::vector<Coord> dataPoints = std::vector<Coord>();
-
-    for(int i = 0; i < dx; i++) {
-      for(int j = 0; j < dy; j++) {
-        int peopleHere = popMatrix.numberUnservicedAtCoord(MARS::Coord(i,j));
-        for(int k = 0; k < peopleHere; k++) {
-          dataPoints.push_back(Coord(i, j));
-        }
-      }
-    }
-
-    clusters = std::vector<std::vector<Coord>>(); // reset clusters to be empty
+    clusters = std::vector<std::vector<Coord>>(); // (re)set clusters to be empty
     for(int i = 0; i < k; i++) {
       clusters.push_back(std::vector<Coord>());
     }
@@ -112,6 +112,7 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
       
     }
   }
+
   return std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> (centroids, clusters);
 }
 
@@ -134,16 +135,17 @@ std::pair<bool, Coord> Clustering::placePlantKMeans(PopulationMatrix popMatrix, 
   }
 
   bool unservicedClusterExists = maxSize > PLACE_PLANT_THRESHOLD;
+
   Coord placement;
   assert(maxSizeIndex < centroids.size());
 
-  if(unservicedClusterExists) {
+  if(!unservicedClusterExists) {
     placement = Coord(0, 0);
   }
   else {
     placement = centroids.at(maxSizeIndex);
   }
-
+  
   return std::pair<bool,Coord>(unservicedClusterExists, placement);
 }
 
