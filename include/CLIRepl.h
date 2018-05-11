@@ -19,6 +19,7 @@ namespace MARS {
     void loggingLoop(int steps, int decision_interval, int k, std::string path);
     void loggingFromFile(std::string params_path, std::string output_dir_path);
     void stepWithClustering(int k);
+    void stepWithRandom();
   public:
     CLIRepl(std::string inifile);
     CLIRepl(Game* game);

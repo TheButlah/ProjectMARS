@@ -115,7 +115,7 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
   return std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> (centroids, clusters);
 }
 
-std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix, int k) {
+std::pair<bool, Coord> Clustering::placePlantKMeans(PopulationMatrix popMatrix, int k) {
   // Take the largest unserviced cluster and place a plant at its center
 
   std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> clusterResult = Clustering::run(popMatrix, k);
@@ -145,4 +145,20 @@ std::pair<bool, Coord> Clustering::placePlant(PopulationMatrix popMatrix, int k)
   }
 
   return std::pair<bool,Coord>(unservicedClusterExists, placement);
+}
+
+std::pair<bool, Coord> Clustering::placePlantRandom(PopulationMatrix popMatrix) {
+  /* Random baseline method */
+  srand(time(0));
+  int coinFlip = rand() % 2;
+  if(coinFlip == 0) {
+    // don't place a plant this time
+    return std::pair<bool, Coord>(false, Coord(0, 0));
+  }
+  else {
+    // place a plant in a random location
+    int x = rand() % popMatrix.sizeX();
+    int y = rand() % popMatrix.sizeY();
+    return std::pair<bool, Coord>(true, Coord(x, y));
+  }
 }

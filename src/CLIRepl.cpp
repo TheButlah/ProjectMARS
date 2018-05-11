@@ -295,7 +295,12 @@ void CLIRepl::printStats() {
 }
 
 void CLIRepl::stepWithClustering(int k) {
-  std::pair<bool, Coord> res = Clustering::placePlant(game->getPopMatrix(), k);
+  std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
+  game->step(res.first, res.second);
+}
+
+void CLIRepl::stepWithRandom() {
+  std::pair<bool, Coord> res = Clustering::placePlantRandom(game->getPopMatrix());
   game->step(res.first, res.second);
 }
 
@@ -368,7 +373,8 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->stepWithClustering(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
-  } else if(command == "log") {
+  }
+  else if(command == "log") {
     if(tokens.size() == 3) {
       std::string params_path = tokens[1];
       std::string output_dir_path = tokens[2];

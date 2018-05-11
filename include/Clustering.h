@@ -12,7 +12,8 @@ namespace MARS {
 	private:
 		static std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> run(PopulationMatrix popMatrix, int k);
 	public:
-		static std::pair<bool, Coord> placePlant(PopulationMatrix popMatrix, int k);
+		static std::pair<bool, Coord> placePlantKMeans(PopulationMatrix popMatrix, int k);
+		static std::pair<bool, Coord> placePlantRandom(PopulationMatrix popMatrix);
 	};
 }
 
