@@ -10,15 +10,13 @@
 namespace MARS {
 	class Clustering {
 	private:
-		int k;
-		bool clusteredBefore;
-		std::vector<std::vector<Coord>> clusters;
-		std::vector<Coord> centroids;
-		void run(PopulationMatrix popMatrix);
+		static std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> runKMeans(PopulationMatrix popMatrix, int k);
+		static std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> runKMedians(PopulationMatrix popMatrix, int k);
+		static std::pair<bool, Coord> processClusteringResults (std::vector<Coord> centroids, std::vector<std::vector<Coord>> clusters);
 	public:
-    Clustering(int k);
-		Clustering(int k, int dx, int dy);
-		std::pair<bool, Coord> placePlant(PopulationMatrix popMatrix); // Do we place a plant at this step, and where do we place it?
+		static std::pair<bool, Coord> placePlantKMeans(PopulationMatrix popMatrix, int k);
+		static std::pair<bool, Coord> placePlantKMedians(PopulationMatrix popMatrix, int k);
+		static std::pair<bool, Coord> placePlantRandom(PopulationMatrix popMatrix);
 	};
 }
 

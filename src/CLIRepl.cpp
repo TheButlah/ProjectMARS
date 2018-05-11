@@ -25,6 +25,29 @@ using namespace cimg_library;
  */
 CLIRepl::CLIRepl(std::string inifile)
 {
+  this->inifile = inifile;
+  this->initializeGame(inifile);
+}
+
+CLIRepl::CLIRepl(MARS::Game *game) {
+  if (game == nullptr) {
+    throw std::exception();
+  }
+  this->game = game;
+  auto size = game->getSize();
+  size_x = size.first;
+  size_y = size.second;
+  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
+  display = new CImgDisplay(*img, "Project MARS");
+}
+
+CLIRepl::~CLIRepl() {
+  delete game;
+  delete img;
+  delete display;
+}
+
+void CLIRepl::initializeGame(std::string inifile) {
   INIReader ini(inifile);
   int dx = ini.GetInteger("Default", "SizeX", 16);
   int dy = ini.GetInteger("Default", "SizeY", 16);
@@ -49,24 +72,6 @@ CLIRepl::CLIRepl(std::string inifile)
     unserviced_penalty);
   img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
   display = new CImgDisplay(*img, "Project MARS");
-}
-
-CLIRepl::CLIRepl(MARS::Game *game) {
-  if (game == nullptr) {
-    throw std::exception();
-  }
-  this->game = game;
-  auto size = game->getSize();
-  size_x = size.first;
-  size_y = size.second;
-  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
-  display = new CImgDisplay(*img, "Project MARS");
-}
-
-CLIRepl::~CLIRepl() {
-  delete game;
-  delete img;
-  delete display;
 }
 
 std::vector<std::string> CLIRepl::tokenize(std::string s) {
@@ -286,25 +291,42 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
-  std::cout << "log x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
-  std::cout << "log /path/to/params.txt /path/to/dir - log using params.txt, writing output in dir" << std::endl;  
+  std::cout << "kmeans x s k /path/to/file.csv - steps x times, clusters (with k-means) every s steps, logs output as CSV" << std::endl;
+  std::cout << "kmedians x s k /path/to/file.csv - steps x times, clusters (with k-medians) every s steps, logs output as CSV" << std::endl;
+  std::cout << "random x s /path/to/file.csv - steps x times, places plants randomly every s steps, logs output as CSV" << std::endl;
+  std::cout << "trace /path/to/trace.txt - run trace file" << std::endl;  
 }
 
 void CLIRepl::printStats() {
 
 }
 
-void CLIRepl::stepWithClustering(int k) {
-  Clustering clusterer = Clustering(k);
-  std::pair<bool, Coord> res = clusterer.placePlant(game->getPopMatrix());
+void CLIRepl::stepWithKMeans(int k) {
+  std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
   game->step(res.first, res.second);
 }
 
-void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string path) {
+void CLIRepl::stepWithKMedians(int k) {
+  std::pair<bool, Coord> res = Clustering::placePlantKMedians(game->getPopMatrix(), k);
+  game->step(res.first, res.second);
+}
+
+void CLIRepl::stepWithRandom() {
+  std::pair<bool, Coord> res = Clustering::placePlantRandom(game->getPopMatrix());
+  game->step(res.first, res.second);
+}
+
+void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interval, int k, std::string path) {
+  
+  if(method != "kmeans" && method != "kmedians" && method != "random") {
+    std::cout << "Invalid method. Please use either kmeans, kmedians, or random." << std::endl;
+  }
+
+  this->initializeGame(this->inifile);
   std::ofstream out;
 
   out.open(path, std::ios_base::app);
-  out << "Time,Ran Clustering?,Number of Plants,Objective" << std::endl;
+  out << "Time,Ran Algorithm?,Number of Plants,Objective" << std::endl;
 
   for(int i = 0; i < steps; i++) {
     bool run_clustering = i != 0 && i % decision_interval == 0;
@@ -313,7 +335,15 @@ void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string p
       game->step(false, Coord(0, 0));
     }
     else {
-      this->stepWithClustering(k);
+      if(method == "kmeans") {
+        this->stepWithKMeans(k);
+      }
+      else if(method == "kmedians") {
+        this->stepWithKMedians(k);
+      }
+      else if(method == "random") {
+        this->stepWithRandom();
+      }    
     }
 
     std::string ran_clustering_s = run_clustering ? "yes" : "";
@@ -326,18 +356,16 @@ void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string p
   }
 }
 
-void CLIRepl::loggingFromFile(std::string params_path, std::string output_dir_path) {
+void CLIRepl::runTrace(std::string params_path) {
   std::ifstream in;
-
   in.open(params_path);
 
-  int x, s, k;
+  std::string line;
 
-  while(in >> x >> s >> k) {
-    std::string path = output_dir_path + "/" + "kmeans" + "_" 
-      + std::to_string(x) + "_" + std::to_string(s) + "_" + std::to_string(k) + ".csv";
-    std::cout << "Running: k-means x=" << x << " s=" << s << " k=" << k << std::endl;
-    this->loggingLoop(x, s, k, path);
+  while(std::getline(in, line)) {
+    std::cout << line << std::endl;
+    std::vector<std::string> tokens = this->tokenize(line);
+    this->doCommand(tokens);
   }
 
 }
@@ -366,23 +394,30 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->printUsage();
   } else if (tokens.size() == 2 && tokens[0] == "cluster") {
     int k = std::stoi(tokens[1]);
-    this->stepWithClustering(k);
+    this->stepWithKMeans(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
-  } else if(command == "log") {
-    if(tokens.size() == 3) {
-      std::string params_path = tokens[1];
-      std::string output_dir_path = tokens[2];
-      this->loggingFromFile(params_path, output_dir_path);
-    } else if(tokens.size() == 5) {
-      int x = std::stoi(tokens[1]);
-      int s = std::stoi(tokens[2]);
-      int k = std::stoi(tokens[3]);
-      std::string path = tokens[4];
-      this->loggingLoop(x, s, k, path);
-    } else {
-      std::cout << "log: Did not provide correct number of arguments" << std::endl;
-    }
+  }
+  else if(command == "trace" && tokens.size() == 2) {
+      std::string trace_path = tokens[1];
+      this->runTrace(trace_path);
+  } else if(command == "kmeans" && tokens.size() == 5) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    int k = std::stoi(tokens[3]);
+    std::string path = tokens[4];
+    this->placePlantLoop("kmeans", x, s, k, path);
+  } else if(command == "kmedians" && tokens.size() == 5) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    int k = std::stoi(tokens[3]);
+    std::string path = tokens[4];
+    this->placePlantLoop("kmedians", x, s, k, path);
+  } else if(command == "random" && tokens.size() == 4) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    std::string path = tokens[3];
+    this->placePlantLoop("random", x, s, 0, path);
   }
   else {
     this->printUsage();
