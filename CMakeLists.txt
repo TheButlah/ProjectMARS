@@ -67,3 +67,7 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(test_question_mark ${SOURCES} main/tests.cpp)
 target_link_libraries(test_question_mark gtest_main)
+
+# Python bindings using pybind11
+add_subdirectory(lib/pybind11)
+pybind11_add_module(project_mars ${SOURCES} "main/bindings.cpp")
