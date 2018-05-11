@@ -261,6 +261,17 @@ std::pair<bool, Coord> Clustering::placePlantKMeans(PopulationMatrix popMatrix, 
   return Clustering::processClusteringResults(centroids, clusters);
 }
 
+std::pair<bool, Coord> Clustering::placePlantKMedians(PopulationMatrix popMatrix, int k) {
+  // Take the largest unserviced cluster and place a plant at its center
+
+  std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> clusterResult = Clustering::runKMedians(popMatrix, k);
+
+  std::vector<Coord> centroids = clusterResult.first;
+  std::vector<std::vector<Coord>> clusters = clusterResult.second;
+
+  return Clustering::processClusteringResults(centroids, clusters);
+}
+
 std::pair<bool, Coord> Clustering::placePlantRandom(PopulationMatrix popMatrix) {
   /* Random baseline method */
   srand(time(0));

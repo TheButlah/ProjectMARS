@@ -299,8 +299,13 @@ void CLIRepl::printStats() {
 
 }
 
-void CLIRepl::stepWithClustering(int k) {
+void CLIRepl::stepWithKMeans(int k) {
   std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
+  game->step(res.first, res.second);
+}
+
+void CLIRepl::stepWithKMedians(int k) {
+  std::pair<bool, Coord> res = Clustering::placePlantKMedians(game->getPopMatrix(), k);
   game->step(res.first, res.second);
 }
 
@@ -309,12 +314,17 @@ void CLIRepl::stepWithRandom() {
   game->step(res.first, res.second);
 }
 
-void CLIRepl::kmeansLoop(int steps, int decision_interval, int k, std::string path) {
+void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interval, int k, std::string path) {
+  
+  if(method != "kmeans" && method != "kmedians" && method != "random") {
+    std::cout << "Invalid method. Please use either kmeans, kmedians, or random." << std::endl;
+  }
+
   this->initializeGame(this->inifile);
   std::ofstream out;
 
   out.open(path, std::ios_base::app);
-  out << "Time,Ran Clustering?,Number of Plants,Objective" << std::endl;
+  out << "Time,Ran Algorithm?,Number of Plants,Objective" << std::endl;
 
   for(int i = 0; i < steps; i++) {
     bool run_clustering = i != 0 && i % decision_interval == 0;
@@ -323,7 +333,15 @@ void CLIRepl::kmeansLoop(int steps, int decision_interval, int k, std::string pa
       game->step(false, Coord(0, 0));
     }
     else {
-      this->stepWithClustering(k);
+      if(method == "kmeans") {
+        this->stepWithKMeans(k);
+      }
+      else if(method == "kmedians") {
+        this->stepWithKMedians(k);
+      }
+      else if(method == "random") {
+        this->stepWithRandom();
+      }    
     }
 
     std::string ran_clustering_s = run_clustering ? "yes" : "";
@@ -374,20 +392,32 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     this->printUsage();
   } else if (tokens.size() == 2 && tokens[0] == "cluster") {
     int k = std::stoi(tokens[1]);
-    this->stepWithClustering(k);
+    this->stepWithKMeans(k);
   } else if(command == "exit" || command == "quit") {
     exit(0);
   }
   else if(command == "trace" && tokens.size() == 2) {
       std::string trace_path = tokens[1];
       this->runTrace(trace_path);
-    } else if(command == "kmeans" && tokens.size() == 5) {
-      int x = std::stoi(tokens[1]);
-      int s = std::stoi(tokens[2]);
-      int k = std::stoi(tokens[3]);
-      std::string path = tokens[4];
-      this->kmeansLoop(x, s, k, path);
-    } else {
+  } else if(command == "kmeans" && tokens.size() == 5) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    int k = std::stoi(tokens[3]);
+    std::string path = tokens[4];
+    this->placePlantLoop("kmeans", x, s, k, path);
+  } else if(command == "kmedians" && tokens.size() == 5) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    int k = std::stoi(tokens[3]);
+    std::string path = tokens[4];
+    this->placePlantLoop("kmedians", x, s, k, path);
+  } else if(command == "random" && tokens.size() == 4) {
+    int x = std::stoi(tokens[1]);
+    int s = std::stoi(tokens[2]);
+    std::string path = tokens[3];
+    this->placePlantLoop("random", x, s, 0, path);
+  }
+  else {
     this->printUsage();
   }
   draw();
