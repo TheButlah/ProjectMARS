@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <thread>
+#include <mutex>
 
 #include "CLIRepl.h"
 #include "INIReader.h"
@@ -49,6 +51,7 @@ CLIRepl::CLIRepl(std::string inifile)
     unserviced_penalty);
   img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
   display = new CImgDisplay(*img, "Project MARS");
+
 }
 
 CLIRepl::CLIRepl(MARS::Game *game) {
@@ -61,6 +64,7 @@ CLIRepl::CLIRepl(MARS::Game *game) {
   size_y = size.second;
   img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
   display = new CImgDisplay(*img, "Project MARS");
+
 }
 
 CLIRepl::~CLIRepl() {
@@ -387,13 +391,29 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
   else {
     this->printUsage();
   }
-  draw();
+  updateRender();
+}
+
+/** Should be called in rendering thread */
+void CLIRepl::renderLoop() {
+  std::unique_lock<std::mutex> l(render_m); //Held till cv waits or we go out of scope
+  while (!display->is_closed()) {
+    should_update.wait(l); //Can trigger on spurious wakeup, but I dont think we care.
+    printf("Drawing!\n");
+    draw();
+  }
+}
+
+/** Should be called in main thread */
+void CLIRepl::updateRender() {
+  should_update.notify_one();
 }
 
 void CLIRepl::startCLI() {
   std::cout << "Welcome to Project MARS!" << std::endl;
   printUsage();
-  draw();
+  render_thread = std::thread([this](){updateRender();}); //TODO: Will this live when startCLI() returns?
+  updateRender();
   std::string input;
   while (!display->is_closed()) {
     std::cout << "> " << std::flush;
