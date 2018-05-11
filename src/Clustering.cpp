@@ -12,11 +12,10 @@ using namespace MARS;
 #define MIN_CENTROID_DIFFERENCE 0.5
 
 std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> 
-  Clustering::run(PopulationMatrix popMatrix, int k) {
+  Clustering::runKMeans(PopulationMatrix popMatrix, int k) {
 
   std::vector<std::vector<Coord>> clusters = std::vector<std::vector<Coord>>();
   std::vector<Coord> centroids = std::vector<Coord>();
-  bool clusteredBefore = false;
 
   int dx = popMatrix.sizeX();
   int dy = popMatrix.sizeY();
@@ -38,23 +37,18 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
     }
   }
 
+  srand(time(0)); // Seed for random number generator
+
+  for(int i = 0; i < k; i++) {
+    Coord randomCentroid = Coord(rand() % dx, rand() % dy);
+    while(std::find(centroids.begin(), centroids.end(), randomCentroid) != centroids.end()) {
+      randomCentroid = Coord(rand() % dx, rand() % dy);
+    }
+    centroids.push_back(randomCentroid);
+  }
+
   while(totalCentroidDifference > MIN_CENTROID_DIFFERENCE) {
     totalCentroidDifference = 0;
-
-    if(!clusteredBefore) {
-      // We don't have existing centroids to work with - randomly initialize them
-      srand(time(0)); // Seed for random number generator
-
-      for(int i = 0; i < k; i++) {
-        Coord randomCentroid = Coord(rand() % dx, rand() % dy);
-        while(std::find(centroids.begin(), centroids.end(), randomCentroid) != centroids.end()) {
-          randomCentroid = Coord(rand() % dx, rand() % dy);
-        }
-        centroids.push_back(randomCentroid);
-      }
-
-      clusteredBefore = true;
-    }
 
     clusters = std::vector<std::vector<Coord>>(); // (re)set clusters to be empty
     for(int i = 0; i < k; i++) {
@@ -116,6 +110,11 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
   return std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> (centroids, clusters);
 }
 
+std::pair <std::vector<Coord>, std::vector<std::vector<Coord>>> 
+  Clustering::runKMedians(PopulationMatrix popMatrix, int k) {
+    return std::pair <std::vector<Coord>, std::vector<std::vector<Coord>>> ();
+}
+
 std::pair <bool, Coord> Clustering::processClusteringResults(
   std::vector<Coord> centroids,
   std::vector<std::vector<Coord>> clusters) {
@@ -148,7 +147,7 @@ std::pair <bool, Coord> Clustering::processClusteringResults(
 std::pair<bool, Coord> Clustering::placePlantKMeans(PopulationMatrix popMatrix, int k) {
   // Take the largest unserviced cluster and place a plant at its center
 
-  std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> clusterResult = Clustering::run(popMatrix, k);
+  std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>> clusterResult = Clustering::runKMeans(popMatrix, k);
 
   std::vector<Coord> centroids = clusterResult.first;
   std::vector<std::vector<Coord>> clusters = clusterResult.second;
