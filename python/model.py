@@ -1,3 +1,10 @@
+# Python 2-3 compatibility
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import range
+
 import tensorflow as tf
 import numpy as np
 import os
@@ -19,17 +26,19 @@ class DQN:
 
           target_q:  A numpy ndarray that contains the target output of the q function. Should have a shape of
             [batch_size, n_actions]. Note that `n_actions` does not take into consideration position as part of the
-            action space. Instead it should be a probability vector over a number of actions that could be taken at any
+            action space. Instead each index corresponds to the type of action that could be taken at any
             given position.
 
-          mu:  A numpy ndarray that contains a weighting factor for each sample. For example, mu could be the fraction
-            of time spent in the given state.
+          mu:  A numpy ndarray that contains a weighting factor in [0,1] for each state in the batch. States we care
+            more about approximating accurately should be given a higher weight. For example, mu could be the fraction
+            of time spent in a given state, which would mean that states we pass through often should be more important
+            to approximate correctly.
 
           num_epochs:  The number of iterations over the provided batch to perform for this update step. Probably keep
             this as 1 so that the model doesn't become too biased due to the small size of the batch.
 
       Returns:
-          The loss value after training
+          The loss value after the update.
       """
       with self._sess.as_default():
         # Training loop for parameter tuning
