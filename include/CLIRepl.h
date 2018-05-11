@@ -11,15 +11,18 @@
 namespace MARS {
   class CLIRepl {
   private:
+    std::string inifile;
     int size_x;
     int size_y;
     Game *game;
     GameDisplay *game_display;
 
-    void loggingLoop(int steps, int decision_interval, int k, std::string path);
-    void loggingFromFile(std::string params_path, std::string output_dir_path);
-    void stepWithClustering(int k);
+    void placePlantLoop(std::string method, int steps, int decision_interval, int k, std::string path);
+    void runTrace(std::string trace_path);
+    void stepWithKMeans(int k);
+    void stepWithKMedians(int k);
     void stepWithRandom();
+    void initializeGame(std::string inifile);
   public:
     CLIRepl(std::string inifile);
     CLIRepl(Game* game);
