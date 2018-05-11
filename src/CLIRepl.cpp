@@ -291,7 +291,9 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
-  std::cout << "kmeans x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
+  std::cout << "kmeans x s k /path/to/file.csv - steps x times, clusters (with k-means) every s steps, logs output as CSV" << std::endl;
+  std::cout << "kmedians x s k /path/to/file.csv - steps x times, clusters (with k-medians) every s steps, logs output as CSV" << std::endl;
+  std::cout << "random x s /path/to/file.csv - steps x times, places plants randomly every s steps, logs output as CSV" << std::endl;
   std::cout << "trace /path/to/trace.txt - run trace file" << std::endl;  
 }
 
