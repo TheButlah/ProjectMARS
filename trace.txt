@@ -1,0 +1,4 @@
+kmeans 100 20 3 kmeans_100_20_3.txt
+kmeans 500 20 3 kmeans_500_20_3.txt
+kmeans 500 50 3 kmeans_500_50_3.txt
+kmeans 1000 20 3 kmeans_1000_20_3.txt

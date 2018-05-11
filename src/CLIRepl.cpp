@@ -291,8 +291,8 @@ void CLIRepl::printUsage() {
   std::cout << "step plant r c - steps the game while making a plant at location (r, c)" << std::endl;
   std::cout << "cluster k - runs K-means clustering with k clusters to create new plant" << std::endl;
   std::cout << "help - print this list of commands" << std::endl;
-  std::cout << "log x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
-  std::cout << "log /path/to/params.txt /path/to/dir - log using params.txt, writing output in dir" << std::endl;  
+  std::cout << "kmeans x s k /path/to/file.csv - steps x times, clusters (with k clusters) every s steps, logs output as CSV" << std::endl;
+  std::cout << "trace /path/to/trace.txt - run trace file" << std::endl;  
 }
 
 void CLIRepl::printStats() {
@@ -309,7 +309,7 @@ void CLIRepl::stepWithRandom() {
   game->step(res.first, res.second);
 }
 
-void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string path) {
+void CLIRepl::kmeansLoop(int steps, int decision_interval, int k, std::string path) {
   this->initializeGame(this->inifile);
   std::ofstream out;
 
@@ -336,18 +336,16 @@ void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string p
   }
 }
 
-void CLIRepl::loggingFromFile(std::string params_path, std::string output_dir_path) {
+void CLIRepl::runTrace(std::string params_path) {
   std::ifstream in;
-
   in.open(params_path);
 
-  int x, s, k;
+  std::string line;
 
-  while(in >> x >> s >> k) {
-    std::string path = output_dir_path + "/" + "kmeans" + "_" 
-      + std::to_string(x) + "_" + std::to_string(s) + "_" + std::to_string(k) + ".csv";
-    std::cout << "Running: k-means x=" << x << " s=" << s << " k=" << k << std::endl;
-    this->loggingLoop(x, s, k, path);
+  while(std::getline(in, line)) {
+    std::cout << line << std::endl;
+    std::vector<std::string> tokens = this->tokenize(line);
+    this->doCommand(tokens);
   }
 
 }
@@ -380,22 +378,16 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
   } else if(command == "exit" || command == "quit") {
     exit(0);
   }
-  else if(command == "log") {
-    if(tokens.size() == 3) {
-      std::string params_path = tokens[1];
-      std::string output_dir_path = tokens[2];
-      this->loggingFromFile(params_path, output_dir_path);
-    } else if(tokens.size() == 5) {
+  else if(command == "trace" && tokens.size() == 2) {
+      std::string trace_path = tokens[1];
+      this->runTrace(trace_path);
+    } else if(command == "kmeans" && tokens.size() == 5) {
       int x = std::stoi(tokens[1]);
       int s = std::stoi(tokens[2]);
       int k = std::stoi(tokens[3]);
       std::string path = tokens[4];
-      this->loggingLoop(x, s, k, path);
+      this->kmeansLoop(x, s, k, path);
     } else {
-      std::cout << "log: Did not provide correct number of arguments" << std::endl;
-    }
-  }
-  else {
     this->printUsage();
   }
   draw();

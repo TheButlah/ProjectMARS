@@ -17,8 +17,8 @@ namespace MARS {
     Game *game;
     cimg_library::CImg<unsigned char>* img;
     cimg_library::CImgDisplay* display;
-    void loggingLoop(int steps, int decision_interval, int k, std::string path);
-    void loggingFromFile(std::string params_path, std::string output_dir_path);
+    void kmeansLoop(int steps, int decision_interval, int k, std::string path);
+    void runTrace(std::string trace_path);
     void stepWithClustering(int k);
     void stepWithRandom();
     void initializeGame(std::string inifile);
