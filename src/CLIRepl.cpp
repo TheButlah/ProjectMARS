@@ -4,7 +4,6 @@
 #include "../include/Terrain.h"
 #include "../include/Coord.h"
 #include "../include/Clustering.h"
-#include "../include/HClustering.h"
 
 #include <algorithm>
 #include <fstream>
@@ -278,7 +277,6 @@ void CLIRepl::printStats() {
 }
 
 void CLIRepl::stepWithClustering(int k) {
-  //HClustering hierarchical_clusterer = HClustering();
   Clustering clusterer = Clustering(k);
   std::pair<bool, Coord> res = clusterer.placePlant(game->getPopMatrix());
   game->step(res.first, res.second);
