@@ -7,11 +7,16 @@ set (CMAKE_CXX_STANDARD 11)
 
 # Include all header files in the "include" directory
 include_directories(include)
-if(APPLE)
-  find_package(X11 REQUIRED)
-  link_libraries(${X11_LIBRARIES})
-  include_directories(${X11_INCLUDE_DIR})
-endif()
+
+#X11
+find_package(X11 REQUIRED)
+link_libraries(${X11_LIBRARIES})
+include_directories(${X11_INCLUDE_DIR})
+
+#pthreads
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+link_libraries(Threads::Threads)
 
 # We glob all the source files using a wildcard, and store the in the SOURCES variable
 file(GLOB SOURCES "src/*.cpp")
