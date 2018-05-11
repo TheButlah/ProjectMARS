@@ -11,6 +11,7 @@
 namespace MARS {
   class CLIRepl {
   private:
+    std::string inifile;
     int size_x;
     int size_y;
     Game *game;
@@ -20,6 +21,7 @@ namespace MARS {
     void loggingFromFile(std::string params_path, std::string output_dir_path);
     void stepWithClustering(int k);
     void stepWithRandom();
+    void initializeGame(std::string inifile);
   public:
     CLIRepl(std::string inifile);
     CLIRepl(Game* game);

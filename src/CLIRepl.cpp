@@ -25,6 +25,29 @@ using namespace cimg_library;
  */
 CLIRepl::CLIRepl(std::string inifile)
 {
+  this->inifile = inifile;
+  this->initializeGame(inifile);
+}
+
+CLIRepl::CLIRepl(MARS::Game *game) {
+  if (game == nullptr) {
+    throw std::exception();
+  }
+  this->game = game;
+  auto size = game->getSize();
+  size_x = size.first;
+  size_y = size.second;
+  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
+  display = new CImgDisplay(*img, "Project MARS");
+}
+
+CLIRepl::~CLIRepl() {
+  delete game;
+  delete img;
+  delete display;
+}
+
+void CLIRepl::initializeGame(std::string inifile) {
   INIReader ini(inifile);
   int dx = ini.GetInteger("Default", "SizeX", 16);
   int dy = ini.GetInteger("Default", "SizeY", 16);
@@ -49,24 +72,6 @@ CLIRepl::CLIRepl(std::string inifile)
     unserviced_penalty);
   img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
   display = new CImgDisplay(*img, "Project MARS");
-}
-
-CLIRepl::CLIRepl(MARS::Game *game) {
-  if (game == nullptr) {
-    throw std::exception();
-  }
-  this->game = game;
-  auto size = game->getSize();
-  size_x = size.first;
-  size_y = size.second;
-  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
-  display = new CImgDisplay(*img, "Project MARS");
-}
-
-CLIRepl::~CLIRepl() {
-  delete game;
-  delete img;
-  delete display;
 }
 
 std::vector<std::string> CLIRepl::tokenize(std::string s) {
@@ -305,6 +310,7 @@ void CLIRepl::stepWithRandom() {
 }
 
 void CLIRepl::loggingLoop(int steps, int decision_interval, int k, std::string path) {
+  this->initializeGame(this->inifile);
   std::ofstream out;
 
   out.open(path, std::ios_base::app);
