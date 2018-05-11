@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(mars)
 
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-reorder")
+endif()
 
 # Include all header files in the "include" directory
 include_directories(include)

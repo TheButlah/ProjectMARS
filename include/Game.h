@@ -1,11 +1,13 @@
 #ifndef MARS_GAME_H
 #define MARS_GAME_H
 
+#include <queue>
+#include <utility>
+
 #include "Matrix.h"
 #include "PopulationGen.h"
 #include "Terrain.h"
 #include "PopulationMatrix.h"
-#include <queue>
 
 namespace MARS {
 
@@ -61,7 +63,9 @@ namespace MARS {
 
     int getNumberPopServiced();
 
-    int getNumberPopUnserviced();        
+    int getNumberPopUnserviced();
+
+    std::pair<int, int> getSize();
 
     std::vector<Coord> getPlantLocations();
 

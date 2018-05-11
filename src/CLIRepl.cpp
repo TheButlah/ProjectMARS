@@ -1,22 +1,28 @@
-#include "../include/CLIRepl.h"
-#include "../include/INIReader.h"
-#include "../include/Matrix.h"
-#include "../include/Terrain.h"
-#include "../include/Coord.h"
-#include "../include/Clustering.h"
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <exception>
+
+#include "CLIRepl.h"
+#include "INIReader.h"
+#include "Matrix.h"
+#include "Terrain.h"
+#include "Coord.h"
+#include "Clustering.h"
 
 
 using namespace MARS;
 using namespace cimg_library;
 
-#define BOX_SIZE 15
+#define BOX_SIZE 50
 #define POP_SCALE 50.0
 
+/**
+ * Creates a CLI.
+ *
+ * @param inifile The file to initialze a new `Game` with.
+ */
 CLIRepl::CLIRepl(std::string inifile)
 {
   INIReader ini(inifile);
@@ -40,8 +46,20 @@ CLIRepl::CLIRepl(std::string inifile)
     initial_cost, 
     operating_cost, 
     profit_margin,
-    unserviced_penalty); 
-  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0); 
+    unserviced_penalty);
+  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
+  display = new CImgDisplay(*img, "Project MARS");
+}
+
+CLIRepl::CLIRepl(MARS::Game *game) {
+  if (game == nullptr) {
+    throw std::exception();
+  }
+  this->game = game;
+  auto size = game->getSize();
+  size_x = size.first;
+  size_y = size.second;
+  img = new CImg<unsigned char>(13+2*size_y*BOX_SIZE, 13+2*size_x*BOX_SIZE, 1, 3, 0);
   display = new CImgDisplay(*img, "Project MARS");
 }
 

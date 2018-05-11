@@ -1,11 +1,11 @@
-#include "../include/Game.h"
-#include "../include/Matrix.h"
-#include "../include/PopulationGen.h"
-#include "../include/Terrain.h"
-
 #include <queue>
 #include <limits>
 #include <iostream>
+
+#include "Game.h"
+#include "Matrix.h"
+#include "PopulationGen.h"
+#include "Terrain.h"
 
 using namespace MARS;
 
@@ -40,6 +40,10 @@ Game::Game(
 {
 
 }
+
+std::pair<int, int> Game::getSize() {
+  return std::pair<int,int>(size_x, size_y);
+};
 
 bool Game::checkIfPlantPresent(Coord coord) {
   for (int i =0; i < this->plants_in_service.size(); i++) {

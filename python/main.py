@@ -17,7 +17,14 @@ def main():
     profit_margin=5.0,
     unserviced_penalty=1.0
   )
+  tmp = pm.Coord(0,0)
   print(game)
+  cli = pm.CLIRepl(game)
+  cli.startCLI()
+  print('WILL NEVER REACH THIS')
+  for i in range(100_000_000):
+      game.step(False, tmp)
+  print(cli)
 
 
 if __name__ == "__main__":

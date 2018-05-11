@@ -21,6 +21,7 @@ namespace MARS {
     void stepWithClustering(int k);
   public:
     CLIRepl(std::string inifile);
+    CLIRepl(Game* game);
     ~CLIRepl();
 
     std::vector<std::string> tokenize(std::string s);

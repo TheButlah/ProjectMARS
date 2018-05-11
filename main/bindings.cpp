@@ -1,11 +1,25 @@
 #include <pybind11/pybind11.h>
-#include "../include/Coord.h"
-#include "../include/Game.h"
+#include <string>
+
+#include "Coord.h"
+#include "Game.h"
+#include "CLIRepl.h"
 
 namespace py = pybind11;
 
 PYBIND11_PLUGIN(project_mars) {
   py::module m("project_mars");
+
+  py::class_<MARS::CLIRepl>(m, "CLIRepl")
+    .def(py::init<MARS::Game*>(),
+      "Initializer for CLIRepl",
+      py::arg("game"))
+    .def(py::init<std::string>(),
+      "Initializer for CLIRepl",
+      py::arg("inifile"))
+    .def("startCLI", &MARS::CLIRepl::startCLI,
+      "Starts the CLI");
+
 
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
