@@ -331,7 +331,7 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interva
   for(int i = 0; i < steps; i++) {
     bool run_clustering = i != 0 && i % decision_interval == 0;
 
-    if(run_clustering) {
+    if(!run_clustering) {
       game->step(false, Coord(0, 0));
     }
     else {
