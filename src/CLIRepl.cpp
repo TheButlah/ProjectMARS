@@ -200,6 +200,69 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int k, std::string p
   }
 }
 
+void CLIRepl::placePlantLoop(std::string method, int steps, std::string path) {
+  
+  // TODO: DRY
+
+  if(method != "kmeans" && method != "kmedians" && method != "random") {
+    std::cout << "Invalid method. Please use either kmeans or kmedians." << std::endl;
+  }
+
+  this->initializeGame(this->inifile);
+  std::ofstream out;
+
+  out.open(path, std::ios_base::app);
+  out << "Time,Ran Algorithm?,Number of Plants,Objective" << std::endl;
+
+  for(int i = 0; i < steps; i++) {
+
+    int unserviced_pop = this->game->numberUnservicedPop();
+    bool run_clustering = unserviced_pop > UNSERVICED_THRESHOLD;
+
+    if(!run_clustering) {
+      game->step(false, Coord(0, 0));
+    }
+    else {
+
+      // determine k value using heuristic
+      // the greater the variance in unserviced population, the more clusters we need
+
+      float meanUnserviced = 0;
+      Matrix<int> unservicedMatrix = this->game->popMatrixCopy().unservicedPopMatrix();
+
+      for(int i = 0; i < unservicedMatrix.numberRows(); i++) {
+        for(int j = 0; j < unservicedMatrix.numberCols(); j++) {
+          meanUnserviced += unservicedMatrix.at(i, j);
+        }
+      }
+      meanUnserviced /= (unservicedMatrix.numberRows() * unservicedMatrix.numberCols());
+
+      float varianceUnserviced = 0;
+      for(int i = 0; i < unservicedMatrix.numberRows(); i++) {
+        for(int j = 0; j < unservicedMatrix.numberCols(); j++) {
+          varianceUnserviced += ((unservicedMatrix.at(i, j)) - meanUnserviced) * ((unservicedMatrix.at(i, j)) - meanUnserviced);
+        }
+      }
+      varianceUnserviced /= ((unservicedMatrix.numberRows()*unservicedMatrix.numberCols())-1);
+
+      if(method == "kmeans") {
+        this->stepWithKMeans((int)varianceUnserviced);
+      }
+      else if(method == "kmedians") {
+        this->stepWithKMedians((int)varianceUnserviced);
+      }
+    }
+
+    std::string ran_clustering_s = run_clustering ? "yes" : "";
+
+    std::string data = std::to_string(i) + "," + ran_clustering_s + "," 
+      + std::to_string(game->numberPlantsInService()) + "," 
+      + std::to_string(game->calculateObjective());
+    out << data << std::endl;
+
+  }
+}
+
 void CLIRepl::runTrace(std::string params_path) {
   std::ifstream in;
   in.open(params_path);
@@ -247,25 +310,35 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
       this->runTrace(trace_path);
   } else if(command == "kmeans" && tokens.size() == 5) {
     int x = std::stoi(tokens[1]);
-    int k = std::stoi(tokens[3]);
     std::string path = tokens[4];
-    if(tokens[2] == "auto") {
-      this->placePlantLoop("kmeans", x, k, path);
+    if(tokens[3] == "auto") {
+      this->placePlantLoop("kmeans", x, path);
     }
     else {
-      int s = std::stoi(tokens[2]);
-      this->placePlantLoop("kmeans", x, s, k, path);
+      int k = std::stoi(tokens[3]);
+      if(tokens[2] == "auto") {
+        this->placePlantLoop("kmeans", x, k, path);
+      }
+      else {
+        int s = std::stoi(tokens[2]);
+        this->placePlantLoop("kmeans", x, s, k, path);
+      }
     }
   } else if(command == "kmedians" && tokens.size() == 5) {
     int x = std::stoi(tokens[1]);
-    int k = std::stoi(tokens[3]);
     std::string path = tokens[4];
-    if(tokens[2] == "auto") {
-      this->placePlantLoop("kmedians", x, k, path);
+    if(tokens[3] == "auto") {
+      this->placePlantLoop("kmedians", x, path);
     }
     else {
-      int s = std::stoi(tokens[2]);
-      this->placePlantLoop("kmedians", x, s, k, path);
+      int k = std::stoi(tokens[3]);
+      if(tokens[2] == "auto") {
+        this->placePlantLoop("kmedians", x, k, path);
+      }
+      else {
+        int s = std::stoi(tokens[2]);
+        this->placePlantLoop("kmedians", x, s, k, path);
+      }
     }
   } else if(command == "random" && tokens.size() == 4) {
     int x = std::stoi(tokens[1]);
