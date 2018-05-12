@@ -9,7 +9,8 @@ import numpy as np
 import os
 
 from time import strftime
-from .utils import *
+from utils import *
+from layers import *
 
 
 class QMap:
@@ -67,8 +68,8 @@ class QMap:
 
       with tf.variable_scope('Inputs'):
         # Compute shape info
-        state_shape = (None,) + state_shape
-        action_shape = state_shape[:-1] + [n_actions]
+        state_shape = (None,) + tuple(state_shape)
+        action_shape = state_shape[:-1] + (n_actions,)
 
         #####################
         # Data placeholders #
@@ -117,6 +118,11 @@ class QMap:
         '''# Expand action_tuples into full binary masks
         self._action_mask = action_tuples_to_mask(
           self._action_tuples, action_shape)'''
+        pass
+
+
+      with tf.variable_scope('Layers'):
+        pass
 
 
       with tf.variable_scope('Output'):
@@ -129,7 +135,8 @@ class QMap:
 
         # TODO: use tf.cond to decide whether to choose optimal action
         # TODO: Confirm this broadcasts properly
-        self._q = tf.gather_nd(self._qmap, self._action_tuples)
+        # Should end up with shape [batch_size]
+        self._q = index_by_action_tuples(self._qmap, self._action_tuples)
 
         print('q:', self._q)
 
@@ -264,9 +271,7 @@ class QMap:
 
       # TODO: if actions is None, also return selected action
 
-      q_pred = self._sess.run(
-        self._q,
-        feed_dict=feed_dict)
+      q_pred = self._sess.run(self._q, feed_dict=feed_dict)
 
       return q_pred
 

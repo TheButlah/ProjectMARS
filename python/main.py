@@ -8,8 +8,14 @@ import numpy as np
 import tensorflow as tf
 import project_mars as pm
 
+from model import QMap
+
 
 def main():
+  model = QMap((3, 3, 10), 2)
+
+
+def main1():
   # Game initialization
 
   game = pm.Game(

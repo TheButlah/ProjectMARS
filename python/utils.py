@@ -5,7 +5,17 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import tensorflow as tf
-import numpy as np
+
+
+def index_by_action_tuples(tensor, action_tuples):
+  """`tensor` should have the same batch size as `action_tuples`"""
+  idx = tf.range(tf.shape(action_tuples)[0])[:, tf.newaxis]
+
+  selected = tf.gather_nd(
+    tensor,
+    tf.concat([idx, action_tuples], axis=1), name="Selected")
+
+  return selected
 
 
 def action_tuples_to_mask(action_tuples, action_shape):
