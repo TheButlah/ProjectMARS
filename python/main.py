@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
-from builtins import range
 
 import numpy as np
 import tensorflow as tf
@@ -24,12 +23,12 @@ def main():
     profit_margin=5.0,
     unserviced_penalty=1.0
   )
-  tmp = pm.Coord(0,0)
+  tmp = pm.Coord(0, 0)
   print(game)
   cli = pm.CLIRepl(game)
   cli.startCLI()
   print('WILL NEVER REACH THIS')
-  for i in range(100_000_000):
+  for i in range(100000000):
       game.step(False, tmp)
   print(cli)
 

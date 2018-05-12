@@ -9,6 +9,7 @@ import numpy as np
 import os
 
 from time import strftime
+from .utils import *
 
 
 class QMap:
@@ -33,9 +34,7 @@ class QMap:
   """
 
   def __init__(
-    self, state_shape, n_actions,
-    seed=None, load_model=None,
-    learning_rate=0.001):
+    self, state_shape, n_actions, seed=None, load_model=None):
     """Initializes the architecture for the model.
 
     Args:
@@ -47,9 +46,10 @@ class QMap:
         the data is actually provided to the model turing training and
         inference, but you shouldn't specify that here.
 
-      n_actions:  An integer that is equal to the number of different actions
-        that can be taken when ignoring spatial position. This will be
-        equivalent to the number of feature dimensions in the resultant q-map.
+      n_actions:  An integer that is equal to the number of different
+        types of actions that can be taken when ignoring spatial position.
+        This will be equivalent to the number of feature dimensions in the
+        resultant q-map.
 
       seed:  An integer used to seed the initial random state. Can be None to
         generate a new random seed.
@@ -58,50 +58,84 @@ class QMap:
         checkpoint file containing the saved state of the model. It will be
         used to initialize the parameters of the model. Typically used when
         loading a pre-trained model, or resuming a previous training session.
-
-      learning_rate:  The initial learning rate to use for gradient descent.
     """
     self._graph = tf.Graph()
     self._seed = seed
     with self._graph.as_default():
       tf.set_random_seed(seed)
 
+
       with tf.variable_scope('Inputs'):
         # Compute shape info
         state_shape = (None,) + state_shape
+        action_shape = state_shape[:-1] + [n_actions]
 
-        # Setup placeholders
+        #####################
+        # Data placeholders #
+        #####################
+
+        # Input placeholder for batch of states to evaluate the q function for
         self._states = tf.placeholder(
           tf.float32, shape=state_shape, name='States')
+
+        # Targets for the q function. This is just a list, not a map
         self._q_targets = tf.placeholder(
           tf.float32, shape=(None,), name='Q-Targets')
+
+        # List of tuples describing the actions to evaluate the q function for.
+        # This may be not provided if we are instead computing the best action.
+        self._action_tuples = tf.placeholder(
+          tf.int32, shape=(None, 3), name='Action-Tuples')
+
+        # The weighting distribution over the samples. States we care more about
+        # approximating accurately should be given a higher weight.
         self._mu = tf.placeholder(
           tf.float32, shape=(None,), name='Mu')
 
-        self._phase_train = tf.placeholder(
-          tf.bool, shape=(), name='Phase-Train')
+        ####################
+        # Hyper-Parameters #
+        ####################
 
         self._lr = tf.placeholder(tf.float32, shape=(), name='Learning-Rate')
 
-      with tf.variable_scope('ConvLayers'):
+        #################
+        # Training Info #
+        #################
+
+        # Whether we are currently trying to train the model. Will affect
+        # dropout regularization.
+        self._phase_train = tf.placeholder(
+          tf.bool, shape=(), name='Phase-Train')
+
+        # Whether we want to pick the best action automatically, or use the
+        # provided list of actions. By default, we use the provided actions.
+        self._pick_best = tf.placeholder_with_default(
+          tf.constant(False), shape=(), name='Pick-Best')
+
+
+      with tf.variable_scope('Preprocessing'):
+        # Expand action_tuples into full binary masks
+        self._action_mask = action_tuples_to_mask(
+          self._action_tuples, action_shape)
+
+
+      with tf.variable_scope('Output'):
         # For debugging purposes, make this a simple function
         self._qmap = tf.tile(
-          tf.maximum(self._states, axis=-1)[..., tf.newaxis],
+          tf.reduce_max(self._states, axis=-1)[..., tf.newaxis],
           multiples=[1, 1, 1, n_actions])
 
-        print(self._qmap.get_shape())
+        print('qmap shape:', self._qmap.get_shape())
+
 
       with tf.variable_scope('Training'):
-        '''In order to enable us to only take the gradient on the values for 
-        the particular action, we need to keep the loss the same shape as the
-        q-map. However we do want to average over the batch so we reduce 
-        along that axis.'''
-        self._loss_map = tf.reduce_mean(
-          tf.nn.l2_loss(self._qmap - self._q_targets),
-          axis=0)
+        masked_delta = (self._qmap - self._q_targets) * self._action_mask
+        print('masked_d', masked_delta)
+        self._loss = tf.reduce_mean(tf.nn.l2_loss(masked_delta))
 
         self._train_step = tf.train.AdamOptimizer(
-          learning_rate=self._lr).minimize(self._loss_map)
+          learning_rate=self._lr).minimize(self._loss)
+
 
       self._sess = tf.Session()
       with self._sess.as_default():
@@ -112,13 +146,12 @@ class QMap:
           load_model = os.path.abspath(load_model)
           self._saver.restore(self._sess, load_model)
           print("Model Restored!")
-
         else:
           print("Initializing model...")
           self._sess.run(tf.global_variables_initializer())
           print("Model Initialized!")
 
-  def update(self, states, actions, q_targets, mu, num_epochs=1):
+  def update(self, states, actions, q_targets, mu, num_epochs=1, lr=0.001):
     """Updates the model parameters using the provided target batch.
 
     Args:
@@ -133,7 +166,7 @@ class QMap:
         corresponding shapes defined in the initializer of the model. If
         `None`, the action selected will be the best one possible, and the
         return type of the function will be a tuple of
-        `(best_qs, (best_action_tuples))`.
+        `(loss_val, (best_action_tuples))`.
 
       q_targets:  A numpy ndarray that contains the target outputs of the q
         function. Should have a shape of [batch_size].
@@ -149,8 +182,11 @@ class QMap:
         for this update step. Probably keep this as 1 so that the model
         doesn't become too biased due to the small size of the batch.
 
+      lr:  The base learning rate to use for gradient descent.
+
     Returns:
-      The loss value after the update.
+      The loss value after the update, or if `actions` was `None`, a tuple of
+      the loss and the selected actions.
     """
     # TODO: Index loss and train_step by action
     with self._sess.as_default():
@@ -164,7 +200,8 @@ class QMap:
             self._states: states,
             self._q_targets: q_targets,
             self._mu: mu,
-            self._phase_train: True})
+            self._phase_train: True,
+            self._lr: lr})
 
       return loss_val
 
