@@ -15,7 +15,7 @@ namespace MARS {
 		int num_rows; // Number of rows
 		int num_cols; // Number of columns
 		T* matrix; // Matrix memory
-	
+
 	public:
 
 		/*
@@ -95,6 +95,10 @@ namespace MARS {
 				throw -1;
 			#endif
 			return matrix[r * num_cols + c];
+		}
+
+		T* ptr() {
+		  return matrix;
 		}
 	  
 		int numberRows() {

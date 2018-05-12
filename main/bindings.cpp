@@ -53,7 +53,7 @@ PYBIND11_PLUGIN(project_mars) {
 		  "Advance the game's progress by one time step.",
 		  py::arg("add_plant"),
 		  py::arg("plant_coord"))
-    .def("get_reward". &MARS::Game::calculateObjective,
+    .def("get_reward", &MARS::Game::calculateObjective,
       "Get the reward value for the current state of the game.");
 
 	return m.ptr();

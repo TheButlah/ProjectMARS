@@ -17,6 +17,7 @@ using namespace cimg_library;
 
 #define BOX_SIZE 20
 #define POP_SCALE 50.0
+#define UNSERVICED_THRESHOLD 100
 
 /**
  * Creates a CLI.
@@ -155,6 +156,50 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interva
   }
 }
 
+void CLIRepl::placePlantLoop(std::string method, int steps, int k, std::string path) {
+  
+  // TODO: DRY
+
+  if(method != "kmeans" && method != "kmedians" && method != "random") {
+    std::cout << "Invalid method. Please use either kmeans, kmedians, or random." << std::endl;
+  }
+
+  this->initializeGame(this->inifile);
+  std::ofstream out;
+
+  out.open(path, std::ios_base::app);
+  out << "Time,Ran Algorithm?,Number of Plants,Objective" << std::endl;
+
+  for(int i = 0; i < steps; i++) {
+
+    int unserviced_pop = this->game->numberUnservicedPop();
+    bool run_clustering = unserviced_pop > UNSERVICED_THRESHOLD;
+
+    if(!run_clustering) {
+      game->step(false, Coord(0, 0));
+    }
+    else {
+      if(method == "kmeans") {
+        this->stepWithKMeans(k);
+      }
+      else if(method == "kmedians") {
+        this->stepWithKMedians(k);
+      }
+      else if(method == "random") {
+        this->stepWithRandom();
+      }    
+    }
+
+    std::string ran_clustering_s = run_clustering ? "yes" : "";
+
+    std::string data = std::to_string(i) + "," + ran_clustering_s + "," 
+      + std::to_string(game->numberPlantsInService()) + "," 
+      + std::to_string(game->calculateObjective());
+    out << data << std::endl;
+
+  }
+}
+
 void CLIRepl::runTrace(std::string params_path) {
   std::ifstream in;
   in.open(params_path);
@@ -202,21 +247,36 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
       this->runTrace(trace_path);
   } else if(command == "kmeans" && tokens.size() == 5) {
     int x = std::stoi(tokens[1]);
-    int s = std::stoi(tokens[2]);
     int k = std::stoi(tokens[3]);
     std::string path = tokens[4];
-    this->placePlantLoop("kmeans", x, s, k, path);
+    if(tokens[2] == "auto") {
+      this->placePlantLoop("kmeans", x, k, path);
+    }
+    else {
+      int s = std::stoi(tokens[2]);
+      this->placePlantLoop("kmeans", x, s, k, path);
+    }
   } else if(command == "kmedians" && tokens.size() == 5) {
     int x = std::stoi(tokens[1]);
-    int s = std::stoi(tokens[2]);
     int k = std::stoi(tokens[3]);
     std::string path = tokens[4];
-    this->placePlantLoop("kmedians", x, s, k, path);
+    if(tokens[2] == "auto") {
+      this->placePlantLoop("kmedians", x, k, path);
+    }
+    else {
+      int s = std::stoi(tokens[2]);
+      this->placePlantLoop("kmedians", x, s, k, path);
+    }
   } else if(command == "random" && tokens.size() == 4) {
     int x = std::stoi(tokens[1]);
-    int s = std::stoi(tokens[2]);
     std::string path = tokens[3];
-    this->placePlantLoop("random", x, s, 0, path);
+    if(tokens[2] == "auto") {
+      this->placePlantLoop("random", x, 0, path);
+    }
+    else {
+      int s = std::stoi(tokens[2]);
+      this->placePlantLoop("kmeans", x, s, 0, path);
+    }
   }
   else {
     this->printUsage();

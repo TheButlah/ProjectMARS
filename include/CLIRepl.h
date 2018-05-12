@@ -18,6 +18,7 @@ namespace MARS {
     GameDisplay *game_display;
 
     void placePlantLoop(std::string method, int steps, int decision_interval, int k, std::string path);
+    void placePlantLoop(std::string method, int steps, int k, std::string path);
     void runTrace(std::string trace_path);
     void stepWithKMeans(int k);
     void stepWithKMedians(int k);
