@@ -1,4 +1,4 @@
-#include "GrowthPrediction.h"
+#include "../include/GrowthPrediction.h"
 
 #include <cmath>
 
