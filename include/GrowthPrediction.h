@@ -6,8 +6,10 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Matrix"
+#include "Game.h"
+#include "Matrix.h"
 #include "Coord.h"
+#include "Vector.h"
 
 namespace MARS {
 
@@ -16,7 +18,7 @@ namespace MARS {
     int time_interval;
     Matrix<int> last_pop_matrix;
     std::unordered_set<Coord> last_locs_added;
-    Matrix<std::pair<double, double>> growth_gradients; 
+    Matrix<Vector> growth_gradients; 
 
     Game* game;
   public:
