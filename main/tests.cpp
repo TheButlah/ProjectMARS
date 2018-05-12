@@ -239,7 +239,7 @@ namespace {
 
     TEST_F(MarsTest, InitializationTest) {
       MARS::Game game2 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
-      EXPECT_EQ(game2.getNumberPlantsInService(), 0);
+      EXPECT_EQ(game2.numberPlantsInService(), 0);
     }
     // Q: are NULLs the best way to pass in nonexistent coords?
 
@@ -248,14 +248,14 @@ namespace {
       // Stepping without a plant added
       MARS::Game game1 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
       game1.step(false, MARS::Coord(1, 1));
-      EXPECT_EQ(game1.getNumberPlantsInService(), 0);
+      EXPECT_EQ(game1.numberPlantsInService(), 0);
     }
 
 
     TEST_F(MarsTest, StepWithPlant) {
       // Stepping with a plant added
       game.step(true, MARS::Coord(3, 4));
-      EXPECT_NE(game.getNumberPlantsInService(), 0);
+      EXPECT_NE(game.numberPlantsInService(), 0);
     }
 
 
@@ -281,7 +281,7 @@ namespace {
 
       for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-          std::cout << game.getPopulationAt(i, j) << " ";
+          std::cout << game.numberTotalPopAt(i, j) << " ";
         }
         std::cout << std::endl;
       }
@@ -301,7 +301,7 @@ namespace {
       game.step(true, MARS::Coord(1,1));
       game.step(true, MARS::Coord(1,1));
       game.step(true, MARS::Coord(1,1));
-      EXPECT_EQ(game.getNumberPlantsInService(),1);
+      EXPECT_EQ(game.numberPlantsInService(),1);
     }
 
 
@@ -316,7 +316,7 @@ namespace {
             game.step(false, MARS::Coord(0, 0));
         }
     }
-    EXPECT_NE(game.getNumberPopServiced(), 0);
+    EXPECT_NE(game.numberServicedPop(), 0);
   }
 
 

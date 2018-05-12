@@ -63,7 +63,7 @@ void PopulationMatrix::addUnservicedPop(Matrix<int>& newUnserviced) {
   }
 }
 
-Matrix<int> PopulationMatrix::computeCombinedPop(){
+Matrix<int> PopulationMatrix::totalPopMatrix(){
   Matrix<int> combinedPopMatrix = Matrix<int>(serviced_pop_matrix.numberRows(), serviced_pop_matrix.numberCols());
   for (int i = 0; i < serviced_pop_matrix.numberRows(); i++) {
     for (int j = 0; j < serviced_pop_matrix.numberCols(); j++) {
@@ -73,14 +73,6 @@ Matrix<int> PopulationMatrix::computeCombinedPop(){
   return combinedPopMatrix;
 }
 
-int PopulationMatrix::sizeX() {
-  return serviced_pop_matrix.numberRows();
-}
-
-int PopulationMatrix::sizeY() {
-  return serviced_pop_matrix.numberRows();    
-}
-
 Matrix<int> PopulationMatrix::servicedPopMatrix() {
   return serviced_pop_matrix;
 }
@@ -88,3 +80,12 @@ Matrix<int> PopulationMatrix::servicedPopMatrix() {
 Matrix<int> PopulationMatrix::unservicedPopMatrix() {
   return unserviced_pop_matrix;
 }
+
+
+int PopulationMatrix::sizeX() {
+  return serviced_pop_matrix.numberRows();
+}
+
+int PopulationMatrix::sizeY() {
+  return serviced_pop_matrix.numberRows();
+}  

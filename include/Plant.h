@@ -9,29 +9,20 @@
 #include "BitMatrix.h"
 #include <unordered_map>
 
-
 namespace MARS {
   /*
    * Abstraction of plant
    */
   class Plant {
   private:
-    /*
-     * location: coordinates of plant in map
-     */ 
     int in_service; 
     int capacity;
     double serviceable_distance;
     std::unordered_map<Coord, double> serviceable_area; 
     std::unordered_map<Coord, int> serviced_map;
   public:
-    /*
-     * location: coordinates of plant in map
-     */ 
     Coord location;        
     
-    
-
     /*
      * Constructor
      */
@@ -62,11 +53,6 @@ namespace MARS {
      * Get distance to coord, assuming it is serviceable by the plant
      */
     double distanceToCoord(Coord c);
-
-    /*
-     * Access the remaining capacity of the plant
-     */
-    int remainingCapacity();
     
     /*
      * Access the number of people this plant services at a coordinate
@@ -77,6 +63,11 @@ namespace MARS {
      * Changes the size of population the plant services at a given location.
      */
     void changeServicedPop(Coord person_loc, int pop);
+
+    /*
+     * Access the remaining capacity of the plant
+     */
+    int remainingCapacity();
 
     /*
      * Get a copy of the serviceable area

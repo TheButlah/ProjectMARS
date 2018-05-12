@@ -62,16 +62,12 @@ namespace MARS {
      */
     void addUnservicedPop(Matrix<int>& newUnserviced);
     
-    /*
-     * Combines unserviced and serviced population mappings into a single population matrix. 
-     */
-    Matrix<int> computeCombinedPop();
-
-    int sizeX();
-    int sizeY();
     Matrix<int> servicedPopMatrix();
     Matrix<int> unservicedPopMatrix();        
-  
+    Matrix<int> totalPopMatrix();
+    int sizeX();
+    int sizeY();
+    
   };
 }
 

@@ -8,11 +8,11 @@ GrowthPrediction::GrowthPrediction(Game *game, int time_interval): last_pop_matr
 }
 
 void GrowthPrediction::updateGradients() {
-  int t = game->getCurrentTime();
+  int t = game->currentTime();
   if (t == 0)
     return;
 
-  Matrix<int> pop_density_matrix = game->getPopMatrix.computeCombinedPop();
+  Matrix<int> pop_density_matrix = game->popMatrixCopy.totalPopMatrix();
 
   if (t == time_interval) {
     last_pop_matrix = pop_density_matrix;

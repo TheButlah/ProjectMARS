@@ -2,9 +2,7 @@
 #include <queue>
 #include <iostream>
 
-
 using namespace MARS;
-
 
 Plant::Plant(
   int cap,
@@ -75,7 +73,6 @@ std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<C
   return serviced_map;
 }
 
-
 bool Plant::isServiceableCoord(Coord c) {
   std::unordered_map<Coord, double>::const_iterator iter = this->serviceable_area.find(c);
   if (iter == this->serviceable_area.end()) {
@@ -86,10 +83,6 @@ bool Plant::isServiceableCoord(Coord c) {
 
 double Plant::distanceToCoord(Coord c) {
   return serviceable_area[c];
-}
-
-int Plant::remainingCapacity() {
-  return capacity - in_service;
 }
 
 int Plant::numberServicedAtCoord(Coord c) {
@@ -107,4 +100,8 @@ std::unordered_map<Coord, double> Plant::serviceableArea() {
 
 std::unordered_map<Coord, int> Plant::servicedMap() {
   return serviced_map;
+}
+
+int Plant::remainingCapacity() {
+  return capacity - in_service;
 }

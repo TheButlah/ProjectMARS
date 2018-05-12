@@ -13,8 +13,13 @@ namespace MARS {
     Game* game;
     cimg_library::CImg<unsigned char>* img;
     cimg_library::CImgDisplay* display;
+  
+    void drawAxis();
+    void drawUnserviced();
+    void drawTerrain();
+    void drawServiced();    
+    void drawStats();
   public:
-    GameDisplay();
     GameDisplay(Game* game, double box_size, double pop_scale);
     ~GameDisplay();
 

@@ -60,7 +60,7 @@ CLIRepl::CLIRepl(MARS::Game *game) {
     throw std::exception();
   }
   this->game = game;
-  auto size = game->getSize();
+  auto size = game->sizeXY();
   size_x = size.first;
   size_y = size.second;
   game_display = new GameDisplay(game, 15, 50);
@@ -101,17 +101,17 @@ void CLIRepl::printStats() {
 }
 
 void CLIRepl::stepWithKMeans(int k) {
-  std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
+  std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->popMatrixCopy(), k);
   game->step(res.first, res.second);
 }
 
 void CLIRepl::stepWithKMedians(int k) {
-  std::pair<bool, Coord> res = Clustering::placePlantKMedians(game->getPopMatrix(), k);
+  std::pair<bool, Coord> res = Clustering::placePlantKMedians(game->popMatrixCopy(), k);
   game->step(res.first, res.second);
 }
 
 void CLIRepl::stepWithRandom() {
-  std::pair<bool, Coord> res = Clustering::placePlantRandom(game->getPopMatrix());
+  std::pair<bool, Coord> res = Clustering::placePlantRandom(game->popMatrixCopy());
   game->step(res.first, res.second);
 }
 
@@ -148,7 +148,7 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interva
     std::string ran_clustering_s = run_clustering ? "yes" : "";
 
     std::string data = std::to_string(i) + "," + ran_clustering_s + "," 
-      + std::to_string(game->getNumberPlantsInService()) + "," 
+      + std::to_string(game->numberPlantsInService()) + "," 
       + std::to_string(game->calculateObjective());
     out << data << std::endl;
 

@@ -34,14 +34,14 @@ int main() {
       game->step(false, Coord(0, 0));
     }
     else { //cluster
-      std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
+      std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->popMatrixCopy(), k);
       game->step(res.first, res.second);
     }
   }
 
-  std::cout << " number of plants built = " << game->getNumberPlantsInService() << std::endl;
-  std::cout << " number in service = " << game->getNumberPopServiced() << std::endl;
-  std::cout << " number unserviced = " << game->getNumberPopUnserviced() << std::endl;
+  std::cout << " number of plants built = " << game->numberPlantsInService() << std::endl;
+  std::cout << " number in service = " << game->numberServicedPop() << std::endl;
+  std::cout << " number unserviced = " << game->numberUnservicedPop() << std::endl;
 
 
 }

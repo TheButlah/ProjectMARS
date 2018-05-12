@@ -51,62 +51,39 @@ namespace MARS {
       double profit_margin,
       double unserviced_penalty
     );
+    ~Game();    
 
     int sizeX();
     int sizeY();
 
     /* Advance the game's progress by one time step */
     void step(bool add_plant, Coord plant_coord);
-
-    int getPopulationAt(int, int);
-
-    bool checkIfPlantPresent(Coord);
-
-    int getNumberPlantsInService();
-
-    int getNumberPopServiced();
-
-    int getNumberPopUnserviced();
-
-    std::pair<int, int> getSize();
-
-    std::vector<Coord> getPlantLocations();
-
-    PopulationMatrix getPopMatrix();
-
-    int getNumberNewPlants();
-
-    double currentFunds();
-
-    int getCurrentTime();
-
-    Terrain getTerrain();
-
-    Matrix<int> servicedPopMatrix();
-
-    Matrix<int> unservicedPopMatrix();
-
-    ~Game();
-
-    double fundsForCurrentStep();
-
     double calculateObjective();
 
+    int numberPlantsInService();
+    std::vector<Coord> plantLocations();
+
+    int numberTotalPopAt(int, int);
+    int numberServicedPop();
+    int numberUnservicedPop();
+
+    double currentFunds();
+    int currentTime();
+    PopulationMatrix popMatrixCopy();
+    Terrain terrainCopy();
+    std::pair<int, int> sizeXY();
+
     std::pair<Plant*, bool> findBestPlant(Coord person_loc);
-
-    void processUnservicedPopulation();
-
     void processUnservicedElement(int i, int j);
-
+    void processUnservicedPopulation();
     std::queue<Plant*> processServicedPop(Plant*, Coord, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
 
-    void addServicedPop(int);
-
-    std::queue<Plant*> considerNewPlant(Plant*, bool);
-
     Plant* createPlant(Coord);
-
+    std::queue<Plant*> considerNewPlant(Plant*, bool);
     void processTouchedPlants(std::queue<Plant*>);
+
+    bool isPlantPresent(Coord);
+    double fundsForCurrentStep();
   };
 }
 
