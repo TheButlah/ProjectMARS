@@ -115,8 +115,8 @@ class QMap:
 
 
       with tf.variable_scope('Layers'):
-        conv1, _ = conv(self._states, 4, size=7)
-        conv2, _ = conv(conv1, 6, size=5)
+        conv1, _ = conv(self._states, 4, size=5)
+        conv2, _ = conv(conv1, 8, size=3)
 
       with tf.variable_scope('Output'):
         self._qmap, _ = conv(conv2, n_actions, size=3)
@@ -217,11 +217,12 @@ class QMap:
       The loss value after the update, or if `actions` was `None`, a tuple of
       the loss and the selected actions.
     """
-    with self._sess.as_default():
-      assert(num_epochs >= 1)
+    assert(num_epochs >= 1)
+    assert(True if actions is None else states.ndim == actions.ndim)
+    assert(states.shape[0] == q_targets.shape[0])
+    assert(True if actions is None else states.shape[:-1] == actions.shape[:-1])
 
-      batch_size = states.shape[0]
-      assert(actions.shape[0] == batch_size if actions else True)
+    with self._sess.as_default():
 
       feed_dict = {
         self._states: states,
@@ -270,8 +271,10 @@ class QMap:
       `None. Otherwise, provides a tuple of the q values and the actions
       selected.
     """
+    assert(states.ndim == 4)
+    assert(True if actions is None else states.shape[:-1] == actions.shape[:-1])
+
     with self._sess.as_default():
-      assert(True if actions is None else actions.shape[0] == states.shape[0])
 
       feed_dict = {
         self._states: states,
