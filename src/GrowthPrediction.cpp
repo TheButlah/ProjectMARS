@@ -1,4 +1,4 @@
-#include "../include/GrowthPrediction.h"
+#include "GrowthPrediction.h"
 
 using namespace MARS;
 

@@ -6,22 +6,16 @@ from __future__ import absolute_import
 
 import numpy as np
 import tensorflow as tf
+import atexit
 import project_mars as pm
 
 from model import QMap
 
+n_episodes = 1000000
+episode_length = 500
+
 
 def main():
-  state_shape = (3, 3, 10)
-  model = QMap(state_shape, 2)
-  initial_state = np.zeros((1,)+state_shape)
-  q = model.predict_q(initial_state, np.zeros((1, 3)))
-  print('Q:', q)
-  q, selected = model.predict_q(initial_state)
-  print('Q:', q, 'Selected:', selected)
-
-
-def main1():
   # Game initialization
 
   game = pm.Game(
@@ -35,12 +29,10 @@ def main1():
     profit_margin=5.0,
     unserviced_penalty=1.0
   )
-  tmp = pm.Coord(0, 0)
-  print(game)
   cli = pm.CLIRepl(game)
   cli.startCLI()
-  print('WILL NEVER REACH THIS')
-  for i in range(100000000):
+  for episode in range(n_episodes):
+    for step in range(episode_length)
       game.step(False, tmp)
   print(cli)
 

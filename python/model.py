@@ -10,7 +10,7 @@ import os
 
 from time import strftime
 from utils import *
-from layers import *
+from layers.layers import *
 
 
 class QMap:
@@ -65,11 +65,9 @@ class QMap:
     with self._graph.as_default():
       tf.set_random_seed(seed)
 
-
       with tf.variable_scope('Inputs'):
         # Compute shape info
         state_shape = (None,) + tuple(state_shape)
-        action_shape = state_shape[:-1] + (n_actions,)
 
         #####################
         # Data placeholders #
@@ -116,22 +114,13 @@ class QMap:
           tf.constant(False), shape=(), name='Compute-Actions')
 
 
-      with tf.variable_scope('Preprocessing'):
-        '''# Expand action_tuples into full binary masks
-        self._action_mask = action_tuples_to_mask(
-          self._actions, action_shape)'''
-        pass
-
-
       with tf.variable_scope('Layers'):
-        pass
-
+        conv1, _ = conv(self._states, 4, size=7)
+        conv2, _ = conv(conv1, 6, size=5)
 
       with tf.variable_scope('Output'):
-        # For debugging purposes, make this a simple function
-        self._qmap = tf.tile(
-          tf.reduce_max(self._states, axis=-1)[..., tf.newaxis],
-          multiples=[1, 1, 1, n_actions])
+        self._qmap, _ = conv(conv2, n_actions, size=3)
+
 
         def compute_actions():
           prod_dims = np.prod(self._qmap.shape.as_list()[1:])
@@ -172,14 +161,13 @@ class QMap:
 
         self._loss = tf.reduce_mean(self._mu*delta_squared)
 
-        '''self._train_step = tf.train.AdamOptimizer(
-          learning_rate=self._lr).minimize(self._loss)'''
-        self._train_step = tf.no_op()
+        self._train_step = tf.train.AdamOptimizer(
+          learning_rate=self._lr).minimize(self._loss)
 
 
       self._sess = tf.Session()
       with self._sess.as_default():
-        # self._saver = tf.train.Saver()  # Commented due to no variables yet
+        self._saver = tf.train.Saver()
 
         if load_model is not None:
           print("Restoring Model...")
@@ -244,17 +232,17 @@ class QMap:
 
       # Choose whether to compute the best action or use the provided ones
       if actions is None:
+        fetches = [self._train_step, self._loss, self._selected_actions]
         feed_dict[self._compute_actions] = True
       else:
+        fetches = [self._train_step, self._loss]
         feed_dict[self._actions] = actions
 
       # Training step(s)
       for epoch in range(num_epochs):
-        _, loss_val = self._sess.run(
-          [self._train_step, self._loss],
-          feed_dict=feed_dict)
+        result = self._sess.run(fetches, feed_dict=feed_dict)
 
-      return loss_val
+      return result[1:]
 
 
   def predict_q(self, states, actions=None, is_training_phase=False):
@@ -296,9 +284,6 @@ class QMap:
       else:
         fetches = self._q
         feed_dict[self._actions] = actions
-
-
-      # TODO: if actions is None, also return selected action
 
       return self._sess.run(fetches, feed_dict=feed_dict)
 

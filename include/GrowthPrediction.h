@@ -6,8 +6,9 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Matrix"
+#include "Matrix.h"
 #include "Coord.h"
+#include "Game.h"
 
 namespace MARS {
 
