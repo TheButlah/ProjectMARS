@@ -12,7 +12,13 @@ from model import QMap
 
 
 def main():
-  model = QMap((3, 3, 10), 2)
+  state_shape = (3, 3, 10)
+  model = QMap(state_shape, 2)
+  initial_state = np.zeros((1,)+state_shape)
+  q = model.predict_q(initial_state, np.zeros((1, 3)))
+  print('Q:', q)
+  q, selected = model.predict_q(initial_state)
+  print('Q:', q, 'Selected:', selected)
 
 
 def main1():

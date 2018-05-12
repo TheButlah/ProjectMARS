@@ -85,8 +85,10 @@ class QMap:
 
         # List of tuples describing the actions to evaluate the q function for.
         # This may be not provided if we are instead computing the best action.
-        self._action_tuples = tf.placeholder(
-          tf.int32, shape=(None, 3), name='Action-Tuples')
+        self._actions = tf.placeholder_with_default(
+          tf.zeros(shape=(1, 3), dtype=tf.int32),
+          shape=(None, 3),
+          name='Actions')
 
         # The weighting distribution over the samples. States we care more about
         # approximating accurately should be given a higher weight.
@@ -110,14 +112,14 @@ class QMap:
 
         # Whether we want to pick the best action automatically, or use the
         # provided list of actions. By default, we use the provided actions.
-        self._choose_actions = tf.placeholder_with_default(
-          tf.constant(False), shape=(), name='Choose-Actions')
+        self._compute_actions = tf.placeholder_with_default(
+          tf.constant(False), shape=(), name='Compute-Actions')
 
 
       with tf.variable_scope('Preprocessing'):
         '''# Expand action_tuples into full binary masks
         self._action_mask = action_tuples_to_mask(
-          self._action_tuples, action_shape)'''
+          self._actions, action_shape)'''
         pass
 
 
@@ -131,27 +133,53 @@ class QMap:
           tf.reduce_max(self._states, axis=-1)[..., tf.newaxis],
           multiples=[1, 1, 1, n_actions])
 
-        print('qmap shape:', self._qmap.get_shape())
+        def compute_actions():
+          prod_dims = np.prod(self._qmap.shape.as_list()[1:])
+          flattened = tf.reshape(self._qmap, shape=(-1, prod_dims))
+          maximum = tf.reduce_max(flattened, axis=-1)  # [batch_size]
 
-        # TODO: use tf.cond to decide whether to choose optimal action
-        # TODO: Confirm this broadcasts properly
-        # Should end up with shape [batch_size]
-        self._q = index_by_action_tuples(self._qmap, self._action_tuples)
+          # Find flattened index of best q values
+          selected = tf.argmax(flattened, axis=-1)
 
-        print('q:', self._q)
+          # Unravel the flattened indices into an index list [3, batch_size]
+          selected = tf.unravel_index(selected, self._qmap.shape.as_list()[1:])
+
+          # Shape info unknown so we will manually update it
+          selected.set_shape((3, None))
+
+          # Cast back to tf.int32
+          selected = tf.cast(selected, tf.int32)
+
+          # Transpose it back into the form [batch_size, 3]
+          selected = tf.transpose(selected)
+
+          return maximum, selected
+
+        def use_indexed_actions():
+          return index_by_action_tuples(self._qmap, self._actions), \
+            self._actions
+
+        # `q` should be shape [batch_size]
+        # `selected_actions` should be shape [batch_size, 3]
+        self._q, self._selected_actions = tf.cond(
+          self._compute_actions,
+          true_fn=compute_actions,
+          false_fn=use_indexed_actions)
 
 
       with tf.variable_scope('Training'):
-        self._loss = tf.reduce_mean(
-          tf.nn.l2_loss(self._q - self._q_targets))
+        delta_squared = 0.5*(self._q - self._q_targets) ** 2
 
-        self._train_step = tf.train.AdamOptimizer(
-          learning_rate=self._lr).minimize(self._loss)
+        self._loss = tf.reduce_mean(self._mu*delta_squared)
+
+        '''self._train_step = tf.train.AdamOptimizer(
+          learning_rate=self._lr).minimize(self._loss)'''
+        self._train_step = tf.no_op()
 
 
       self._sess = tf.Session()
       with self._sess.as_default():
-        self._saver = tf.train.Saver()
+        # self._saver = tf.train.Saver()  # Commented due to no variables yet
 
         if load_model is not None:
           print("Restoring Model...")
@@ -216,9 +244,9 @@ class QMap:
 
       # Choose whether to compute the best action or use the provided ones
       if actions is None:
-        feed_dict[self._choose_actions] = True
+        feed_dict[self._compute_actions] = True
       else:
-        feed_dict[self._action_tuples] = actions
+        feed_dict[self._actions] = actions
 
       # Training step(s)
       for epoch in range(num_epochs):
@@ -255,9 +283,7 @@ class QMap:
       selected.
     """
     with self._sess.as_default():
-
-      batch_size = states.shape[0]
-      assert(actions.shape[0] == batch_size if actions else True)
+      assert(True if actions is None else actions.shape[0] == states.shape[0])
 
       feed_dict = {
         self._states: states,
@@ -265,15 +291,16 @@ class QMap:
 
       # Choose whether to compute the best action or use the provided ones
       if actions is None:
-        feed_dict[self._choose_actions] = True
+        fetches = [self._q, self._selected_actions]
+        feed_dict[self._compute_actions] = True
       else:
-        feed_dict[self._action_tuples] = actions
+        fetches = self._q
+        feed_dict[self._actions] = actions
+
 
       # TODO: if actions is None, also return selected action
 
-      q_pred = self._sess.run(self._q, feed_dict=feed_dict)
-
-      return q_pred
+      return self._sess.run(fetches, feed_dict=feed_dict)
 
 
   def save_model(self, save_path=None):
