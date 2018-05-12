@@ -6,10 +6,16 @@
 #include <unordered_map>
 #include <utility>
 
+<<<<<<< HEAD
 #include "Game.h"
 #include "Matrix.h"
 #include "Coord.h"
 #include "Vector.h"
+=======
+#include "Matrix.h"
+#include "Coord.h"
+#include "Game.h"
+>>>>>>> 52d17ccd585c0d8c7aceb6d054e485e803f26b09
 
 namespace MARS {
 

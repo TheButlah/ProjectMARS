@@ -12,18 +12,18 @@ PYBIND11_PLUGIN(project_mars) {
 
   py::class_<MARS::CLIRepl>(m, "CLIRepl")
     .def(py::init<MARS::Game*>(),
-      "Initializer for CLIRepl",
+      "Initializer for CLIRepl.",
       py::arg("game"))
     .def(py::init<std::string>(),
-      "Initializer for CLIRepl",
+      "Initializer for CLIRepl.",
       py::arg("inifile"))
     .def("startCLI", &MARS::CLIRepl::startCLI,
-      "Starts the CLI");
+      "Starts the CLI.");
 
 
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
-      "Initializer for Coord",
+      "Initializer for Coord.",
       py::arg("x"),
       py::arg("y"));
 
@@ -39,7 +39,7 @@ PYBIND11_PLUGIN(project_mars) {
         double,
         double,
         double>(),
-      "Initializer for Game",
+      "Initializer for Game.",
       py::arg("dx"),
       py::arg("dy"),
       py::arg("number_of_turns"),
@@ -50,10 +50,11 @@ PYBIND11_PLUGIN(project_mars) {
       py::arg("profit_margin"),
       py::arg("unserviced_penalty"))
 		.def("step", &MARS::Game::step,
-		  "Advance the game's progress by one time step",
+		  "Advance the game's progress by one time step.",
 		  py::arg("add_plant"),
-		  py::arg("plant_coord"));
-
+		  py::arg("plant_coord"))
+    .def("get_reward". &MARS::Game::calculateObjective,
+      "Get the reward value for the current state of the game.");
 
 	return m.ptr();
 }
