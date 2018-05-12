@@ -95,6 +95,8 @@ void CLIRepl::printUsage() {
   std::cout << "kmedians x s k /path/to/file.csv - steps x times, clusters (with k-medians) every s steps, logs output as CSV" << std::endl;
   std::cout << "random x s /path/to/file.csv - steps x times, places plants randomly every s steps, logs output as CSV" << std::endl;
   std::cout << "trace /path/to/trace.txt - run trace file" << std::endl;  
+  std::cout << std::endl;
+  std::cout << "For the `kmeans', `kmedians', and `random' commands, use \"auto\" for s or k to have Project MARS auto-determine these." << std::endl;
 }
 
 void CLIRepl::printStats() {
@@ -158,7 +160,7 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int decision_interva
 
 void CLIRepl::placePlantLoop(std::string method, int steps, int k, std::string path) {
   
-  // TODO: DRY
+  // TODO: refactor this to make less repetitive
 
   if(method != "kmeans" && method != "kmedians" && method != "random") {
     std::cout << "Invalid method. Please use either kmeans, kmedians, or random." << std::endl;
@@ -202,7 +204,7 @@ void CLIRepl::placePlantLoop(std::string method, int steps, int k, std::string p
 
 void CLIRepl::placePlantLoop(std::string method, int steps, std::string path) {
   
-  // TODO: DRY
+  // TODO: refactor to make this less repetitive
 
   if(method != "kmeans" && method != "kmedians" && method != "random") {
     std::cout << "Invalid method. Please use either kmeans or kmedians." << std::endl;
@@ -308,7 +310,10 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
   else if(command == "trace" && tokens.size() == 2) {
       std::string trace_path = tokens[1];
       this->runTrace(trace_path);
-  } else if(command == "kmeans" && tokens.size() == 5) {
+  } 
+  // TODO: refactor conditions below
+
+  else if(command == "kmeans" && tokens.size() == 5) {
     int x = std::stoi(tokens[1]);
     std::string path = tokens[4];
     if(tokens[3] == "auto") {
