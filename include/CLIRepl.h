@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "CImg.h"
+#include "GameDisplay.h"
 #include "Game.h"
 #include "Clustering.h"
 
@@ -15,8 +15,8 @@ namespace MARS {
     int size_x;
     int size_y;
     Game *game;
-    cimg_library::CImg<unsigned char>* img;
-    cimg_library::CImgDisplay* display;
+    GameDisplay *game_display;
+
     void placePlantLoop(std::string method, int steps, int decision_interval, int k, std::string path);
     void runTrace(std::string trace_path);
     void stepWithKMeans(int k);

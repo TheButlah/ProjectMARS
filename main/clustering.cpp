@@ -34,7 +34,7 @@ int main() {
       game->step(false, Coord(0, 0));
     }
     else { //cluster
-      std::pair<bool, Coord> res = Clustering::placePlant(game->getPopMatrix(), k);
+      std::pair<bool, Coord> res = Clustering::placePlantKMeans(game->getPopMatrix(), k);
       game->step(res.first, res.second);
     }
   }

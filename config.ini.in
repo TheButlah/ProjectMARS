@@ -2,7 +2,7 @@
 SizeX=16
 SizeY=16
 NumberOfTurns=10000
-PlantCapacity=25
+PlantCapacity=2500
 PlantServableDistance=3
 PlantInitialCost=50
 PlantOperatingCost=25

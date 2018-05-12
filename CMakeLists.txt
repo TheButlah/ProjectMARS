@@ -12,20 +12,25 @@ include_directories(include)
 # We glob all the source files using a wildcard, and store the in the SOURCES variable
 file(GLOB SOURCES "src/*.cpp")
 
-#X11
-find_package(X11 REQUIRED)
-link_libraries(${X11_LIBRARIES})
-include_directories(${X11_INCLUDE_DIR})
+if (NOT WIN32)
+  #X11
+  find_package(X11 REQUIRED)
+  link_libraries(${X11_LIBRARIES})
+  include_directories(${X11_INCLUDE_DIR})
 
-#pthreads
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-link_libraries(Threads::Threads)
+  #pthreads
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+  link_libraries(Threads::Threads)
+endif()
+
+
 
 # Build an excutable with our sources (SOURCES) and a main file
 add_executable(cli ${SOURCES} main/cli.cpp)
-add_executable(clustering ${SOURCES} main/clustering.cpp)
-
+if (NOT WIN32)
+  add_executable(clustering ${SOURCES} main/clustering.cpp)
+endif()
 
 if (APPLE)
   #target_include_directories(cli PUBLIC /opt/X11/include)
@@ -76,6 +81,8 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 add_executable(test_question_mark ${SOURCES} main/tests.cpp)
 target_link_libraries(test_question_mark gtest_main)
 
-# Python bindings using pybind11
-add_subdirectory(lib/pybind11)
-pybind11_add_module(project_mars ${SOURCES} "main/bindings.cpp")
+if (NOT WIN32)
+  # Python bindings using pybind11
+  add_subdirectory(lib/pybind11)
+  pybind11_add_module(project_mars ${SOURCES} "main/bindings.cpp")
+endif()

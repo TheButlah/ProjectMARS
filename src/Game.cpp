@@ -12,8 +12,8 @@ using namespace MARS;
 Game::Game(
   int dx,
   int dy,
-  int default_capacity,
   int number_turns,
+  int default_capacity,
   double serveable_distance,
   double initial_cost,
   double operating_cost,
