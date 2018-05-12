@@ -69,6 +69,8 @@ namespace MARS {
 
     double currentFunds();
     int currentTime();
+    int plantDefaultCapacity();
+    double plantServableDistance();
     PopulationMatrix popMatrixCopy();
     Terrain terrainCopy();
     std::pair<int, int> sizeXY();

@@ -42,6 +42,10 @@
     "utility": "cpp",
     "map": "cpp",
     "cstdarg": "cpp",
-    "cstddef": "cpp"
+    "cstddef": "cpp",
+    "atomic": "cpp",
+    "complex": "cpp",
+    "typeindex": "cpp",
+    "valarray": "cpp"
   }
 }

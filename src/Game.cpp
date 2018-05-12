@@ -125,6 +125,14 @@ Terrain Game::terrainCopy() {
   return terrain;
 }
 
+int Game::plantDefaultCapacity() {
+  return plant_default_capacity;
+}
+
+double Game::plantServableDistance() {
+  return plant_servable_distance;
+}
+
 PopulationMatrix Game::popMatrixCopy() {
   return this->pop_matrix;
 };
