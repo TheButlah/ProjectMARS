@@ -109,14 +109,14 @@ class QMap:
 
         # Whether we want to pick the best action automatically, or use the
         # provided list of actions. By default, we use the provided actions.
-        self._pick_best = tf.placeholder_with_default(
-          tf.constant(False), shape=(), name='Pick-Best')
+        self._choose_actions = tf.placeholder_with_default(
+          tf.constant(False), shape=(), name='Choose-Actions')
 
 
       with tf.variable_scope('Preprocessing'):
-        # Expand action_tuples into full binary masks
+        '''# Expand action_tuples into full binary masks
         self._action_mask = action_tuples_to_mask(
-          self._action_tuples, action_shape)
+          self._action_tuples, action_shape)'''
 
 
       with tf.variable_scope('Output'):
@@ -127,11 +127,16 @@ class QMap:
 
         print('qmap shape:', self._qmap.get_shape())
 
+        # TODO: use tf.cond to decide whether to choose optimal action
+        # TODO: Confirm this broadcasts properly
+        self._q = tf.gather_nd(self._qmap, self._action_tuples)
+
+        print('q:', self._q)
+
 
       with tf.variable_scope('Training'):
-        masked_delta = (self._qmap - self._q_targets) * self._action_mask
-        print('masked_d', masked_delta)
-        self._loss = tf.reduce_mean(tf.nn.l2_loss(masked_delta))
+        self._loss = tf.reduce_mean(
+          tf.nn.l2_loss(self._q - self._q_targets))
 
         self._train_step = tf.train.AdamOptimizer(
           learning_rate=self._lr).minimize(self._loss)
@@ -150,6 +155,7 @@ class QMap:
           print("Initializing model...")
           self._sess.run(tf.global_variables_initializer())
           print("Model Initialized!")
+
 
   def update(self, states, actions, q_targets, mu, num_epochs=1, lr=0.001):
     """Updates the model parameters using the provided target batch.
@@ -188,22 +194,33 @@ class QMap:
       The loss value after the update, or if `actions` was `None`, a tuple of
       the loss and the selected actions.
     """
-    # TODO: Index loss and train_step by action
     with self._sess.as_default():
-      # Training loop for parameter tuning
       assert(num_epochs >= 1)
 
+      batch_size = states.shape[0]
+      assert(actions.shape[0] == batch_size if actions else True)
+
+      feed_dict = {
+        self._states: states,
+        self._q_targets: q_targets,
+        self._mu: mu,
+        self._phase_train: True,
+        self._lr: lr}
+
+      # Choose whether to compute the best action or use the provided ones
+      if actions is None:
+        feed_dict[self._choose_actions] = True
+      else:
+        feed_dict[self._action_tuples] = actions
+
+      # Training step(s)
       for epoch in range(num_epochs):
         _, loss_val = self._sess.run(
           [self._train_step, self._loss],
-          feed_dict={
-            self._states: states,
-            self._q_targets: q_targets,
-            self._mu: mu,
-            self._phase_train: True,
-            self._lr: lr})
+          feed_dict=feed_dict)
 
       return loss_val
+
 
   def predict_q(self, states, actions=None, is_training_phase=False):
     """Uses the model to predict the q function for the given state-action pair.
@@ -230,33 +247,29 @@ class QMap:
       `None. Otherwise, provides a tuple of the q values and the actions
       selected.
     """
-    # TODO: Index loss, train_step by action, figure out if action logic works
     with self._sess.as_default():
 
       batch_size = states.shape[0]
       assert(actions.shape[0] == batch_size if actions else True)
 
-      qmap = self._sess.run(
-        self._qmap,
-        feed_dict={self._states: states, self._phase_train: is_training_phase})
+      feed_dict = {
+        self._states: states,
+        self._phase_train: is_training_phase}
 
-      assert(qmap.shape[0] == batch_size)
-
-      if actions is not None:
-        actions = np.array(actions)
-        # Numpy expects indexing format to be like [(x0, x1, x2), (y0,y1,y2)]
-        # Instead of [(x0,y0), (x1,y1), (x2,y2)]
-        inds_array = np.moveaxis(actions, -1, 0)
-        assert(inds_array.shape == (actions.shape[1], actions.shape[0]))
-        indexer = np.index_exp[:] + tuple(inds_array)
-        result = qmap[indexer]
-        assert(result.shape == actions.shape[0])
+      # Choose whether to compute the best action or use the provided ones
+      if actions is None:
+        feed_dict[self._choose_actions] = True
       else:
-        # Select best action to use
-        q_flat = qmap.reshape(qmap.shape[0], -1)
-        idxs_flat = np.argmax(qmap, axis=-1)
+        feed_dict[self._action_tuples] = actions
 
-        q_vals = q_flat[:, idxs_flat]
+      # TODO: if actions is None, also return selected action
+
+      q_pred = self._sess.run(
+        self._q,
+        feed_dict=feed_dict)
+
+      return q_pred
+
 
   def save_model(self, save_path=None):
     """Saves the model in the specified file.
