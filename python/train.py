@@ -33,7 +33,7 @@ action_map = {
   'nothing': 0,
 }
 
-seed = None
+seed = 1337
 
 
 def exit_fn(model, file):
