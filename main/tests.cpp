@@ -6,32 +6,35 @@
 #include <unordered_set>
 #include <gtest/gtest.h>
 
-#include "../include/Clustering.h"
-#include "../include/Coord.h"
-#include "../include/Game.h"
-#include "../include/Matrix.h"
-#include "../include/BitMatrix.h"
-#include "../include/PopulationGen.h"
-#include "../include/Terrain.h"
-#include "../include/PopulationMatrix.h"
-#include "../include/Plant.h"
+#include "Clustering.h"
+#include "Coord.h"
+#include "Game.h"
+#include "Matrix.h"
+#include "BitMatrix.h"
+#include "PopulationGen.h"
+#include "Terrain.h"
+#include "PopulationMatrix.h"
+#include "Plant.h"
 
 
 namespace {
 
     class MarsTest : public ::testing::Test {
     protected:
-        MarsTest() {
-          // setup for each test
-        }
+
+      MARS::PopulationMatrix popMat;
+      MARS::Game game;
+
+
+      MarsTest() :
+          popMat(8,8),
+          game(8, 8, 100, 100, 50, 200, 200, 200, 1.0)
+        {}
 
         virtual ~MarsTest() {
           // teardown for each test
         }
 
-        // can declare objects here used by all tests
-        MARS::PopulationMatrix popMat = MARS::PopulationMatrix(8, 8);
-        MARS::Game game = MARS::Game(8, 8, 100, 100, 50, 200, 200, 200, 1.0);
     };
 
     TEST_F(MarsTest, MatrixStoresData) {
@@ -67,7 +70,7 @@ namespace {
       double servable_dist = 4.0;
       int x = 1;
       int y = 1;
-      MARS::Plant plant = MARS::Plant(cap, servable_dist, x, y, terrain);
+      MARS::Plant plant(cap, servable_dist, x, y, terrain);
 
       std::unordered_map<MARS::Coord, double> serviceableArea = plant.serviceableArea();
       EXPECT_EQ(15, serviceableArea.size());
@@ -238,7 +241,7 @@ namespace {
 
 
     TEST_F(MarsTest, InitializationTest) {
-      MARS::Game game2 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
+      MARS::Game game2(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
       EXPECT_EQ(game2.numberPlantsInService(), 0);
     }
     // Q: are NULLs the best way to pass in nonexistent coords?
@@ -246,7 +249,7 @@ namespace {
 
     TEST_F(MarsTest, StepNoPlant) {
       // Stepping without a plant added
-      MARS::Game game1 = MARS::Game(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
+      MARS::Game game1(8, 8, 1, 100, 50, 200, 200, 200, 1.0);
       game1.step(false, MARS::Coord(1, 1));
       EXPECT_EQ(game1.numberPlantsInService(), 0);
     }

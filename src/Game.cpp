@@ -78,19 +78,6 @@ void Game::step(bool add_plant, const Coord& plant_coord) {
   rlState.update(*this);
 }
 
-/*
-RLState* Game::getRLState() {
-  return &rlState;
-}
-
-void Game::updateRLState() {
-  PopulationMatrix pm = popMatrixCopy();
-  Terrain t = terrainCopy();
-  std::vector<Coord> pList = plantLocations();
-
-}*/
-
-
 
 double Game::calculateObjective() const {
   double objective = (this->number_pop_serviced*this->plant_profit_margin)

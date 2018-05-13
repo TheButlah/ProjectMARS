@@ -23,11 +23,6 @@ PYBIND11_PLUGIN(project_mars) {
     .def("startCLI", &MARS::CLIRepl::startCLI,
       "Starts the CLI.");
 
-
-  /*py::class_<MARS::RLState>(m, "RLState")
-    .def("");*/
-
-
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
       "Initializer for Coord.",
@@ -64,6 +59,13 @@ PYBIND11_PLUGIN(project_mars) {
       "Get the reward value for the current state of the game.")
     .def("get_env_state" &MARS::Game::getRLState,
       "Gets the state for the RL agent.");
+
+
+  py::class_<MARS::Game::RLState>(m, "RLState")
+    .def_readwrite("unserviced_pops", &MARS::Game::RLState::unservicedPops)
+    .def_readwrite("serviced_pops", &MARS::Game::RLState::servicedPops)
+    .def_readwrite("terrain", &MARS::Game::RLState::terrain)
+    .def_readwrite("plants", &MARS::Game::RLState::plantLocs);
 
 	return m.ptr();
 }

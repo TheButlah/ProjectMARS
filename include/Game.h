@@ -64,7 +64,7 @@ namespace MARS {
     double plant_profit_margin;
     double unserviced_pop_penalty;
 
-    RLState rlState; //Must be a pointer since we forward declared RLState :(
+    RLState rlState;
 
   public:
 
