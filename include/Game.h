@@ -26,7 +26,7 @@ namespace MARS {
       Matrix<int> unservicedPops;
       Matrix<int> servicedPops;
 
-      Matrix<float> terrain;
+      Matrix<int> terrain;
 
       // Not using BitMatrix because I care more about speed than memory usage
       Matrix<bool> plantLocs;

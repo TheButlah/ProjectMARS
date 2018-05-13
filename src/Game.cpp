@@ -32,11 +32,11 @@ Game::Game(
   plant_initial_cost(initial_cost),
   plant_operating_cost(operating_cost),
   plant_profit_margin(profit_margin),
-  plants_in_service(std::vector<Plant*>() ),
+  plants_in_service(),
   unserviced_pop_penalty(unserviced_penalty),
-  pop_matrix(PopulationMatrix(dx, dy)),
-  terrain(Terrain(dx, dy)),
-  pop_gen(PopulationGen()),
+  pop_matrix(dx, dy),
+  terrain(dx, dy),
+  pop_gen(),
   rlState(*this)
 {
 
@@ -289,7 +289,9 @@ Game::RLState::RLState(const Game& game) :
   servicedPops(game.sizeY(), game.sizeX()),
   terrain(game.sizeY(), game.sizeX()),
   plantLocs(game.sizeY(), game.sizeX())
-{}
+{
+  update(game);
+}
 
 void Game::RLState::update(const Game& game) {
   PopulationMatrix pm = game.popMatrixCopy();
@@ -297,7 +299,7 @@ void Game::RLState::update(const Game& game) {
   unservicedPops = pm.unservicedPopMatrix();
   servicedPops = pm.servicedPopMatrix();
 
-  terrain = game.terrainCopy().getMatrixCopy();
+  terrain = game.terrainCopy().getTerrainMatrix();
 
   plantLocs.resetToDefault();
   for (Coord& c : game.plantLocations()) {
