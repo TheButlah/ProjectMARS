@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import tensorflow as tf
+import numpy as np
+import xxhash
 
 
 def index_by_action_tuples(tensor, action_tuples):
@@ -18,13 +20,18 @@ def index_by_action_tuples(tensor, action_tuples):
   return selected
 
 
-def action_tuples_to_mask(action_tuples, action_shape):
-  """`action_tuples` should have shape [None, 3]"""
+def my_hash(state):
+  return xxhash.xxh32(state).digest()
 
-  sparse = tf.SparseTensor(
-    indices=action_tuples,
-    values=True,
-    dense_shape=action_tuples[1:])
 
-  print('sparse:', sparse)
-  return sparse
+def build_numpy_state(game):
+  state = game.state
+  pop = np.array(state.total_pops, dtype=np.int32)
+  terrain = np.array(state.terrain, dtype=np.int32)
+  plants = np.array(state.plants, dtype=np.int32)
+
+  result = np.stack([terrain, plants, pop], axis=-1)
+  result = np.expand_dims(result, axis=0)
+
+  return result
+

@@ -19,17 +19,19 @@ namespace MARS {
   class Terrain {
   private:
     siv::PerlinNoise perlin;
-    Matrix<float> terrainMatrix;
+    Matrix<float> weightMatrix;
+    Matrix<int> terrainMatrix; //Holds terrain type, not weights
     int size_x;
     int size_y;
   public:
-    
+
 
     Terrain(int dx, int dy);
     Terrain(int dim);
     Terrain(int dx, int dy, bool water);
 
     Matrix<float> getMatrixCopy() const;
+    Matrix<int> getTerrainMatrix() const;
 
     int sizeX() const;
     int sizeY() const;

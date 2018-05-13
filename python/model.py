@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 from time import strftime
-from utils import *
+from utils import index_by_action_tuples
 from layers.layers import *
 
 
@@ -159,11 +159,17 @@ class QMap:
       with tf.variable_scope('Training'):
         delta_squared = 0.5*(self._q - self._q_targets) ** 2
 
-        self._loss = tf.reduce_mean(self._mu*delta_squared)
+        # Sum instead of mean due to mu summing to 1.
+        self._loss = tf.reduce_sum(self._mu*delta_squared)
 
-        self._train_step = tf.train.AdamOptimizer(
-          learning_rate=self._lr).minimize(self._loss)
 
+        optimizer = tf.train.AdamOptimizer(learning_rate=self._lr)
+
+        # Clip gradients to avoid mega magnitudes
+        grads = optimizer.compute_gradients(self._loss)
+        clipped = [(tf.clip_by_value(grad, -2., 2.), var)
+                   for grad, var in grads]
+        self._train_step = optimizer.apply_gradients(clipped)
 
       self._sess = tf.Session()
       with self._sess.as_default():
@@ -243,7 +249,7 @@ class QMap:
       for epoch in range(num_epochs):
         result = self._sess.run(fetches, feed_dict=feed_dict)
 
-      return result[1:]
+      return np.squeeze(result[1:])
 
 
   def predict_q(self, states, actions=None, is_training_phase=False):

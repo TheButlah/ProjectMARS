@@ -29,7 +29,44 @@ PYBIND11_PLUGIN(project_mars) {
       py::arg("x"),
       py::arg("y"));
 
+  py::class_<MARS::Matrix<int>>(m, "IntMatrix", py::buffer_protocol())
+    .def_buffer([](MARS::Matrix<int>& m) -> py::buffer_info {
+      return py::buffer_info(
+        m.ptr(),                              /* Pointer to buffer */
+        sizeof(int),                          /* Size of one item */
+        py::format_descriptor<int>::format(), /* Python struct-style format */
+        2,                                    /* Number of dimensions */
+        { m.numberRows(), m.numberCols() },   /* Buffer dimensions */
+        { sizeof(int) * m.numberCols(),       /* Strides in bytes */
+          sizeof(int) }
+      );
+    });
 
+  py::class_<MARS::Matrix<bool>>(m, "BoolMatrix", py::buffer_protocol())
+    .def_buffer([](MARS::Matrix<bool>& m) -> py::buffer_info {
+      return py::buffer_info(
+        m.ptr(),                               /* Pointer to buffer */
+        sizeof(bool),                          /* Size of one item */
+        py::format_descriptor<bool>::format(), /* Python struct-style format */
+        2,                                     /* Number of dimensions */
+        { m.numberRows(), m.numberCols() },    /* Buffer dimensions */
+        { sizeof(bool) * m.numberCols(),       /* Strides in bytes */
+          sizeof(bool) }
+      );
+    });
+
+  py::class_<MARS::Matrix<float>>(m, "FloatMatrix", py::buffer_protocol())
+    .def_buffer([](MARS::Matrix<float>& m) -> py::buffer_info {
+      return py::buffer_info(
+        m.ptr(),                                /* Pointer to buffer */
+        sizeof(float),                          /* Size of one item */
+        py::format_descriptor<float>::format(), /* Python struct-style format */
+        2,                                      /* Number of dimensions */
+        { m.numberRows(), m.numberCols() },     /* Buffer dimensions */
+        { sizeof(float) * m.numberCols(),       /* Strides in bytes */
+          sizeof(float) }
+      );
+    });
 
 
 	py::class_<MARS::Game> game(m, "Game");
@@ -65,6 +102,7 @@ PYBIND11_PLUGIN(project_mars) {
   py::class_<MARS::Game::RLState> (m, "RLState", game)
     .def_readwrite("unserviced_pops", &MARS::Game::RLState::unservicedPops)
     .def_readwrite("serviced_pops", &MARS::Game::RLState::servicedPops)
+    .def_readwrite("total_pops", &MARS::Game::RLState::totalPops)
     .def_readwrite("terrain", &MARS::Game::RLState::terrain)
     .def_readwrite("plants", &MARS::Game::RLState::plantLocs);
 

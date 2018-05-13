@@ -8,9 +8,11 @@ import numpy as np
 import tensorflow as tf
 import atexit
 import project_mars as pm
+import xxhash
 
 from model import QMap
 from collections import defaultdict
+from utils import build_numpy_state, my_hash
 
 n_episodes = 1000000
 episode_length = 500
@@ -61,7 +63,9 @@ def main():
 
     # The initial game state
     s = get_state(game, state_counts)
+    assert(s.shape[1] == dx and s.shape[2] == dy and s.shape[3] == n_features)
 
+    loss_avg = 0
     for step in range(episode_length):
 
       q, a = compute_action_value(model, s)  # action-value and action taken
@@ -79,11 +83,14 @@ def main():
         q_prime = np.array(r, dtype=np.float32, ndmin=1)
 
       mu = get_mu(state_counts, s)  # Weight for importance of `s`
-      model.update(s, a, q_prime, mu)  # Gradient update for model towards `q'`
+
+      # Gradient update for model towards q_prime
+      loss = model.update(s, a, q_prime, mu)
+      loss_avg += loss/episode_length
 
       s = s_prime  # prep for the next step
 
-    print("Completed episode %d" % episode)
+    print("Completed episode %d. Avg. loss: %f" % (episode, loss_avg))
 
 
 def compute_action_value(model, state):
@@ -103,8 +110,8 @@ def compute_action_value(model, state):
 def get_mu(state_counts, state):
   """Computes the weight for the particular state. States explored more
   frequently will have a higher weight, which encourages the model to place
-  more importance on learning those states accurately."""
-  state_hashes = [hash(str(s)) for s in state]
+  more importance on learning those states accurately. Should sum to 1."""
+  state_hashes = [my_hash(s) for s in state]
   return np.array([state_counts[h]/state_counts['all'] for h in state_hashes])
 
 
@@ -121,7 +128,9 @@ def take_action(game, action):
 
 def get_reward(game):
   """Gets the reward signal for the current state"""
-  return game.get_reward()
+  reward = game.get_reward()
+  # print(reward)
+  return reward
 
 
 def get_state(game, state_counts):
@@ -130,12 +139,10 @@ def get_state(game, state_counts):
   episode. Note that the state *will* have a batch dimension, even if its
   just a singleton dimension. """
 
-  # TODO: Get ndarray from C++ instead of just an array of zeros.
-  # state = game.get_state()
-  state = np.zeros((1, dx, dy, n_features), dtype=np.float32)
+  state = build_numpy_state(game)
 
   # simple hashing of state
-  h = hash(str(state))
+  h = my_hash(state)
 
   state_counts[h] += 1
   state_counts['all'] += 1
