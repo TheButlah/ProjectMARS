@@ -4,8 +4,11 @@
 #include "Coord.h"
 #include "Game.h"
 #include "CLIRepl.h"
+#include "Matrix.h"
 
 namespace py = pybind11;
+
+
 
 PYBIND11_PLUGIN(project_mars) {
   py::module m("project_mars");
@@ -20,6 +23,20 @@ PYBIND11_PLUGIN(project_mars) {
     .def("startCLI", &MARS::CLIRepl::startCLI,
       "Starts the CLI.");
 
+/*
+  py::class_<MARS::Game::RLState>(m, "RLState", py::buffer_protocol())
+    .def_buffer([](MARS::Game::RLState& m) -> py::buffer_info {
+      return py::buffer_info(
+        m.ptr(),
+        sizeof(float),
+        py::format_descriptor<float>::format(),
+        2,
+        { m.numberRows(), m.numberCols() },
+        { sizeof(float) * m.numberCols(),
+          sizeof(float) }
+      );
+    });
+*/
 
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
@@ -54,7 +71,9 @@ PYBIND11_PLUGIN(project_mars) {
 		  py::arg("add_plant"),
 		  py::arg("plant_coord"))
     .def("get_reward", &MARS::Game::calculateObjective,
-      "Get the reward value for the current state of the game.");
+      "Get the reward value for the current state of the game.")
+    .def("get_env_state" &MARS::Game::getRLState,
+      "Gets the state for the RL agent.");
 
 	return m.ptr();
 }

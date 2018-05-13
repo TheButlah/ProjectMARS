@@ -10,16 +10,16 @@ PopulationMatrix::PopulationMatrix(int dx, int dy):
 
 }
 
-int PopulationMatrix::numberServicedAtCoord(Coord c) {
+int PopulationMatrix::numberServicedAtCoord(const Coord& c) const {
   return serviced_pop_matrix.at(c.x, c.y);
 }
 
-int PopulationMatrix::numberUnservicedAtCoord(Coord c) {
+int PopulationMatrix::numberUnservicedAtCoord(const Coord& c) const {
   return unserviced_pop_matrix.at(c.x, c.y);    
 }
 
-int PopulationMatrix::numberServicedAtCoordByPlant(Coord c, Plant* p) {
-  return plant_assign_matrix.at(c.x, c.y)[p];
+int PopulationMatrix::numberServicedAtCoordByPlant(const Coord& c, Plant* p) const {
+  return plant_assign_matrix.at(c.x, c.y).at(p);
 }
 
 std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> PopulationMatrix::potentialPopForPlant(Plant* p) {
@@ -44,12 +44,12 @@ std::unordered_map<Coord, std::pair<int, std::unordered_map<Plant*, int>>> Popul
   return result;
 }
 
-void PopulationMatrix::moveServicedPopBetweenPlants(Plant* from, Plant* to, Coord c, int num_pop) {
+void PopulationMatrix::moveServicedPopBetweenPlants(Plant* from, Plant* to, const Coord& c, int num_pop) {
   plant_assign_matrix.at(c.x, c.y)[from] -= num_pop;
   plant_assign_matrix.at(c.x, c.y)[to] += num_pop;
 }
 
-void PopulationMatrix::assignUnservicedPop(Plant* p, Coord c, int num_pop) {
+void PopulationMatrix::assignUnservicedPop(Plant* p, const Coord& c, int num_pop) {
   unserviced_pop_matrix.at(c.x, c.y) -= num_pop;
   serviced_pop_matrix.at(c.x,c.y) += num_pop;
   plant_assign_matrix.at(c.x, c.y)[p] += num_pop;    
@@ -63,7 +63,7 @@ void PopulationMatrix::addUnservicedPop(Matrix<int>& newUnserviced) {
   }
 }
 
-Matrix<int> PopulationMatrix::totalPopMatrix(){
+Matrix<int> PopulationMatrix::totalPopMatrix() const {
   Matrix<int> combinedPopMatrix = Matrix<int>(serviced_pop_matrix.numberRows(), serviced_pop_matrix.numberCols());
   for (int i = 0; i < serviced_pop_matrix.numberRows(); i++) {
     for (int j = 0; j < serviced_pop_matrix.numberCols(); j++) {
@@ -73,19 +73,19 @@ Matrix<int> PopulationMatrix::totalPopMatrix(){
   return combinedPopMatrix;
 }
 
-Matrix<int> PopulationMatrix::servicedPopMatrix() {
+Matrix<int> PopulationMatrix::servicedPopMatrix() const {
   return serviced_pop_matrix;
 }
 
-Matrix<int> PopulationMatrix::unservicedPopMatrix() {
+Matrix<int> PopulationMatrix::unservicedPopMatrix() const {
   return unserviced_pop_matrix;
 }
 
 
-int PopulationMatrix::sizeX() {
+int PopulationMatrix::sizeX() const {
   return serviced_pop_matrix.numberRows();
 }
 
-int PopulationMatrix::sizeY() {
+int PopulationMatrix::sizeY() const {
   return serviced_pop_matrix.numberRows();
 }  

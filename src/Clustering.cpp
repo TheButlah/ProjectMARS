@@ -1,4 +1,4 @@
-#include "../include/Clustering.h"
+#include "Clustering.h"
 
 #include <algorithm>
 #include <cmath>

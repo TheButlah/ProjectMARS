@@ -20,6 +20,8 @@ namespace MARS {
 
     int time; // The current time in the game
     double funds; // The funds available for building plants
+
+
     Terrain terrain;
     PopulationGen pop_gen;
     std::vector<Plant*> plants_in_service;
@@ -39,6 +41,8 @@ namespace MARS {
     double plant_profit_margin;
     double unserviced_pop_penalty;
 
+    //void updateRLState();
+
   public:
     Game(
       int dx,
@@ -53,27 +57,28 @@ namespace MARS {
     );
     ~Game();    
 
-    int sizeX();
-    int sizeY();
+    int sizeX() const;
+    int sizeY() const;
+
 
     /* Advance the game's progress by one time step */
     void step(bool add_plant, Coord plant_coord);
-    double calculateObjective();
+    double calculateObjective() const;
 
-    int numberPlantsInService();
-    std::vector<Coord> plantLocations();
+    int numberPlantsInService() const;
+    std::vector<Coord> plantLocations() const;
 
     int numberTotalPopAt(int, int);
-    int numberServicedPop();
-    int numberUnservicedPop();
+    int numberServicedPop() const;
+    int numberUnservicedPop() const;
 
-    double currentFunds();
-    int currentTime();
-    int plantDefaultCapacity();
-    double plantServableDistance();
-    PopulationMatrix popMatrixCopy();
-    Terrain terrainCopy();
-    std::pair<int, int> sizeXY();
+    double currentFunds() const;
+    int currentTime() const;
+    int plantDefaultCapacity() const;
+    double plantServableDistance() const;
+    PopulationMatrix popMatrixCopy() const;
+    Terrain terrainCopy() const;
+    std::pair<int, int> sizeXY() const;
 
     std::pair<Plant*, bool> findBestPlant(Coord person_loc);
     void processUnservicedElement(int i, int j);
