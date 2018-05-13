@@ -18,6 +18,7 @@ n_episodes = 1000000
 episode_length = 500
 
 eps = 0.1  # The probability of taking a random, non-optimal action
+gamma = 0.8  # The discount factor, exponential decay of future events on q val
 
 dx = 128
 dy = 128
@@ -30,7 +31,7 @@ action_map = {
   'nothing': 0,
 }
 
-seed = 1337
+seed = None
 
 
 def main():
@@ -46,7 +47,7 @@ def main():
 
 
   # Learn from simulated experience
-  for episode in range(n_episodes):
+  for episode in range(2):
     game = pm.Game(
       dx=dx,
       dy=dy,
@@ -66,18 +67,22 @@ def main():
     assert(s.shape[1] == dx and s.shape[2] == dy and s.shape[3] == n_features)
 
     loss_avg = 0
+    total_return = 0
+    prev_serviced = [0]  # List for easy mutable argument
     for step in range(episode_length):
 
       q, a = compute_action_value(model, s)  # action-value and action taken
 
       take_action(game, a)  # actually take the selected action
       s_prime = get_state(game, state_counts)  # See what the new state is
-      r = get_reward(game)  # See what the reward is
+      r = get_reward(game, prev_serviced)  # See what the reward is
+      total_return += r
 
       # Retroactively predict the value of the previous state using the reward
       # The terminal state should have a value of 0, so we add a check for that
       if step < episode_length - 1:
-        q_prime, _ = model.predict_q(s_prime)
+        q_prime,  = model.predict_q(s_prime)
+        q_prime *= gamma
         q_prime += r
       else:
         q_prime = np.array(r, dtype=np.float32, ndmin=1)
@@ -88,9 +93,13 @@ def main():
       loss = model.update(s, a, q_prime, mu)
       loss_avg += loss/episode_length
 
+      #print('q_prime, q, reward', q_prime, q, r)
+
       s = s_prime  # prep for the next step
 
-    print("Completed episode %d. Avg. loss: %f" % (episode, loss_avg))
+    print("Completed episode %d. Avg. loss: %f, Total Return: %f "
+          % (episode, loss_avg, total_return))
+
 
 
 def compute_action_value(model, state):
@@ -126,9 +135,11 @@ def take_action(game, action):
     game.step(True, pm.Coord(action[0], action[1]))
 
 
-def get_reward(game):
+def get_reward(game, prev_serviced):
   """Gets the reward signal for the current state"""
-  reward = game.get_reward()
+  total = game.get_total_serviced()
+  reward = total - prev_serviced[0]
+  prev_serviced[0] = total
   # print(reward)
   return reward
 

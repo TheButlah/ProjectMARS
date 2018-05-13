@@ -95,8 +95,10 @@ PYBIND11_PLUGIN(project_mars) {
 		  "Advance the game's progress by one time step.",
 		  py::arg("add_plant"),
 		  py::arg("plant_coord"))
-    .def("get_reward", &MARS::Game::calculateObjective,
-      "Get the reward value for the current state of the game.")
+    .def("calc_objective", &MARS::Game::calculateObjective,
+      "Get the value of the objective fn the current state of the game.")
+    .def("get_total_serviced", &MARS::Game::numberServicedPop,
+      "Gets the total number of pops that are being serviced by our plants")
     .def_readonly("state", &MARS::Game::rlState);
 
   py::class_<MARS::Game::RLState> (m, "RLState", game)

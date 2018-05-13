@@ -160,14 +160,14 @@ class QMap:
         delta_squared = 0.5*(self._q - self._q_targets) ** 2
 
         # Sum instead of mean due to mu summing to 1.
-        self._loss = tf.reduce_sum(self._mu*delta_squared)
+        self._loss = tf.reduce_sum(self._mu * delta_squared)
 
 
         optimizer = tf.train.AdamOptimizer(learning_rate=self._lr)
 
         # Clip gradients to avoid mega magnitudes
         grads = optimizer.compute_gradients(self._loss)
-        clipped = [(tf.clip_by_value(grad, -2., 2.), var)
+        clipped = [(tf.clip_by_value(grad, -10., 10.), var)
                    for grad, var in grads]
         self._train_step = optimizer.apply_gradients(clipped)
 
