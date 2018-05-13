@@ -62,7 +62,7 @@ namespace MARS {
 
 
     /* Advance the game's progress by one time step */
-    void step(bool add_plant, Coord plant_coord);
+    void step(bool add_plant, const Coord& plant_coord);
     double calculateObjective() const;
 
     int numberPlantsInService() const;
@@ -80,16 +80,16 @@ namespace MARS {
     Terrain terrainCopy() const;
     std::pair<int, int> sizeXY() const;
 
-    std::pair<Plant*, bool> findBestPlant(Coord person_loc) const;
+    std::pair<Plant*, bool> findBestPlant(const Coord& person_loc) const;
     void processUnservicedElement(int i, int j);
     void processUnservicedPopulation();
-    std::queue<Plant*> processServicedPop(Plant*, Coord, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
+    std::queue<Plant*> processServicedPop(Plant*, const Coord&, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
 
-    Plant* createPlant(Coord);
+    Plant* createPlant(const Coord&);
     std::queue<Plant*> considerNewPlant(Plant*, bool);
     void processTouchedPlants(std::queue<Plant*>);
 
-    bool isPlantPresent(Coord) const;
+    bool isPlantPresent(const Coord&) const;
     double fundsForCurrentStep() const;
   };
 }

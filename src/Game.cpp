@@ -48,7 +48,7 @@ Game::~Game() {
   }
 }
 
-void Game::step(bool add_plant, Coord plant_coord) {
+void Game::step(bool add_plant, const Coord& plant_coord) {
 
   Matrix<int> new_population = pop_gen.generate(this->pop_matrix.totalPopMatrix(), this->terrain, this->time);
   pop_matrix.addUnservicedPop(new_population);
@@ -167,7 +167,7 @@ int Game::sizeY() const {
   return size_y;
 }
 
-std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) const {
+std::pair<Plant*, bool> Game::findBestPlant(const Coord& person_loc) const {
   if (numberPlantsInService() == 0) {
     return std::pair<Plant*, bool> (NULL, false);
   } else {
@@ -216,7 +216,7 @@ void Game::processUnservicedPopulation() {
 
 std::queue<Plant*> Game::processServicedPop(
   Plant* plant,
-  Coord coord,
+  const Coord& coord,
   std::unordered_map<Plant*, int> serviced_map,
   std::queue<Plant*>& queue)
 {
@@ -235,7 +235,7 @@ std::queue<Plant*> Game::processServicedPop(
   return queue;
 }
 
-Plant* Game::createPlant(Coord plant_loc) {
+Plant* Game::createPlant(const Coord& plant_loc) {
   this->number_new_plants++;
   Plant* new_plant = new Plant(
     plant_default_capacity,
@@ -274,7 +274,7 @@ void Game::processTouchedPlants(std::queue<Plant*> touched_plants) {
   }
 }
 
-bool Game::isPlantPresent(Coord coord) const {
+bool Game::isPlantPresent(const Coord& coord) const {
   for (int i =0; i < this->plants_in_service.size(); i++) {
     Plant* plant = this->plants_in_service[i];
     if (coord==(plant->location)) {
