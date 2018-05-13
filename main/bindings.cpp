@@ -24,7 +24,7 @@ PYBIND11_PLUGIN(project_mars) {
       "Starts the CLI.");
 
 
-  /*py::class_<MARS::Game::RLState>(m, "RLState")
+  /*py::class_<MARS::RLState>(m, "RLState")
     .def("");*/
 
 

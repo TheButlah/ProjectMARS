@@ -6,7 +6,6 @@
 #include "Matrix.h"
 #include "PopulationGen.h"
 #include "Terrain.h"
-#include "RLState.h"
 
 using namespace MARS;
 
@@ -38,7 +37,7 @@ Game::Game(
   pop_matrix(PopulationMatrix(dx, dy)),
   terrain(Terrain(dx, dy)),
   pop_gen(PopulationGen()),
-  rlState(new RLState(*this))
+  rlState(*this)
 {
 
 }
@@ -47,7 +46,6 @@ Game::~Game() {
   for (Plant* p: plants_in_service) {
     delete p;
   }
-  delete rlState;
 }
 
 void Game::step(bool add_plant, const Coord& plant_coord) {
@@ -77,7 +75,7 @@ void Game::step(bool add_plant, const Coord& plant_coord) {
   this->number_new_plants = 0;
   this->time++;
 
-  rlState->update(*this);
+  rlState.update(*this);
 }
 
 /*
@@ -294,6 +292,30 @@ double Game::fundsForCurrentStep() const {
   return objective;
 }
 
-RLState& Game::getRLState() {
-  return *rlState;
+Game::RLState& Game::getRLState() {
+  return rlState;
 }
+
+
+Game::RLState::RLState(const Game& game) :
+  totalPops(game.sizeY(), game.sizeX()),
+  unservicedPops(game.sizeY(), game.sizeX()),
+  servicedPops(game.sizeY(), game.sizeX()),
+  terrain(game.sizeY(), game.sizeX()),
+  plantLocs(game.sizeY(), game.sizeX())
+{}
+
+void Game::RLState::update(const Game& game) {
+  PopulationMatrix pm = game.popMatrixCopy();
+  totalPops = pm.totalPopMatrix();
+  unservicedPops = pm.unservicedPopMatrix();
+  servicedPops = pm.servicedPopMatrix();
+
+  terrain = game.terrainCopy().getMatrixCopy();
+
+  plantLocs.resetToDefault();
+  for (Coord& c : game.plantLocations()) {
+    plantLocs.at(c.x, c.y) = true;
+  }
+}
+

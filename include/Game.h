@@ -9,17 +9,35 @@
 #include "Terrain.h"
 #include "PopulationMatrix.h"
 
-#include "RLState.h"
 
 namespace MARS {
-
-
-  class RLState;
 
   /*
    * Game - a simulation of a growing population of people on a terrain, in which power plants are placed to support the existing and future population
    */
   class Game {
+    /**
+  * Provides the RL agent a way to interpret the state.
+  */
+  public:
+    class RLState {
+    public:
+      Matrix<int> totalPops;
+      Matrix<int> unservicedPops;
+      Matrix<int> servicedPops;
+
+      Matrix<float> terrain;
+
+      // Not using BitMatrix because I care more about speed than memory usage
+      Matrix<bool> plantLocs;
+
+      RLState(const Game&);
+      RLState(const RLState&) = delete;
+      RLState& operator=(const RLState&) = delete;
+
+      /** Update this object to reflect the latest state of the game */
+      void update(const Game& game);
+    };
   private:
     // Game state - traits of the simulation that change over time
 
@@ -46,9 +64,11 @@ namespace MARS {
     double plant_profit_margin;
     double unserviced_pop_penalty;
 
-    RLState* rlState; //Must be a pointer since we forward declared RLState :(
+    RLState rlState; //Must be a pointer since we forward declared RLState :(
 
   public:
+
+
     Game(
       int dx,
       int dy,
