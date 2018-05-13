@@ -27,10 +27,7 @@ namespace MARS {
 			num_cols(cols),
 			matrix(new T[rows * cols]) 
 		{
-		  unsigned int items = rows * cols;
-			for (unsigned int i = 0; i < items; i++) {
-				matrix[i] = T();
-			}
+		  resetToDefault();
 		};
 
 		/** Copy constructor */
@@ -116,6 +113,10 @@ namespace MARS {
 
 		int numberCols() const {
 			return num_cols;
+		}
+
+		void resetToDefault() {
+      std::fill(matrix, matrix + (num_rows*num_cols), T());
 		}
 
 		~Matrix() {

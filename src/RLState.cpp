@@ -17,5 +17,16 @@ RLState::RLState(const Game& game) :
 }
 
 void RLState::update(const Game& game) {
+  PopulationMatrix pm = game.popMatrixCopy();
+  totalPops = pm.totalPopMatrix();
+  unservicedPops = pm.unservicedPopMatrix();
+  serviecdPops = pm.servicedPopMatrix();
+
+  terrain = game.terrainCopy().getMatrixCopy();
+
+  plantLocs.resetToDefault();
+  for (Coord& c : game.plantLocations()) {
+    plantLocs.at(c.x, c.y) = true;
+  }
 
 }
