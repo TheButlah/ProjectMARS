@@ -30,8 +30,11 @@ PYBIND11_PLUGIN(project_mars) {
       py::arg("y"));
 
 
-	py::class_<MARS::Game>(m, "Game")
-		.def(py::init<
+
+
+	py::class_<MARS::Game> game(m, "Game");
+	game
+    .def(py::init<
         int,
         int,
         int,
@@ -57,15 +60,15 @@ PYBIND11_PLUGIN(project_mars) {
 		  py::arg("plant_coord"))
     .def("get_reward", &MARS::Game::calculateObjective,
       "Get the reward value for the current state of the game.")
-    .def("get_env_state" &MARS::Game::getRLState,
-      "Gets the state for the RL agent.");
+    .def_readonly("state", &MARS::Game::rlState);
 
-
-  py::class_<MARS::Game::RLState>(m, "RLState")
+  py::class_<MARS::Game::RLState> (m, "RLState", game)
     .def_readwrite("unserviced_pops", &MARS::Game::RLState::unservicedPops)
     .def_readwrite("serviced_pops", &MARS::Game::RLState::servicedPops)
     .def_readwrite("terrain", &MARS::Game::RLState::terrain)
     .def_readwrite("plants", &MARS::Game::RLState::plantLocs);
+
+
 
 	return m.ptr();
 }

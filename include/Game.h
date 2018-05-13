@@ -64,10 +64,7 @@ namespace MARS {
     double plant_profit_margin;
     double unserviced_pop_penalty;
 
-    RLState rlState;
-
   public:
-
 
     Game(
       int dx,
@@ -84,6 +81,8 @@ namespace MARS {
 
     int sizeX() const;
     int sizeY() const;
+
+    RLState rlState;
 
 
     /* Advance the game's progress by one time step */
@@ -116,8 +115,6 @@ namespace MARS {
 
     bool isPlantPresent(const Coord&) const;
     double fundsForCurrentStep() const;
-
-    RLState& getRLState();
   };
 }
 

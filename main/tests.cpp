@@ -25,7 +25,6 @@ namespace {
       MARS::PopulationMatrix popMat;
       MARS::Game game;
 
-
       MarsTest() :
           popMat(8,8),
           game(8, 8, 100, 100, 50, 200, 200, 200, 1.0)

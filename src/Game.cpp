@@ -279,9 +279,8 @@ double Game::fundsForCurrentStep() const {
   return objective;
 }
 
-Game::RLState& Game::getRLState() {
-  return rlState;
-}
+//RL State
+
 
 
 Game::RLState::RLState(const Game& game) :
