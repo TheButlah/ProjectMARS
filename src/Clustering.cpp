@@ -74,6 +74,8 @@ std::pair<std::vector<Coord>, std::vector<std::vector<Coord>>>
         }
       }
 
+      //std::cout << "nearest " << nearestCentroidIndex << " clusters size " << clusters.size() << std::endl;
+
       assert(nearestCentroidIndex < clusters.size());
       clusters.at(nearestCentroidIndex).push_back(dataPoint);
     }
@@ -276,7 +278,6 @@ std::pair<bool, Coord> Clustering::placePlantKMedians(PopulationMatrix popMatrix
 
 std::pair<bool, Coord> Clustering::placePlantRandom(PopulationMatrix popMatrix) {
   /* Random baseline method */
-  srand(time(0));
   int coinFlip = rand() % 2;
   if(coinFlip == 0) {
     // don't place a plant this time
