@@ -33,10 +33,10 @@ namespace MARS {
     Terrain(int dim);
     Terrain(int dx, int dy, bool water);
 
-    int sizeX();
-    int sizeY();
-    double weightAtXY(int x, int y);
-    double weightAtCoord(Coord c);
+    int sizeX() const;
+    int sizeY() const;
+    double weightAtXY(int x, int y) const;
+    double weightAtCoord(const Coord& c) const;
   };
 }
 

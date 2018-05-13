@@ -1,4 +1,4 @@
-#include "../include/Terrain.h"
+#include "Terrain.h"
 
 #include <iostream>
 #include <cmath>
@@ -19,7 +19,12 @@ Terrain::Terrain(int dx, int dy): perlin(std::time(NULL)), size_x(dx), size_y(dy
   }
 }
 
-Terrain::Terrain(int dim): perlin(std::time(NULL)), size_x(dim), size_y(dim), terrainMatrix(dim, dim){
+Terrain::Terrain(int dim) :
+  perlin(std::time(NULL)),
+  size_x(dim),
+  size_y(dim),
+  terrainMatrix(dim, dim)
+{
   //std::cout << "In this constructor" << std::endl;
   for (int i=0; i<dim; i++) {
     for (int j=0; j<dim; j++) {
@@ -29,7 +34,12 @@ Terrain::Terrain(int dim): perlin(std::time(NULL)), size_x(dim), size_y(dim), te
   }
 }
 
-Terrain::Terrain(int x, int y, bool water) : perlin(std::time(NULL)), size_x(x), size_y(y), terrainMatrix(x,y){
+Terrain::Terrain(int x, int y, bool water) :
+  perlin(std::time(NULL)),
+  size_x(x),
+  size_y(y),
+  terrainMatrix(x,y)
+{
   for (int i=0; i<x; i++) {
     for (int j=0; j<y; j++) {
       terrainMatrix.at(i,j) = GRASSLAND_WEIGHT;
@@ -42,18 +52,18 @@ Terrain::Terrain(int x, int y, bool water) : perlin(std::time(NULL)), size_x(x),
   terrainMatrix.at(2,1) = WATER_WEIGHT;
 }
 
-int Terrain::sizeX() {
+int Terrain::sizeX() const {
   return size_x;
 }
 
-int Terrain::sizeY() {
+int Terrain::sizeY() const {
   return size_y;
 }
 
-double Terrain::weightAtXY(int x, int y) {
+double Terrain::weightAtXY(int x, int y) const {
   return terrainMatrix.at(x, y);
 }
 
-double Terrain::weightAtCoord(Coord c) {
+double Terrain::weightAtCoord(const Coord& c) const {
   return weightAtXY(c.x, c.y);
 }
