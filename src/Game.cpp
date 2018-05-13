@@ -111,7 +111,7 @@ int Game::numberPlantsInService() const {
   return this->number_plants_in_service;
 }
 
-int Game::numberTotalPopAt(int i, int j) {
+int Game::numberTotalPopAt(int i, int j) const {
   return this->pop_matrix.totalPopMatrix().at(i,j);
 }
 
@@ -167,7 +167,7 @@ int Game::sizeY() const {
   return size_y;
 }
 
-std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) {
+std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) const {
   if (numberPlantsInService() == 0) {
     return std::pair<Plant*, bool> (NULL, false);
   } else {
@@ -274,7 +274,7 @@ void Game::processTouchedPlants(std::queue<Plant*> touched_plants) {
   }
 }
 
-bool Game::isPlantPresent(Coord coord) {
+bool Game::isPlantPresent(Coord coord) const {
   for (int i =0; i < this->plants_in_service.size(); i++) {
     Plant* plant = this->plants_in_service[i];
     if (coord==(plant->location)) {
@@ -284,7 +284,7 @@ bool Game::isPlantPresent(Coord coord) {
   return false;
 };
 
-double Game::fundsForCurrentStep() {
+double Game::fundsForCurrentStep() const {
   double objective;
   objective = this->funds - (this->plant_operating_cost)*(this->number_plants_in_service)
               - (this->number_new_plants * this->plant_initial_cost)

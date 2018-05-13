@@ -68,7 +68,7 @@ namespace MARS {
     int numberPlantsInService() const;
     std::vector<Coord> plantLocations() const;
 
-    int numberTotalPopAt(int, int);
+    int numberTotalPopAt(int, int) const;
     int numberServicedPop() const;
     int numberUnservicedPop() const;
 
@@ -80,7 +80,7 @@ namespace MARS {
     Terrain terrainCopy() const;
     std::pair<int, int> sizeXY() const;
 
-    std::pair<Plant*, bool> findBestPlant(Coord person_loc);
+    std::pair<Plant*, bool> findBestPlant(Coord person_loc) const;
     void processUnservicedElement(int i, int j);
     void processUnservicedPopulation();
     std::queue<Plant*> processServicedPop(Plant*, Coord, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
@@ -89,8 +89,8 @@ namespace MARS {
     std::queue<Plant*> considerNewPlant(Plant*, bool);
     void processTouchedPlants(std::queue<Plant*>);
 
-    bool isPlantPresent(Coord);
-    double fundsForCurrentStep();
+    bool isPlantPresent(Coord) const;
+    double fundsForCurrentStep() const;
   };
 }
 
