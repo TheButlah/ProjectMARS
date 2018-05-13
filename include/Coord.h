@@ -32,7 +32,7 @@ namespace std {
   struct hash<MARS::Coord> {
   
     std::size_t operator()(const MARS::Coord& other) const {
-      return other.x * 10000 + other.y;
+      return (other.x << 16) + other.y;
     }
   
   };
