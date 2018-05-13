@@ -12,9 +12,9 @@ import xxhash
 
 from model import QMap
 from collections import defaultdict
-from utils import build_numpy_state, my_hash
+from utils import build_numpy_state, my_hash, take_action, get_reward
 
-save_path = "saved/overnight1"
+save_path = None
 
 n_episodes = 1000000
 episode_length = 500
@@ -26,12 +26,6 @@ dx = 128
 dy = 128
 n_features = 3
 n_actions = 2
-
-# Mapping from actions to their index. Should be as many actions as `n_actions`.
-action_map = {
-  'place': 1,
-  'nothing': 0,
-}
 
 seed = 1337
 
@@ -135,26 +129,6 @@ def get_mu(state_counts, state):
   more importance on learning those states accurately. Should sum to 1."""
   state_hashes = [my_hash(s) for s in state]
   return np.array([state_counts[h]/state_counts['all'] for h in state_hashes])
-
-
-def take_action(game, action):
-  """Interprets the provided action tuple and steps the game state."""
-  action = np.squeeze(action)
-  action_type = action[-1]
-  if action_type == action_map['nothing']:
-    game.step(False, pm.Coord(0, 0))
-  else:
-    assert(action_type == action_map['place'])
-    game.step(True, pm.Coord(action[0], action[1]))
-
-
-def get_reward(game, prev_serviced):
-  """Gets the reward signal for the current state"""
-  total = game.get_total_serviced()
-  reward = total - prev_serviced[0]
-  prev_serviced[0] = total
-  # print(reward)
-  return reward
 
 
 def get_state(game, state_counts):

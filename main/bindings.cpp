@@ -21,7 +21,18 @@ PYBIND11_PLUGIN(project_mars) {
       "Initializer for CLIRepl.",
       py::arg("inifile"))
     .def("startCLI", &MARS::CLIRepl::startCLI,
-      "Starts the CLI.");
+      "Starts the CLI.")
+    .def("draw", &MARS::CLIRepl::draw,
+      "Draws the current game state.");
+
+  py::class_<MARS::GameDisplay>(m, "GameDisplay")
+    .def(py::init<MARS::Game*, double, double>(),
+      "Initializer for GameDisplay",
+      py::arg("game"),
+      py::arg("box_size"),
+      py::arg("pop_scale"))
+    .def("update", &MARS::GameDisplay::updateDisplay,
+      "Update the display to reflect the current game state");
 
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
