@@ -11,6 +11,7 @@ import project_mars as pm
 
 from model import QMap
 from collections import defaultdict
+from utils import build_numpy_state
 
 n_episodes = 1000000
 episode_length = 500
@@ -130,9 +131,7 @@ def get_state(game, state_counts):
   episode. Note that the state *will* have a batch dimension, even if its
   just a singleton dimension. """
 
-  # TODO: Get ndarray from C++ instead of just an array of zeros.
-  # state = game.get_state()
-  state = np.zeros((1, dx, dy, n_features), dtype=np.float32)
+  state = build_numpy_state(game)
 
   # simple hashing of state
   h = hash(str(state))
