@@ -115,6 +115,7 @@ void CLIRepl::stepWithKMedians(int k) {
 
 void CLIRepl::stepWithRandom() {
   std::pair<bool, Coord> res = Clustering::placePlantRandom(game->popMatrixCopy());
+  std::cout << res.first << " " << res.second.x << " " << res.second.y << std::endl;
   game->step(res.first, res.second);
 }
 
@@ -206,7 +207,7 @@ void CLIRepl::placePlantLoop(std::string method, int steps, std::string path) {
   
   // TODO: refactor to make this less repetitive
 
-  if(method != "kmeans" && method != "kmedians" && method != "random") {
+  if(method != "kmeans" && method != "kmedians") {
     std::cout << "Invalid method. Please use either kmeans or kmedians." << std::endl;
   }
 
@@ -248,10 +249,10 @@ void CLIRepl::placePlantLoop(std::string method, int steps, std::string path) {
       varianceUnserviced /= ((unservicedMatrix.numberRows()*unservicedMatrix.numberCols())-1);
 
       if(method == "kmeans") {
-        this->stepWithKMeans((int)varianceUnserviced);
+        this->stepWithKMeans((int)varianceUnserviced + 1);
       }
       else if(method == "kmedians") {
-        this->stepWithKMedians((int)varianceUnserviced);
+        this->stepWithKMedians((int)varianceUnserviced + 1);
       }
     }
 
@@ -353,7 +354,7 @@ void CLIRepl::doCommand(std::vector<std::string> tokens) {
     }
     else {
       int s = std::stoi(tokens[2]);
-      this->placePlantLoop("kmeans", x, s, 0, path);
+      this->placePlantLoop("random", x, s, 0, path);
     }
   }
   else {
