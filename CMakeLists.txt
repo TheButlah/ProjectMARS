@@ -27,7 +27,7 @@ endif()
 
 
 # Build an excutable with our sources (SOURCES) and a main file
-add_executable(cli ${SOURCES} main/cli.cpp)
+add_executable(cli ${SOURCES} main/cli.cpp src/RLState.cpp include/RLState.h)
 if (NOT WIN32)
   add_executable(clustering ${SOURCES} main/clustering.cpp)
 endif()

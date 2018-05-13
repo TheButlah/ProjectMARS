@@ -6,6 +6,9 @@
 
 namespace MARS {
 
+  // Forward declare Game to avoid cyclic dependency (smh c++ )
+  class Game;
+
   /**
    * Provides the RL agent a way to interpret the state.
    */
@@ -13,7 +16,7 @@ namespace MARS {
   public:
     Matrix<int> totalPops;
     Matrix<int> unservicedPops;
-    Matrix<int> serviecdPops;
+    Matrix<int> servicedPops;
 
     Matrix<float> terrain;
 

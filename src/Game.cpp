@@ -37,7 +37,8 @@ Game::Game(
   unserviced_pop_penalty(unserviced_penalty),
   pop_matrix(PopulationMatrix(dx, dy)),
   terrain(Terrain(dx, dy)),
-  pop_gen(PopulationGen())
+  pop_gen(PopulationGen()),
+  rlState(new RLState(*this))
 {
 
 }
@@ -46,6 +47,7 @@ Game::~Game() {
   for (Plant* p: plants_in_service) {
     delete p;
   }
+  delete rlState;
 }
 
 void Game::step(bool add_plant, const Coord& plant_coord) {
@@ -75,7 +77,7 @@ void Game::step(bool add_plant, const Coord& plant_coord) {
   this->number_new_plants = 0;
   this->time++;
 
-  //updateRLState();
+  rlState->update(*this);
 }
 
 /*
@@ -290,4 +292,8 @@ double Game::fundsForCurrentStep() const {
               - (this->number_new_plants * this->plant_initial_cost)
               + (this->number_pop_serviced * this->plant_profit_margin);
   return objective;
+}
+
+RLState& Game::getRLState() {
+  return *rlState;
 }

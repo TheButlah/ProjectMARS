@@ -1,7 +1,3 @@
-//
-// Created by Marissa Colasacco on 4/15/18.
-//
-
 #ifndef MARS_TERRAIN_H
 #define MARS_TERRAIN_H
 
@@ -14,7 +10,7 @@
 
 #define GRASSLAND_THRESHOLD 0.3
 #define MOUNTAIN_THRESHOLD 0.7
-#define WATER_WEIGHT std::numeric_limits<double>::max()
+#define WATER_WEIGHT std::numeric_limits<float>::max()
 #define GRASSLAND_WEIGHT 1.0
 #define MOUNTAIN_WEIGHT 100.0
 

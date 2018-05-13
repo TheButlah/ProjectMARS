@@ -23,20 +23,10 @@ PYBIND11_PLUGIN(project_mars) {
     .def("startCLI", &MARS::CLIRepl::startCLI,
       "Starts the CLI.");
 
-/*
-  py::class_<MARS::Game::RLState>(m, "RLState", py::buffer_protocol())
-    .def_buffer([](MARS::Game::RLState& m) -> py::buffer_info {
-      return py::buffer_info(
-        m.ptr(),
-        sizeof(float),
-        py::format_descriptor<float>::format(),
-        2,
-        { m.numberRows(), m.numberCols() },
-        { sizeof(float) * m.numberCols(),
-          sizeof(float) }
-      );
-    });
-*/
+
+  /*py::class_<MARS::Game::RLState>(m, "RLState")
+    .def("");*/
+
 
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),

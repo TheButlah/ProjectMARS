@@ -9,7 +9,12 @@
 #include "Terrain.h"
 #include "PopulationMatrix.h"
 
+#include "RLState.h"
+
 namespace MARS {
+
+
+  class RLState;
 
   /*
    * Game - a simulation of a growing population of people on a terrain, in which power plants are placed to support the existing and future population
@@ -41,7 +46,7 @@ namespace MARS {
     double plant_profit_margin;
     double unserviced_pop_penalty;
 
-    //void updateRLState();
+    RLState* rlState; //Must be a pointer since we forward declared RLState :(
 
   public:
     Game(
@@ -91,6 +96,8 @@ namespace MARS {
 
     bool isPlantPresent(const Coord&) const;
     double fundsForCurrentStep() const;
+
+    RLState& getRLState();
   };
 }
 
