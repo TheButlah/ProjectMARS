@@ -1,4 +1,13 @@
-kmeans 100 20 3 kmeans_100_20_3.txt
-kmeans 500 20 3 kmeans_500_20_3.txt
-kmeans 500 50 3 kmeans_500_50_3.txt
-kmeans 1000 20 3 kmeans_1000_20_3.txt
+kmeans 500 20 3 kmeans_20_3.txt
+kmeans 500 50 3 kmeans_50_3.txt
+kmeans 500 20 5 kmeans_20_5.txt
+kmeans 500 50 5 kmeans_50_5.txt
+kmedians 500 20 3 kmedians_20_3.txt
+kmedians 500 50 3 kmedians_50_3.txt
+kmedians 500 20 5 kmedians_20_5.txt
+kmedians 500 50 5 kmedians_50_5.txt
+random 500 20 random_20.txt
+random 500 50 random_50.txt
+kmeans 500 auto auto kmeans_auto.txt
+kmedians 500 auto auto kmedians_auto.txt
+random 500 auto random_auto.txt
