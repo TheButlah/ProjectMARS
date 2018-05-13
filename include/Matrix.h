@@ -39,7 +39,8 @@ namespace MARS {
 			num_cols(other.num_cols),
 			matrix(new T[other.num_rows * other.num_cols]) 
 		{
-			for (int i = 0; i < other.num_rows * other.num_cols; i++) {
+		  unsigned int items = other.num_rows * other.num_cols;
+			for (unsigned int i = 0; i < items; i++) {
 				matrix[i] = T(other.matrix[i]);
 			}
 		}
@@ -56,14 +57,16 @@ namespace MARS {
 		/** Copy assignment operator */
 		Matrix& operator=(const Matrix& other)
 		{
-		  if (this == &other) return other; // Avoid deleting ourselves
-			num_rows = other.num_rows;
-			num_cols = other.num_cols;
-			delete[] matrix;
-			matrix = new T[num_rows * num_cols];
-			for (int i = 0; i < other.num_rows * other.num_cols; i++) {
-				matrix[i] = T(other.matrix[i]);
-			}
+		  if (this != &other) { // Avoid deleting ourselves
+        num_rows = other.num_rows;
+        num_cols = other.num_cols;
+        delete[] matrix;
+        unsigned int items = num_rows * num_cols;
+        matrix = new T[items];
+        for (unsigned int i = 0; i < items; i++) {
+          matrix[i] = T(other.matrix[i]);
+        }
+      }
 			return *this;
 		}
 

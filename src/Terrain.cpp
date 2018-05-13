@@ -8,7 +8,7 @@ using namespace MARS;
 Terrain::Terrain(int dx, int dy): perlin(std::time(NULL)), size_x(dx), size_y(dy), terrainMatrix(dx, dy) {
   for (int i = 0; i < size_x; i++) {
     for (int j = 0; j < size_y; j++) {
-      double value = perlin.noise0_1(i/std::log2(size_x), j/std::log2(size_x));
+      float value = perlin.noise0_1(i/std::log2(size_x), j/std::log2(size_x));
       if (value >= MOUNTAIN_THRESHOLD)
         terrainMatrix.at(i,j) = MOUNTAIN_WEIGHT;
       else if (value >= GRASSLAND_THRESHOLD)
@@ -60,10 +60,14 @@ int Terrain::sizeY() const {
   return size_y;
 }
 
-double Terrain::weightAtXY(int x, int y) const {
+float Terrain::weightAtXY(int x, int y) const {
   return terrainMatrix.at(x, y);
 }
 
-double Terrain::weightAtCoord(const Coord& c) const {
+float Terrain::weightAtCoord(const Coord& c) const {
   return weightAtXY(c.x, c.y);
+}
+
+Matrix<float> Terrain::getMatrixCopy() const {
+  return terrainMatrix;
 }

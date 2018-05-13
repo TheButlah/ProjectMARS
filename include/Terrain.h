@@ -23,7 +23,7 @@ namespace MARS {
   class Terrain {
   private:
     siv::PerlinNoise perlin;
-    Matrix<double> terrainMatrix;
+    Matrix<float> terrainMatrix;
     int size_x;
     int size_y;
   public:
@@ -33,10 +33,12 @@ namespace MARS {
     Terrain(int dim);
     Terrain(int dx, int dy, bool water);
 
+    Matrix<float> getMatrixCopy() const;
+
     int sizeX() const;
     int sizeY() const;
-    double weightAtXY(int x, int y) const;
-    double weightAtCoord(const Coord& c) const;
+    float weightAtXY(int x, int y) const;
+    float weightAtCoord(const Coord& c) const;
   };
 }
 
