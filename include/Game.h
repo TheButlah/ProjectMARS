@@ -9,17 +9,42 @@
 #include "Terrain.h"
 #include "PopulationMatrix.h"
 
+
 namespace MARS {
 
   /*
    * Game - a simulation of a growing population of people on a terrain, in which power plants are placed to support the existing and future population
    */
   class Game {
+    /**
+  * Provides the RL agent a way to interpret the state.
+  */
+  public:
+    class RLState {
+    public:
+      Matrix<int> totalPops;
+      Matrix<int> unservicedPops;
+      Matrix<int> servicedPops;
+
+      Matrix<float> terrain;
+
+      // Not using BitMatrix because I care more about speed than memory usage
+      Matrix<bool> plantLocs;
+
+      RLState(const Game&);
+      RLState(const RLState&) = delete;
+      RLState& operator=(const RLState&) = delete;
+
+      /** Update this object to reflect the latest state of the game */
+      void update(const Game& game);
+    };
   private:
     // Game state - traits of the simulation that change over time
 
     int time; // The current time in the game
     double funds; // The funds available for building plants
+
+
     Terrain terrain;
     PopulationGen pop_gen;
     std::vector<Plant*> plants_in_service;
@@ -40,6 +65,7 @@ namespace MARS {
     double unserviced_pop_penalty;
 
   public:
+
     Game(
       int dx,
       int dy,
@@ -53,39 +79,42 @@ namespace MARS {
     );
     ~Game();    
 
-    int sizeX();
-    int sizeY();
+    int sizeX() const;
+    int sizeY() const;
+
+    RLState rlState;
+
 
     /* Advance the game's progress by one time step */
-    void step(bool add_plant, Coord plant_coord);
-    double calculateObjective();
+    void step(bool add_plant, const Coord& plant_coord);
+    double calculateObjective() const;
 
-    int numberPlantsInService();
-    std::vector<Coord> plantLocations();
+    int numberPlantsInService() const;
+    std::vector<Coord> plantLocations() const;
 
-    int numberTotalPopAt(int, int);
-    int numberServicedPop();
-    int numberUnservicedPop();
+    int numberTotalPopAt(int, int) const;
+    int numberServicedPop() const;
+    int numberUnservicedPop() const;
 
-    double currentFunds();
-    int currentTime();
-    int plantDefaultCapacity();
-    double plantServableDistance();
-    PopulationMatrix popMatrixCopy();
-    Terrain terrainCopy();
-    std::pair<int, int> sizeXY();
+    double currentFunds() const;
+    int currentTime() const;
+    int plantDefaultCapacity() const;
+    double plantServableDistance() const;
+    PopulationMatrix popMatrixCopy() const;
+    Terrain terrainCopy() const;
+    std::pair<int, int> sizeXY() const;
 
-    std::pair<Plant*, bool> findBestPlant(Coord person_loc);
+    std::pair<Plant*, bool> findBestPlant(const Coord& person_loc) const;
     void processUnservicedElement(int i, int j);
     void processUnservicedPopulation();
-    std::queue<Plant*> processServicedPop(Plant*, Coord, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
+    std::queue<Plant*> processServicedPop(Plant*, const Coord&, std::unordered_map<Plant*,int>, std::queue<Plant*>&);
 
-    Plant* createPlant(Coord);
+    Plant* createPlant(const Coord&);
     std::queue<Plant*> considerNewPlant(Plant*, bool);
     void processTouchedPlants(std::queue<Plant*>);
 
-    bool isPlantPresent(Coord);
-    double fundsForCurrentStep();
+    bool isPlantPresent(const Coord&) const;
+    double fundsForCurrentStep() const;
   };
 }
 

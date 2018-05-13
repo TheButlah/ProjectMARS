@@ -218,9 +218,9 @@ class QMap:
       the loss and the selected actions.
     """
     assert(num_epochs >= 1)
-    assert(True if actions is None else states.ndim == actions.ndim)
+    assert(states.ndim == 4)
     assert(states.shape[0] == q_targets.shape[0])
-    assert(True if actions is None else states.shape[:-1] == actions.shape[:-1])
+    assert(True if actions is None else states.shape[0] == actions.shape[0])
 
     with self._sess.as_default():
 
@@ -272,7 +272,8 @@ class QMap:
       selected.
     """
     assert(states.ndim == 4)
-    assert(True if actions is None else states.shape[:-1] == actions.shape[:-1])
+    assert(True if actions is None else states.shape[0] == actions.shape[0])
+
 
     with self._sess.as_default():
 

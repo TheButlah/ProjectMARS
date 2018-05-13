@@ -36,7 +36,8 @@ Game::Game(
   unserviced_pop_penalty(unserviced_penalty),
   pop_matrix(PopulationMatrix(dx, dy)),
   terrain(Terrain(dx, dy)),
-  pop_gen(PopulationGen())
+  pop_gen(PopulationGen()),
+  rlState(*this)
 {
 
 }
@@ -47,7 +48,7 @@ Game::~Game() {
   }
 }
 
-void Game::step(bool add_plant, Coord plant_coord) {
+void Game::step(bool add_plant, const Coord& plant_coord) {
 
   Matrix<int> new_population = pop_gen.generate(this->pop_matrix.totalPopMatrix(), this->terrain, this->time);
   pop_matrix.addUnservicedPop(new_population);
@@ -73,16 +74,19 @@ void Game::step(bool add_plant, Coord plant_coord) {
   this->number_plants_in_service += this->number_new_plants;
   this->number_new_plants = 0;
   this->time++;
+
+  rlState.update(*this);
 }
 
-double Game::calculateObjective() {
+
+double Game::calculateObjective() const {
   double objective = (this->number_pop_serviced*this->plant_profit_margin)
     - (this->plant_operating_cost*this->number_plants_in_service)  
     - (this->numberUnservicedPop() * this->unserviced_pop_penalty);
   return objective;
 }
 
-std::vector<Coord> Game::plantLocations(){
+std::vector<Coord> Game::plantLocations() const {
   std::vector<Coord> result;
   for (Plant *p : plants_in_service) {
     result.push_back(p->location);
@@ -90,19 +94,19 @@ std::vector<Coord> Game::plantLocations(){
   return result;
 }
 
-int Game::numberPlantsInService() {
+int Game::numberPlantsInService() const {
   return this->number_plants_in_service;
 }
 
-int Game::numberTotalPopAt(int i, int j) {
+int Game::numberTotalPopAt(int i, int j) const {
   return this->pop_matrix.totalPopMatrix().at(i,j);
 }
 
-int Game::numberServicedPop() {
+int Game::numberServicedPop() const {
   return this->number_pop_serviced;
 }
 
-int Game::numberUnservicedPop() {
+int Game::numberUnservicedPop() const {
   int total = 0;
   Matrix<int> unserviced_pop_matrix = this->pop_matrix.unservicedPopMatrix();
   for (int i = 0; i < unserviced_pop_matrix.numberRows(); i++) {
@@ -113,36 +117,44 @@ int Game::numberUnservicedPop() {
   return total;
 }
 
-double Game::currentFunds() {
+double Game::currentFunds() const {
   return this->funds;
 }
 
-int Game::currentTime() {
+int Game::currentTime() const {
   return this->time;
 }
 
-Terrain Game::terrainCopy() {
+Terrain Game::terrainCopy() const {
   return terrain;
 }
 
-int Game::plantDefaultCapacity() {
+int Game::plantDefaultCapacity() const {
   return plant_default_capacity;
 }
 
-double Game::plantServableDistance() {
+double Game::plantServableDistance() const {
   return plant_servable_distance;
 }
 
-PopulationMatrix Game::popMatrixCopy() {
+PopulationMatrix Game::popMatrixCopy() const {
   return this->pop_matrix;
 };
 
 
-std::pair<int, int> Game::sizeXY() {
+std::pair<int, int> Game::sizeXY() const {
   return std::pair<int,int>(size_x, size_y);
 };
 
-std::pair<Plant*, bool> Game::findBestPlant(Coord person_loc) {
+int Game::sizeX() const {
+  return size_x;
+}
+
+int Game::sizeY() const {
+  return size_y;
+}
+
+std::pair<Plant*, bool> Game::findBestPlant(const Coord& person_loc) const {
   if (numberPlantsInService() == 0) {
     return std::pair<Plant*, bool> (NULL, false);
   } else {
@@ -191,7 +203,7 @@ void Game::processUnservicedPopulation() {
 
 std::queue<Plant*> Game::processServicedPop(
   Plant* plant,
-  Coord coord,
+  const Coord& coord,
   std::unordered_map<Plant*, int> serviced_map,
   std::queue<Plant*>& queue)
 {
@@ -210,7 +222,7 @@ std::queue<Plant*> Game::processServicedPop(
   return queue;
 }
 
-Plant* Game::createPlant(Coord plant_loc) {
+Plant* Game::createPlant(const Coord& plant_loc) {
   this->number_new_plants++;
   Plant* new_plant = new Plant(
     plant_default_capacity,
@@ -249,7 +261,7 @@ void Game::processTouchedPlants(std::queue<Plant*> touched_plants) {
   }
 }
 
-bool Game::isPlantPresent(Coord coord) {
+bool Game::isPlantPresent(const Coord& coord) const {
   for (int i =0; i < this->plants_in_service.size(); i++) {
     Plant* plant = this->plants_in_service[i];
     if (coord==(plant->location)) {
@@ -259,10 +271,37 @@ bool Game::isPlantPresent(Coord coord) {
   return false;
 };
 
-double Game::fundsForCurrentStep() {
+double Game::fundsForCurrentStep() const {
   double objective;
   objective = this->funds - (this->plant_operating_cost)*(this->number_plants_in_service)
               - (this->number_new_plants * this->plant_initial_cost)
               + (this->number_pop_serviced * this->plant_profit_margin);
   return objective;
 }
+
+//RL State
+
+
+
+Game::RLState::RLState(const Game& game) :
+  totalPops(game.sizeY(), game.sizeX()),
+  unservicedPops(game.sizeY(), game.sizeX()),
+  servicedPops(game.sizeY(), game.sizeX()),
+  terrain(game.sizeY(), game.sizeX()),
+  plantLocs(game.sizeY(), game.sizeX())
+{}
+
+void Game::RLState::update(const Game& game) {
+  PopulationMatrix pm = game.popMatrixCopy();
+  totalPops = pm.totalPopMatrix();
+  unservicedPops = pm.unservicedPopMatrix();
+  servicedPops = pm.servicedPopMatrix();
+
+  terrain = game.terrainCopy().getMatrixCopy();
+
+  plantLocs.resetToDefault();
+  for (Coord& c : game.plantLocations()) {
+    plantLocs.at(c.x, c.y) = true;
+  }
+}
+

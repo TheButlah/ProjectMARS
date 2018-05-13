@@ -1,7 +1,3 @@
-//
-// Created by Marissa Colasacco on 4/15/18.
-//
-
 #ifndef MARS_PLANT_H
 #define MARS_PLANT_H
 #include "Coord.h"
@@ -10,7 +6,7 @@
 #include <unordered_map>
 
 namespace MARS {
-  /*
+  /**
    * Abstraction of plant
    */
   class Plant {
@@ -23,7 +19,7 @@ namespace MARS {
   public:
     Coord location;        
     
-    /*
+    /**
      * Constructor
      */
     Plant(
@@ -34,50 +30,51 @@ namespace MARS {
       Terrain &terrain
     );
 
-    /*
+    /**
      * Generate the plant's serviceable area given a terrain, location, and serviceable distance.
      */
-    std::unordered_map<Coord,double> generateServiceableArea(Terrain &terrain, Coord plant_loc, double serve_dist);
+    std::unordered_map<Coord,double> generateServiceableArea(const Terrain& terrain, const Coord& plant_loc, double serve_dist);
 
-    /*
+    /**
      * Initialize the serviced map using the plant's serviceable area.
      */
     std::unordered_map<Coord, int> initializeServicedMap(std::unordered_map<Coord, double> serviceable_area);
 
-    /*
+    /**
      * Check if coordinate is serviceable by plant
      */
-    bool isServiceableCoord(Coord c);
+    bool isServiceableCoord(const Coord& c) const;
 
-    /*
+    /**
      * Get distance to coord, assuming it is serviceable by the plant
      */
-    double distanceToCoord(Coord c);
+    double distanceToCoord(const Coord& c) const;
     
-    /*
-     * Access the number of people this plant services at a coordinate
+    /**
+     * Access the number of people this plant services at a coordinate, assuming
+     * it is serviceable
      */
-    int numberServicedAtCoord(Coord c);
+    int numberServicedAtCoord(const Coord& c) const;
 
-    /*
+    /**
      * Changes the size of population the plant services at a given location.
      */
-    void changeServicedPop(Coord person_loc, int pop);
+    void changeServicedPop(const Coord& person_loc, int pop);
 
-    /*
+    /**
      * Access the remaining capacity of the plant
      */
-    int remainingCapacity();
+    int remainingCapacity() const;
 
-    /*
+    /**
      * Get a copy of the serviceable area
      */
-    std::unordered_map<Coord, double> serviceableArea();
+    std::unordered_map<Coord, double> serviceableArea() const;
 
-    /*
+    /**
      * Get a copy of the serviced map
      */
-    std::unordered_map<Coord, int> servicedMap();
+    std::unordered_map<Coord, int> servicedMap() const;
 
     bool operator==(const Plant& other) const {
       return location == other.location;

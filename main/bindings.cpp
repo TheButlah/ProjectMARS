@@ -4,8 +4,11 @@
 #include "Coord.h"
 #include "Game.h"
 #include "CLIRepl.h"
+#include "Matrix.h"
 
 namespace py = pybind11;
+
+
 
 PYBIND11_PLUGIN(project_mars) {
   py::module m("project_mars");
@@ -20,7 +23,6 @@ PYBIND11_PLUGIN(project_mars) {
     .def("startCLI", &MARS::CLIRepl::startCLI,
       "Starts the CLI.");
 
-
   py::class_<MARS::Coord>(m, "Coord")
 		.def(py::init<int,int>(),
       "Initializer for Coord.",
@@ -28,8 +30,11 @@ PYBIND11_PLUGIN(project_mars) {
       py::arg("y"));
 
 
-	py::class_<MARS::Game>(m, "Game")
-		.def(py::init<
+
+
+	py::class_<MARS::Game> game(m, "Game");
+	game
+    .def(py::init<
         int,
         int,
         int,
@@ -54,7 +59,16 @@ PYBIND11_PLUGIN(project_mars) {
 		  py::arg("add_plant"),
 		  py::arg("plant_coord"))
     .def("get_reward", &MARS::Game::calculateObjective,
-      "Get the reward value for the current state of the game.");
+      "Get the reward value for the current state of the game.")
+    .def_readonly("state", &MARS::Game::rlState);
+
+  py::class_<MARS::Game::RLState> (m, "RLState", game)
+    .def_readwrite("unserviced_pops", &MARS::Game::RLState::unservicedPops)
+    .def_readwrite("serviced_pops", &MARS::Game::RLState::servicedPops)
+    .def_readwrite("terrain", &MARS::Game::RLState::terrain)
+    .def_readwrite("plants", &MARS::Game::RLState::plantLocs);
+
+
 
 	return m.ptr();
 }

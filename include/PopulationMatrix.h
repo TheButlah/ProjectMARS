@@ -29,17 +29,17 @@ namespace MARS {
     /*
      * Number of people serviced at a given coordinate.
      */
-    int numberServicedAtCoord(Coord c);
+    int numberServicedAtCoord(const Coord& c) const;
     
     /*
      * Number of people unserviced at a given coordinate.
      */
-    int numberUnservicedAtCoord(Coord c);
+    int numberUnservicedAtCoord(const Coord& c) const;
     
     /*
      * Number of people serviced at a given coordinate by a given plant.
      */
-    int numberServicedAtCoordByPlant(Coord c, Plant* p);
+    int numberServicedAtCoordByPlant(const Coord& c, Plant* p) const;
     
     /*
      * Returns a mapping of coordinates to (unserviced, {plant => serviced_by_plant})
@@ -50,23 +50,23 @@ namespace MARS {
     /*
      * Moves a population at a given coordinate from one plant to another.
      */
-    void moveServicedPopBetweenPlants(Plant* from, Plant* to, Coord c, int num_pop);
+    void moveServicedPopBetweenPlants(Plant* from, Plant* to, const Coord& c, int num_pop);
     
     /*
      * Assigns an unserviced population at a given coordinate to a given plant.
      */
-    void assignUnservicedPop(Plant* p, Coord c, int num_pop);
+    void assignUnservicedPop(Plant* p, const Coord& c, int num_pop);
      
     /*
      * Matrix-adds a new unserviced population mapping to the existing unserviced population mapping.
      */
     void addUnservicedPop(Matrix<int>& newUnserviced);
     
-    Matrix<int> servicedPopMatrix();
-    Matrix<int> unservicedPopMatrix();        
-    Matrix<int> totalPopMatrix();
-    int sizeX();
-    int sizeY();
+    Matrix<int> servicedPopMatrix() const;
+    Matrix<int> unservicedPopMatrix() const;
+    Matrix<int> totalPopMatrix() const;
+    int sizeX() const;
+    int sizeY() const;
     
   };
 }

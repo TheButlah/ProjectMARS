@@ -72,12 +72,18 @@ def main():
 
       # Retroactively predict the value of the previous state using the reward
       # The terminal state should have a value of 0, so we add a check for that
-      q_prime = r + model.predict_q(s_prime) if step < episode_length-1 else r
+      if step < episode_length - 1:
+        q_prime, _ = model.predict_q(s_prime)
+        q_prime += r
+      else:
+        q_prime = np.array(r, dtype=np.float32, ndmin=1)
 
       mu = get_mu(state_counts, s)  # Weight for importance of `s`
       model.update(s, a, q_prime, mu)  # Gradient update for model towards `q'`
 
       s = s_prime  # prep for the next step
+
+    print("Completed episode %d" % episode)
 
 
 def compute_action_value(model, state):
@@ -87,6 +93,7 @@ def compute_action_value(model, state):
   # Evaluate eps-greedy policy
   if np.random.rand() < eps:
     a = np.random.uniform(high=[dx, dy, n_actions], size=(3,))[np.newaxis, :]
+    a = a.astype(np.int32, copy=False)
     q = model.predict_q(state, a)
   else:
     q, a = model.predict_q(state)
@@ -97,7 +104,8 @@ def get_mu(state_counts, state):
   """Computes the weight for the particular state. States explored more
   frequently will have a higher weight, which encourages the model to place
   more importance on learning those states accurately."""
-  return np.array([state_counts[s]/state_counts['all'] for s in state])
+  state_hashes = [hash(str(s)) for s in state]
+  return np.array([state_counts[h]/state_counts['all'] for h in state_hashes])
 
 
 def take_action(game, action):

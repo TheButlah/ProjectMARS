@@ -1,7 +1,3 @@
-//
-// Created by Marissa Colasacco on 4/15/18.
-//
-
 #ifndef MARS_TERRAIN_H
 #define MARS_TERRAIN_H
 
@@ -14,7 +10,7 @@
 
 #define GRASSLAND_THRESHOLD 0.3
 #define MOUNTAIN_THRESHOLD 0.7
-#define WATER_WEIGHT std::numeric_limits<double>::max()
+#define WATER_WEIGHT std::numeric_limits<float>::max()
 #define GRASSLAND_WEIGHT 1.0
 #define MOUNTAIN_WEIGHT 100.0
 
@@ -23,7 +19,7 @@ namespace MARS {
   class Terrain {
   private:
     siv::PerlinNoise perlin;
-    Matrix<double> terrainMatrix;
+    Matrix<float> terrainMatrix;
     int size_x;
     int size_y;
   public:
@@ -33,10 +29,12 @@ namespace MARS {
     Terrain(int dim);
     Terrain(int dx, int dy, bool water);
 
-    int sizeX();
-    int sizeY();
-    double weightAtXY(int x, int y);
-    double weightAtCoord(Coord c);
+    Matrix<float> getMatrixCopy() const;
+
+    int sizeX() const;
+    int sizeY() const;
+    float weightAtXY(int x, int y) const;
+    float weightAtCoord(const Coord& c) const;
   };
 }
 

@@ -1,4 +1,4 @@
-#include "../include/Plant.h"
+#include "Plant.h"
 #include <queue>
 #include <iostream>
 
@@ -21,7 +21,7 @@ Plant::Plant(
 
 }
 
-std::unordered_map<Coord,double> Plant::generateServiceableArea(Terrain &terrain, Coord plantLoc, double serve_dist) {
+std::unordered_map<Coord,double> Plant::generateServiceableArea(const Terrain &terrain, const Coord& plantLoc, double serve_dist) {
   BitMatrix visited = BitMatrix(terrain.sizeX(), terrain.sizeY());
 
   std::queue<std::tuple<Coord, double>> queue;
@@ -73,7 +73,7 @@ std::unordered_map<Coord, int> Plant::initializeServicedMap(std::unordered_map<C
   return serviced_map;
 }
 
-bool Plant::isServiceableCoord(Coord c) {
+bool Plant::isServiceableCoord(const Coord& c) const {
   std::unordered_map<Coord, double>::const_iterator iter = this->serviceable_area.find(c);
   if (iter == this->serviceable_area.end()) {
     return false;
@@ -81,27 +81,27 @@ bool Plant::isServiceableCoord(Coord c) {
   return true;
 }
 
-double Plant::distanceToCoord(Coord c) {
-  return serviceable_area[c];
+double Plant::distanceToCoord(const Coord& c) const {
+  return serviceable_area.at(c);
 }
 
-int Plant::numberServicedAtCoord(Coord c) {
-  return serviced_map[c];
+int Plant::numberServicedAtCoord(const Coord& c) const {
+  return serviced_map.at(c);
 }
 
-void Plant::changeServicedPop(Coord person_loc, int pop) {
+void Plant::changeServicedPop(const Coord& person_loc, int pop) {
   this->serviced_map[person_loc] += pop;
   this->in_service += pop;
 }
 
-std::unordered_map<Coord, double> Plant::serviceableArea() {
+std::unordered_map<Coord, double> Plant::serviceableArea() const {
   return serviceable_area;
 }
 
-std::unordered_map<Coord, int> Plant::servicedMap() {
+std::unordered_map<Coord, int> Plant::servicedMap() const {
   return serviced_map;
 }
 
-int Plant::remainingCapacity() {
+int Plant::remainingCapacity() const {
   return capacity - in_service;
 }

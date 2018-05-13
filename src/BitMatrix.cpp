@@ -9,7 +9,7 @@ BitMatrix::BitMatrix(int rows, int cols):
 {
 }
 
-bool BitMatrix::get(int r, int c) {
+bool BitMatrix::get(int r, int c) const {
   int cd = c / (8 * sizeof(int));
   int cr = c % (8 * sizeof(int));
 
@@ -27,10 +27,10 @@ void BitMatrix::set(int r, int c, bool val) {
   }
 }
 
-int BitMatrix::numRows() {
+int BitMatrix::numRows() const {
   return num_rows;
 }
 
-int BitMatrix::numCols() {
+int BitMatrix::numCols() const {
   return num_cols;
 }
