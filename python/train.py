@@ -14,6 +14,8 @@ from model import QMap
 from collections import defaultdict
 from utils import build_numpy_state, my_hash
 
+save_path = "saved/overnight1"
+
 n_episodes = 1000000
 episode_length = 500
 
@@ -34,6 +36,12 @@ action_map = {
 seed = None
 
 
+def exit_fn(model, file):
+  model.save_model(save_path)
+  file.close()
+
+
+
 def main():
   np.random.seed(seed)
 
@@ -43,11 +51,14 @@ def main():
     n_actions,
     seed=seed)
 
-  atexit.register(model.save_model)  # Ensure we have our progress saved
+  f = open(save_path+'.log', 'w')
+
+  # Ensure we have our progress saved
+  atexit.register(lambda: exit_fn(model, f))
 
 
   # Learn from simulated experience
-  for episode in range(2):
+  for episode in range(n_episodes):
     game = pm.Game(
       dx=dx,
       dy=dy,
@@ -81,7 +92,7 @@ def main():
       # Retroactively predict the value of the previous state using the reward
       # The terminal state should have a value of 0, so we add a check for that
       if step < episode_length - 1:
-        q_prime,  = model.predict_q(s_prime)
+        q_prime, _ = model.predict_q(s_prime)
         q_prime *= gamma
         q_prime += r
       else:
@@ -99,6 +110,8 @@ def main():
 
     print("Completed episode %d. Avg. loss: %f, Total Return: %f "
           % (episode, loss_avg, total_return))
+    f.write("%d,%f,%d\n" % (episode, loss_avg, total_return))
+    f.flush()
 
 
 
