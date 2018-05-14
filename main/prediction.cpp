@@ -28,6 +28,7 @@ void runExperiment(
     1,
     1
   );
+  std::cout << "Size: " << sizeX << "x" << sizeY << ", ServeDist " << servable_distance << std::endl;
   GameDisplay gd(&game, 10, 50);
   GrowthPrediction gp(&game, 10);
   gp.updateStateRecord();
@@ -58,4 +59,26 @@ int main() {
   runExperiment(64, 64, std::numeric_limits<int>::max(), 8.0, 1000, "predict_64_64_8_1000.csv");
   runExperiment(64, 64, std::numeric_limits<int>::max(), 16.0, 1000, "predict_64_64_16_1000.csv");  
   runExperiment(128, 128, std::numeric_limits<int>::max(), 16.0, 1000, "predict_128_128_16_1000.csv");
+  runExperiment(256, 256, std::numeric_limits<int>::max(), 40.0, 1000, "predict_256_256_40_1000.csv");  
 }
+
+/*
+
+init():
+    P := sample of potential power plants
+    avg_cover = average size of serviceable areas of plants p in P
+    B := split terrain into tiled subgrids of roughly size avg_cover
+    for each subgrid b in B:
+      assign potential plant p to b
+
+predict():
+    S := population cells to which population has spread
+    P' = empty set, used to store plants to place
+    for each coord c in S
+        b := subgrid that c belongs to
+        p := the potential plant assigned to subgrid
+        if p is not already placed:
+            add p to P'
+      return P'
+
+*/
