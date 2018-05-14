@@ -13,7 +13,6 @@ namespace MARS {
   private:
     Game* game;
     std::ofstream log_file;
-    int last_diff;
   public:
     Logger(Game* game, std::string filename);
     void log(bool place, Coord plant_loc);

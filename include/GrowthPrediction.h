@@ -15,17 +15,20 @@ namespace MARS {
   private:
     Game* game;
     int avg_cover;
+    std::unordered_map<Coord, std::vector<Coord>> bin_assign;
 
     // Previous game state
     Matrix<int> last_pop_matrix;
     int last_diff;
     int last_diff_slope;
-  public:
-    GrowthPrediction(Game* game, int sample_size);
     
     int binXY();
+    Coord nearestValidCoord(Coord c, Terrain& terrain);
     Coord plantLocationInBin(Coord bin);
     std::unordered_set<Coord> unservicedCoords(bool old);
+  public:
+    GrowthPrediction(Game* game, int sample_size);
+
     std::vector<Coord> predictNewPlants();
     void updateStateRecord();
   };

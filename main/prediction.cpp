@@ -42,9 +42,7 @@ void runExperiment(
       plant_queue.pop();
     }
     game.step(decision, loc);
-    std::cout<< i <<std::endl;    
     std::vector<Coord> new_plants = gp.predictNewPlants();
-    std::cout<< i <<std::endl;    
     for (Coord c : new_plants) {
       plant_queue.push(c);
     }
@@ -55,5 +53,9 @@ void runExperiment(
 }
 
 int main() {
-  runExperiment(16, 16, std::numeric_limits<int>::max(), 3.0, 1000, "predict_1000.csv");
+  runExperiment(16, 16, std::numeric_limits<int>::max(), 3.0, 1000, "predict_16_16_3_1000.csv");
+  runExperiment(64, 64, std::numeric_limits<int>::max(), 3.0, 1000, "predict_64_64_3_1000.csv");  
+  runExperiment(64, 64, std::numeric_limits<int>::max(), 8.0, 1000, "predict_64_64_8_1000.csv");
+  runExperiment(64, 64, std::numeric_limits<int>::max(), 16.0, 1000, "predict_64_64_16_1000.csv");  
+  runExperiment(128, 128, std::numeric_limits<int>::max(), 16.0, 1000, "predict_128_128_16_1000.csv");
 }

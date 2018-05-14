@@ -48,14 +48,48 @@ std::unordered_set<Coord> GrowthPrediction::unservicedCoords(bool old) {
 }
 
 int GrowthPrediction::binXY() {
-  return (int) (std::sqrt(avg_cover) + 1.0);
+  return (int) ((game->plantServableDistance() + std::sqrt(avg_cover)) / 2.0);
+}
+
+Coord GrowthPrediction::nearestValidCoord(Coord c, Terrain& terrain) {
+  Coord new_coord = c;
+  while (new_coord.x < terrain.sizeX()) {
+    if (terrain.weightAtCoord(new_coord) == GRASSLAND_WEIGHT)
+      return new_coord;
+    new_coord.x++;
+  }
+
+  new_coord = c;
+  while (new_coord.x >= 0) {
+    if (terrain.weightAtCoord(new_coord) == GRASSLAND_WEIGHT)
+      return new_coord;
+    new_coord.x--;
+  }
+
+  new_coord = c;
+  while (new_coord.y < terrain.sizeY()) {
+    if (terrain.weightAtCoord(new_coord) == GRASSLAND_WEIGHT)
+      return new_coord;
+    new_coord.y++;
+  }
+
+  new_coord = c;
+  while (new_coord.y >= 0) {
+    if (terrain.weightAtCoord(new_coord) == GRASSLAND_WEIGHT)
+      return new_coord;
+    new_coord.y--;
+  }
+  return c;
 }
 
 Coord GrowthPrediction::plantLocationInBin(Coord bin) {
-  int x = bin.x*binXY() + binXY() / 2;
-  int y = bin.y*binXY() + binXY() / 2;
+  int x = bin.x*binXY();
+  int y = bin.y*binXY();
   x = std::min(x, game->sizeX()-1);
   y = std::min(y, game->sizeY()-1);
+  Terrain terrain = game->terrainCopy();
+  if (terrain.weightAtXY(x, y) != GRASSLAND_WEIGHT) 
+    return nearestValidCoord(Coord(x, y), terrain);
   return Coord(x, y);
 }
 
