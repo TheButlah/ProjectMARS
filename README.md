@@ -1,6 +1,6 @@
 # Project MARS
 
-Project MARS is an exploration of near-optimally designing electricity grids amidst a growing population of people. We model several growth patterns for people spreading across a terrain, and hope to learn how to place power stations to support the population. We factor in population density, financial constraints, power station supply constraints, and consumer preference to model the economics and social benefit behind how power stations are built in the real world.
+Project MARS is an exploration of near-optimally designing electricity grids amidst a growing population of people. The algorithms used include Deep Q Learning, K-Means and K-Medians clustering, and a custom population growth model. We also simulate several growth patterns for people spreading across a terrain, and hope to learn how to place power stations to support the population. We factor in population density, financial constraints, power station supply constraints, and consumer preference to model the economics and social benefit behind how power stations are built in the real world. 
 
 ## Installing SDL2 (tested on Windows 10)
 
@@ -14,10 +14,12 @@ We use SDL2 to display our graphics. For now, we do a sort of "manual" install o
 ## Requirements
 
 You will need a C++ compiler, such as `g++` or `clang++`, that supports C++11. You will also need CMake (`cmake`) installed.
+If you wish to use the Deep Q Network, you will also need to install Python3, TensorFlow, NumPy, xxhash, and pybind11.
 
 ## Build
 
 We use CMake for our build system. As such, you will need to create a `build` directory from which to run CMake and build executables.
+If you are only interested in the reinforcement learning agent however, you should invodke `python setup.py install` and then run `main.py`.
 
 After cloning, create the `build` directory.
 ```

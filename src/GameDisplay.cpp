@@ -212,7 +212,7 @@ void GameDisplay::drawStats() {
   );
   img->draw_text(
     23+size_y*box_size,
-    23+size_x*box_size+20,
+    23+size_x*box_size+30,
     funds_string.c_str(),
     text_color,
     0,
@@ -220,7 +220,7 @@ void GameDisplay::drawStats() {
   );
   img->draw_text(
     23+size_y*box_size,
-    23+size_x*box_size+40,
+    23+size_x*box_size+60,
     plants_string.c_str(),
     text_color,
     0,
@@ -228,7 +228,7 @@ void GameDisplay::drawStats() {
   );
   img->draw_text(
     23+size_y*box_size,
-    23+size_x*box_size+60,
+    23+size_x*box_size+90,
     unserviced_string.c_str(),
     text_color,
     0,
@@ -236,7 +236,7 @@ void GameDisplay::drawStats() {
   );
   img->draw_text(
     23+size_y*box_size,
-    23+size_x*box_size+80,
+    23+size_x*box_size+120,
     serviced_string.c_str(),
     text_color,
     0,

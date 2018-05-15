@@ -1,5 +1,5 @@
-#ifndef MARS_GAME_DISPLAY_H
-#define MARS_GAME_DISPLAY_H
+#ifndef MARS_GAMEDISPLAY_H
+#define MARS_GAMEDISPLAY_H
 
 #include "Game.h"
 #include "CImg.h"

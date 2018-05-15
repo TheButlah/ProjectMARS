@@ -32,6 +32,8 @@ if (NOT WIN32)
   add_executable(clustering ${SOURCES} main/clustering.cpp)
 endif()
 
+add_executable(prediction ${SOURCES} main/prediction.cpp)
+
 if (APPLE)
   #target_include_directories(cli PUBLIC /opt/X11/include)
   #target_link_libraries(cli)
