@@ -1,1 +1,4 @@
 __pycache__
+
+# Only commit the saved models we actually care about
+saved/

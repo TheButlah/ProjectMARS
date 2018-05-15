@@ -12,10 +12,10 @@ from model import QMap
 from utils import build_numpy_state, take_action, get_reward
 
 
-save_path = 'saved/overnight1'
+save_path = 'saved/testing1'
 
-dx = 128
-dy = 128
+dx = 64
+dy = 64
 n_features = 3
 n_actions = 2
 
