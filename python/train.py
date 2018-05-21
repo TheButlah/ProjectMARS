@@ -14,13 +14,14 @@ from model import QMap
 from collections import defaultdict
 from utils import build_numpy_state, my_hash, take_action, get_reward
 
-save_path = 'saved/gamma-0-eps-03'
+save_path = 'saved/gamma-08-eps-03'
 
 n_episodes = 1000000
 episode_length = 500
 
 eps = 0.3  # The probability of taking a random, non-optimal action
-gamma = 0  # The discount factor, exponential decay of future events on q val
+gamma = 0.8  # The discount factor, exponential decay of future events on q val
+lr = 0.0001
 
 dx = 128
 dy = 128
@@ -45,7 +46,7 @@ def main():
   model = QMap(
     (dx, dy, n_features),
     n_actions,
-    seed=seed,
+    seed=seed)
     load_model=save_path)
 
   # Ensure we have our progress saved
@@ -96,7 +97,7 @@ def main():
       mu = get_mu(state_counts, s)  # Weight for importance of `s`
 
       # Gradient update for model towards q_prime
-      loss = model.update(s, a, q_prime, mu)
+      loss = model.update(s, a, q_prime, mu, lr=lr)
       loss_avg += loss/episode_length
 
 

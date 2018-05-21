@@ -12,7 +12,7 @@ from model import QMap
 from utils import build_numpy_state, take_action, get_reward
 
 
-save_path = 'saved/gamma-0-eps-03'
+save_path = 'saved/gamma-08-eps-03'
 
 dx = 64
 dy = 64
