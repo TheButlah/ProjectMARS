@@ -67,13 +67,20 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args,
                               cwd=self.build_temp)
         print()  # Add an empty line for cleaner output
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(
     name='project_mars',
     version='0.1',
-    author='Project MARS',
+    author='Ryan Butler',
     description='Python-C++ interaction for RL agent',
-    long_description='',
+    long_description=long_description,
+    url="https://github.com/TheButlah/ProjectMARS",
+    install_requires=[
+        'xxhash',
+        'pybind11',
+    ],
     # add extension module
     ext_modules=[CMakeExtension('project_mars')],
     # add custom build_ext command
